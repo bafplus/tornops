@@ -21,6 +21,13 @@
         </div>
     </div>
 
+    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div class="text-center">
+            <p class="text-gray-400 text-sm uppercase tracking-wide mb-2" id="timer-label">Time</p>
+            <p class="text-4xl md:text-5xl font-bold font-mono text-blue-400" id="timer-display">--:--:--</p>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 md:col-span-2">
             <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-4">Final Score</h3>
@@ -96,4 +103,67 @@
         </div>
     </div>
 </div>
+
+@endsection
+
+@section('scripts')
+<script>
+(function() {
+    const status = '{{ $war->status }}';
+    const startTimestamp = {{ $war->start_date ? $war->start_date->timestamp : 0 }};
+    const endTimestamp = {{ $war->end_date ? $war->end_date->timestamp : 0 }};
+    
+    function formatDuration(seconds) {
+        const d = Math.floor(seconds / 86400);
+        const h = Math.floor((seconds % 86400) / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        
+        let result = '';
+        if (d > 0) result += d + 'd ';
+        if (h > 0 || d > 0) result += h + 'h ';
+        if (m > 0 || h > 0 || d > 0) result += m + 'm ';
+        result += s + 's';
+        return result;
+    }
+    
+    function updateTimer() {
+        const now = Math.floor(Date.now() / 1000);
+        const label = document.getElementById('timer-label');
+        const display = document.getElementById('timer-display');
+        
+        if (status === 'pending') {
+            const diff = startTimestamp - now;
+            if (diff > 0) {
+                label.textContent = 'Starts in';
+                display.textContent = formatDuration(diff);
+                display.className = 'text-4xl md:text-5xl font-bold font-mono text-yellow-400';
+            } else {
+                label.textContent = 'Started';
+                display.textContent = formatDuration(Math.abs(diff));
+                display.className = 'text-4xl md:text-5xl font-bold font-mono text-green-400';
+            }
+        } else if (status === 'in progress') {
+            const diff = now - startTimestamp;
+            label.textContent = 'In progress for';
+            display.textContent = formatDuration(diff);
+            display.className = 'text-4xl md:text-5xl font-bold font-mono text-green-400';
+        } else if (status === 'won' || status === 'lost') {
+            if (endTimestamp > 0) {
+                const diff = now - endTimestamp;
+                label.textContent = 'Ended';
+                display.textContent = formatDuration(diff) + ' ago';
+                display.className = 'text-4xl md:text-5xl font-bold font-mono text-gray-400';
+            } else {
+                label.textContent = 'Finished';
+                display.textContent = '--';
+                display.className = 'text-4xl md:text-5xl font-bold font-mono text-gray-400';
+            }
+        }
+    }
+    
+    updateTimer();
+    setInterval(updateTimer, 1000);
+})();
+</script>
 @endsection
