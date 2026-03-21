@@ -84,6 +84,9 @@
                                     @endif"></span>
                                 <span class="font-medium">{{ $member->name }}</span>
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
+                                @if($member->online_description)
+                                    <span class="block text-xs text-gray-500 ml-4">{{ $member->online_description }}</span>
+                                @endif
                             </td>
                             <td class="p-3">{{ $member->level }}</td>
                             <td class="p-3 text-right">
@@ -139,6 +142,9 @@
                                     @endif"></span>
                                 <span class="font-medium">{{ $member->name }}</span>
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
+                                @if($member->online_description)
+                                    <span class="block text-xs text-gray-500 ml-4">{{ $member->online_description }}</span>
+                                @endif
                             </td>
                             <td class="p-3">{{ $member->level }}</td>
                             <td class="p-3 text-right">
