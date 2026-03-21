@@ -81,12 +81,19 @@ class SyncRankedWars extends Command
             foreach ($factions as $oppFactionId => $oppData) {
                 $memberData = $tornApi->getFactionMembers((int)$oppFactionId);
                 if ($memberData && isset($memberData['members'])) {
+                    $playerIds = array_keys($memberData['members']);
+                    $ffResults = $ffscouter->getStats($playerIds);
+                    $ffIndex = [];
+                    foreach ($ffResults as $ff) {
+                        $ffIndex[$ff['player_id']] = $ff;
+                    }
+                    
                     foreach ($memberData['members'] as $playerId => $member) {
                         $warScore = $oppData['score'] ?? 0;
                         
-                        $ffData = $ffscouter->getPlayerStats((int)$playerId);
-                        $ffScore = $ffData['ff_score'] ?? null;
-                        $estimatedStats = isset($ffData['estimated_stats']) ? json_encode($ffData['estimated_stats']) : null;
+                        $ffData = $ffIndex[$playerId] ?? null;
+                        $ffScore = $ffData['fair_fight'] ?? null;
+                        $estimatedStats = $ffData['bs_estimate_human'] ?? null;
                         
                         WarMember::updateOrCreate(
                             [

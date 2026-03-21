@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class FFScouterService
 {
     private ?string $apiKey = null;
-    private string $baseUrl = 'https://ffscouter.com/api.php';
+    private string $baseUrl = 'https://ffscouter.com/api/v1';
     private int $cacheTtl = 3600;
 
     public function __construct()
@@ -23,54 +23,68 @@ class FFScouterService
 
     public function getPlayerStats(int $playerId): ?array
     {
-        if (!$this->apiKey) {
-            return null;
+        $result = $this->getStats([$playerId]);
+        return $result[0] ?? null;
+    }
+
+    public function getStats(array $playerIds): array
+    {
+        if (!$this->apiKey || empty($playerIds)) {
+            return [];
         }
 
-        $cacheKey = 'ffscouter_player_' . $playerId;
+        $cacheKey = 'ffscouter_stats_' . md5(implode(',', $playerIds));
 
-        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($playerId) {
+        return Cache::remember($cacheKey, $this->cacheTtl, function () use ($playerIds) {
             $response = Http::timeout(10)
-                ->get($this->baseUrl, [
-                    'action' => 'playerstats',
+                ->get("{$this->baseUrl}/get-stats", [
                     'key' => $this->apiKey,
-                    'player_id' => $playerId
+                    'targets' => implode(',', $playerIds),
                 ]);
 
             if ($response->failed()) {
                 Log::error('FFScouter API Error', [
-                    'player_id' => $playerId,
-                    'status' => $response->status()
+                    'player_ids' => $playerIds,
+                    'status' => $response->status(),
+                    'body' => $response->body(),
                 ]);
-                return null;
+                return [];
             }
 
             $data = $response->json();
 
             if (isset($data['error'])) {
                 Log::error('FFScouter API Error', [
-                    'player_id' => $playerId,
-                    'error' => $data['error']
+                    'player_ids' => $playerIds,
+                    'error' => $data['error'],
                 ]);
-                return null;
+                return [];
             }
 
             return $data;
         });
     }
 
-    public function getBSSPublic(int $playerId): ?float
+    public function checkKey(): ?array
     {
-        $stats = $this->getPlayerStats($playerId);
-        return $stats['bss_public'] ?? null;
+        if (!$this->apiKey) {
+            return null;
+        }
+
+        $response = Http::timeout(10)
+            ->get("{$this->baseUrl}/check-key", [
+                'key' => $this->apiKey,
+            ]);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return $response->json();
     }
 
-    public function clearCache(int $playerId = null): void
+    public function clearCache(): void
     {
-        if ($playerId) {
-            Cache::forget('ffscouter_player_' . $playerId);
-        } else {
-            Cache::flush();
-        }
+        Cache::flush();
     }
 }
