@@ -2,19 +2,23 @@
 
 namespace App\Services;
 
+use App\Models\FactionSettings;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class TornApiService
 {
-    private string $apiKey;
+    private ?string $apiKey = null;
     private string $baseUrl = 'https://api.torn.com';
     private int $rateLimit = 100;
 
     public function __construct()
     {
-        $this->apiKey = config('services.torn.api_key');
+        $settings = FactionSettings::first();
+        if ($settings) {
+            $this->apiKey = $settings->torn_api_key;
+        }
     }
 
     public function setApiKey(string $apiKey): void
