@@ -6,6 +6,7 @@ use App\Models\FactionSettings;
 use App\Models\RankedWar;
 use App\Models\WarMember;
 use App\Services\TornApiService;
+use App\Services\FFScouterService;
 use Illuminate\Console\Command;
 
 class SyncRankedWars extends Command
@@ -13,7 +14,7 @@ class SyncRankedWars extends Command
     protected $signature = 'torn:sync-wars {faction_id?}';
     protected $description = 'Sync ranked wars from Torn API';
 
-    public function handle(TornApiService $tornApi): int
+    public function handle(TornApiService $tornApi, FFScouterService $ffscouter): int
     {
         $factionId = $this->argument('faction_id') ?? FactionSettings::value('faction_id');
 
@@ -49,7 +50,7 @@ class SyncRankedWars extends Command
                     $opponentName = $oppData['name'] ?? null;
                     $scoreThem = $oppData['score'] ?? null;
                 } else {
-                    $scoreOurs = $oppData['score'] ?? null;
+                    $scoreOurs = $oppData['score'] ?? 0;
                 }
             }
 
@@ -82,6 +83,11 @@ class SyncRankedWars extends Command
                 if ($memberData && isset($memberData['members'])) {
                     foreach ($memberData['members'] as $playerId => $member) {
                         $warScore = $oppData['score'] ?? 0;
+                        
+                        $ffData = $ffscouter->getPlayerStats((int)$playerId);
+                        $ffScore = $ffData['ff_score'] ?? null;
+                        $estimatedStats = isset($ffData['estimated_stats']) ? json_encode($ffData['estimated_stats']) : null;
+                        
                         WarMember::updateOrCreate(
                             [
                                 'war_id' => $warId,
@@ -97,6 +103,8 @@ class SyncRankedWars extends Command
                                 'status_color' => $member['status']['color'] ?? null,
                                 'status_description' => $member['status']['description'] ?? null,
                                 'war_score' => $warScore,
+                                'ff_score' => $ffScore,
+                                'estimated_stats' => $estimatedStats,
                                 'data' => $member,
                             ]
                         );

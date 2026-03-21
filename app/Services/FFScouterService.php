@@ -2,23 +2,38 @@
 
 namespace App\Services;
 
+use App\Models\FactionSettings;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class FFScouterService
 {
+    private ?string $apiKey = null;
     private string $baseUrl = 'https://ffscouter.com/api.php';
     private int $cacheTtl = 3600;
 
+    public function __construct()
+    {
+        $settings = FactionSettings::first();
+        if ($settings) {
+            $this->apiKey = $settings->ffscouter_api_key;
+        }
+    }
+
     public function getPlayerStats(int $playerId): ?array
     {
+        if (!$this->apiKey) {
+            return null;
+        }
+
         $cacheKey = 'ffscouter_player_' . $playerId;
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($playerId) {
             $response = Http::timeout(10)
                 ->get($this->baseUrl, [
                     'action' => 'playerstats',
+                    'key' => $this->apiKey,
                     'player_id' => $playerId
                 ]);
 

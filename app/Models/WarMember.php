@@ -19,6 +19,7 @@ class WarMember extends Model
         'status_description',
         'war_score',
         'ff_score',
+        'estimated_stats',
         'data',
     ];
 

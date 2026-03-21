@@ -68,9 +68,9 @@
                         <tr class="text-left text-gray-400 text-sm">
                             <th class="p-3">Name</th>
                             <th class="p-3">Level</th>
-                            <th class="p-3">Position</th>
                             <th class="p-3">Status</th>
-                            <th class="p-3 text-right">War Score</th>
+                            <th class="p-3 text-right">FF Score</th>
+                            <th class="p-3 text-right">Est. Stats</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
@@ -81,7 +81,6 @@
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
                             </td>
                             <td class="p-3">{{ $member->level }}</td>
-                            <td class="p-3 text-gray-400 text-sm">{{ $member->position ?? '-' }}</td>
                             <td class="p-3">
                                 <span class="inline-block w-2 h-2 rounded-full 
                                     @if($member->status_color === 'green') bg-green-500
@@ -91,7 +90,8 @@
                                     @endif"></span>
                                 <span class="text-xs text-gray-400 ml-1">{{ $member->status_description ?? 'Offline' }}</span>
                             </td>
-                            <td class="p-3 text-right font-mono font-bold text-green-400">{{ $member->war_score ?? 0 }}</td>
+                            <td class="p-3 text-right font-mono text-green-400">{{ $member->ff_score ?? '-' }}</td>
+                            <td class="p-3 text-right font-mono text-gray-400 text-sm">{{ $member->estimated_stats ?? '-' }}</td>
                         </tr>
                         @empty
                         <tr>
@@ -113,9 +113,9 @@
                         <tr class="text-left text-gray-400 text-sm">
                             <th class="p-3">Name</th>
                             <th class="p-3">Level</th>
-                            <th class="p-3">Position</th>
                             <th class="p-3">Status</th>
-                            <th class="p-3 text-right">War Score</th>
+                            <th class="p-3 text-right">FF Score</th>
+                            <th class="p-3 text-right">Est. Stats</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
@@ -126,7 +126,6 @@
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
                             </td>
                             <td class="p-3">{{ $member->level }}</td>
-                            <td class="p-3 text-gray-400 text-sm">{{ $member->position ?? '-' }}</td>
                             <td class="p-3">
                                 <span class="inline-block w-2 h-2 rounded-full 
                                     @if($member->status_color === 'green') bg-green-500
@@ -136,7 +135,8 @@
                                     @endif"></span>
                                 <span class="text-xs text-gray-400 ml-1">{{ $member->status_description ?? 'Offline' }}</span>
                             </td>
-                            <td class="p-3 text-right font-mono font-bold text-red-400">{{ $member->war_score ?? 0 }}</td>
+                            <td class="p-3 text-right font-mono text-red-400">{{ $member->ff_score ?? '-' }}</td>
+                            <td class="p-3 text-right font-mono text-gray-400 text-sm">{{ $member->estimated_stats ?? '-' }}</td>
                         </tr>
                         @empty
                         <tr>
