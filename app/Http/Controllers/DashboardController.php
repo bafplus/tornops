@@ -56,7 +56,17 @@ class DashboardController extends Controller
         $war = RankedWar::where('war_id', $warId)
             ->where('faction_id', $settings->faction_id ?? 0)
             ->firstOrFail();
+        
+        $ourMembers = $war->members()
+            ->where('faction_id', $settings->faction_id)
+            ->orderBy('war_score', 'desc')
+            ->get();
+        
+        $opponentMembers = $war->members()
+            ->where('faction_id', $war->opponent_faction_id)
+            ->orderBy('war_score', 'desc')
+            ->get();
 
-        return view('dashboard.war-detail', compact('settings', 'war'));
+        return view('dashboard.war-detail', compact('settings', 'war', 'ourMembers', 'opponentMembers'));
     }
 }

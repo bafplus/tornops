@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\FactionSettings;
 use App\Models\RankedWar;
+use App\Models\WarMember;
 use App\Services\TornApiService;
 use Illuminate\Console\Command;
 
@@ -30,7 +31,9 @@ class SyncRankedWars extends Command
             return Command::FAILURE;
         }
 
-        $count = 0;
+        $warCount = 0;
+        $memberCount = 0;
+
         foreach ($data['rankedwars'] as $warId => $war) {
             $factions = $war['factions'] ?? [];
             $warInfo = $war['war'] ?? [];
@@ -73,10 +76,39 @@ class SyncRankedWars extends Command
                     'data' => $war,
                 ]
             );
-            $count++;
+
+            foreach ($factions as $oppFactionId => $oppData) {
+                $memberData = $tornApi->getFactionMembers((int)$oppFactionId);
+                if ($memberData && isset($memberData['members'])) {
+                    foreach ($memberData['members'] as $playerId => $member) {
+                        $warScore = $oppData['score'] ?? 0;
+                        WarMember::updateOrCreate(
+                            [
+                                'war_id' => $warId,
+                                'faction_id' => $oppFactionId,
+                                'player_id' => $playerId,
+                            ],
+                            [
+                                'name' => $member['name'] ?? null,
+                                'level' => $member['level'] ?? 1,
+                                'rank' => $member['rank'] ?? null,
+                                'position' => $member['position'] ?? null,
+                                'days_in_faction' => $member['days_in_faction'] ?? null,
+                                'status_color' => $member['status']['color'] ?? null,
+                                'status_description' => $member['status']['description'] ?? null,
+                                'war_score' => $warScore,
+                                'data' => $member,
+                            ]
+                        );
+                        $memberCount++;
+                    }
+                }
+            }
+
+            $warCount++;
         }
 
-        $this->info("Synced {$count} ranked wars.");
+        $this->info("Synced {$warCount} ranked wars with {$memberCount} member records.");
         return Command::SUCCESS;
     }
 }

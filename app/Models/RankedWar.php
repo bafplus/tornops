@@ -29,4 +29,9 @@ class RankedWar extends Model
     {
         return $this->hasMany(WarAttack::class, 'war_id', 'war_id');
     }
+
+    public function members()
+    {
+        return $this->hasMany(WarMember::class, 'war_id', 'war_id');
+    }
 }
