@@ -1,0 +1,28 @@
+services:
+  tornops:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tornops
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - TZ=UTC
+    volumes:
+      - ./:/var/www/html
+      - ./docker/apache-site.conf:/etc/apache2/sites-available/000-default.conf
+      - ./docker/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - dbdata:/var/lib/mysql
+    networks:
+      - tornops-network
+
+volumes:
+  dbdata:
+    driver: local
+
+networks:
+  tornops-network:
+    driver: bridge
