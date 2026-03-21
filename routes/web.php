@@ -15,7 +15,7 @@ Route::get('/', function () {
         return redirect('/setup');
     }
 
-    return view('welcome');
+    return redirect('/dashboard');
 });
 
 Route::prefix('dashboard')->group(function () {
