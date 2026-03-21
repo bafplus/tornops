@@ -149,10 +149,10 @@
             display.textContent = formatDuration(diff);
             display.className = 'text-4xl md:text-5xl font-bold font-mono text-green-400';
         } else if (status === 'won' || status === 'lost') {
-            if (endTimestamp > 0) {
-                const diff = now - endTimestamp;
-                label.textContent = 'Ended';
-                display.textContent = formatDuration(diff) + ' ago';
+            if (endTimestamp > 0 && startTimestamp > 0) {
+                const duration = endTimestamp - startTimestamp;
+                label.textContent = 'War duration';
+                display.textContent = formatDuration(duration);
                 display.className = 'text-4xl md:text-5xl font-bold font-mono text-gray-400';
             } else {
                 label.textContent = 'Finished';
