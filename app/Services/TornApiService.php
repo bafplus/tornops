@@ -105,14 +105,14 @@ class TornApiService
         $results = [];
         foreach ($playerIds as $playerId) {
             $data = $this->get("user/{$playerId}", ['selections' => 'profile']);
-            if ($data && isset($data['status'])) {
+            if ($data && isset($data['last_action']['status'])) {
                 $results[$playerId] = [
-                    'online_status' => $data['status']['indicator'] ?? 'offline',
-                    'online_description' => $data['status']['description'] ?? null,
+                    'online_status' => $data['last_action']['status'] ?? 'Offline',
+                    'online_description' => $data['last_action']['relative'] ?? null,
                 ];
             } else {
                 $results[$playerId] = [
-                    'online_status' => 'offline',
+                    'online_status' => 'Offline',
                     'online_description' => null,
                 ];
             }
