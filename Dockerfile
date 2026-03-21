@@ -4,6 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
 RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg2 \
     libzip-dev \
     unzip \
     libpng-dev \
@@ -12,9 +14,9 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libxml2-dev \
     libonig-dev \
-    libmbstring-dev \
     supervisor \
     cron \
+    sudo \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo \
@@ -32,14 +34,21 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y mariadb-server mariadb-client && apt-get clean
+
 COPY docker/apache-site.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY docker/mariadb.cnf /etc/mysql/mariadb.conf.d/99-tornops.cnf
+COPY docker/init-db.sh /usr/local/bin/init-db.sh
+COPY docker/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/init-db.sh /usr/local/bin/start.sh
 
-RUN usermod -u 1000 www-data
+RUN mkdir -p /run/mysqld /var/lib/mysql \
+    && chown mysql:mysql /run/mysqld /var/lib/mysql
 
 WORKDIR /var/www/html
 
 EXPOSE 80 443
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/bin/bash", "/usr/local/bin/start.sh"]

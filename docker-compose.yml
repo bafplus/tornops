@@ -11,17 +11,18 @@ services:
       - APP_ENV=local
       - APP_DEBUG=true
       - TZ=UTC
+      - DB_HOST=127.0.0.1
+      - DB_DATABASE=tornops
+      - DB_USERNAME=tornops
+      - DB_PASSWORD=tornops123
     volumes:
       - ./:/var/www/html
       - ./docker/apache-site.conf:/etc/apache2/sites-available/000-default.conf
       - ./docker/php.ini:/usr/local/etc/php/conf.d/custom.ini
-      - dbdata:/var/lib/mysql
+      - ../data:/var/lib/mysql
+      - ./storage:/var/www/html/storage
     networks:
       - tornops-network
-
-volumes:
-  dbdata:
-    driver: local
 
 networks:
   tornops-network:
