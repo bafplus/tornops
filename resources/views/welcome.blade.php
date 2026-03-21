@@ -46,15 +46,11 @@
             
             <?php if ($settings && $settings->torn_api_key && $settings->faction_id): ?>
             <div class="bg-gray-800 rounded-lg p-8 mb-8">
-                <h2 class="text-xl font-semibold mb-4 text-purple-400">Quick Actions</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <a href="/sync/factions" class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg transition">
-                        Sync Faction Data
-                    </a>
-                    <a href="/sync/wars" class="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg transition">
-                        Sync War Data
-                    </a>
-                </div>
+                <h2 class="text-xl font-semibold mb-4 text-purple-400">Sync Status</h2>
+                <p class="text-gray-400">
+                    Data wordt automatisch gesynchroniseerd.<br>
+                    Faction sync: elke 5 minuten | War sync: elke 10 minuten
+                </p>
             </div>
             <?php else: ?>
             <div class="bg-gray-800 rounded-lg p-8">
