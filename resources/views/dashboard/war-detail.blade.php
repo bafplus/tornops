@@ -77,6 +77,12 @@
                         @forelse($ourMembers as $member)
                         <tr class="hover:bg-gray-700/30">
                             <td class="p-3">
+                                <span class="inline-block w-2 h-2 rounded-full mr-2
+                                    @if($member->status_color === 'green') bg-green-500
+                                    @elseif($member->status_color === 'blue') bg-blue-500
+                                    @elseif($member->status_color === 'red') bg-red-500
+                                    @else bg-gray-500
+                                    @endif"></span>
                                 <span class="font-medium">{{ $member->name }}</span>
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
                             </td>
@@ -127,6 +133,12 @@
                         @forelse($opponentMembers as $member)
                         <tr class="hover:bg-gray-700/30">
                             <td class="p-3">
+                                <span class="inline-block w-2 h-2 rounded-full mr-2
+                                    @if($member->status_color === 'green') bg-green-500
+                                    @elseif($member->status_color === 'blue') bg-blue-500
+                                    @elseif($member->status_color === 'red') bg-red-500
+                                    @else bg-gray-500
+                                    @endif"></span>
                                 <span class="font-medium">{{ $member->name }}</span>
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
                             </td>
