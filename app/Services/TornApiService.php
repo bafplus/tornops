@@ -78,6 +78,15 @@ class TornApiService
         return $data;
     }
 
+    public function getFactionChain(int $factionId): ?array
+    {
+        $data = $this->getNoCache("faction/{$factionId}", ['selections' => 'chain']);
+        if ($data && isset($data['chain'])) {
+            return $data['chain'];
+        }
+        return null;
+    }
+
     public function getRankedWars(int $factionId, bool $noCache = false): ?array
     {
         $data = $noCache ? $this->getNoCache("faction/{$factionId}") : $this->get("faction/{$factionId}");

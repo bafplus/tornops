@@ -6,6 +6,7 @@ use App\Models\FactionSettings;
 use App\Models\FactionMember;
 use App\Models\RankedWar;
 use App\Models\WarAttack;
+use App\Models\WarChain;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -68,18 +69,72 @@ class DashboardController extends Controller
             ->orderBy('war_score', 'desc')
             ->get();
 
-        $attackStats = WarAttack::where('war_id', $warId)
-            ->selectRaw('attacker_id, 
-                         COUNT(*) as total_attacks,
-                         SUM(CASE WHEN result = "Attacked" OR result = "Hospitalized" THEN 1 ELSE 0 END) as successful,
-                         SUM(CASE WHEN result = "Lost" OR result = "Stalemate" THEN 1 ELSE 0 END) as failed,
-                         SUM(CASE WHEN result = "Interrupted" THEN 1 ELSE 0 END) as interrupted,
-                         SUM(respect_gain) as total_score')
-            ->groupBy('attacker_id')
-            ->get()
-            ->keyBy('attacker_id');
+$ourFactionId = $settings->faction_id;
+    $oppFactionId = $war->opponent_faction_id;
+    $ourMemberIds = $war->members()->where('faction_id', $ourFactionId)->pluck('player_id');
+    $oppMemberIds = $war->members()->where('faction_id', $oppFactionId)->pluck('player_id');
 
-        return view('dashboard.war-detail', compact('settings', 'war', 'ourMembers', 'opponentMembers', 'attackStats'));
+    $attackStats = WarAttack::where('war_id', $warId)
+        ->whereIn('attacker_id', $ourMemberIds)
+        ->whereIn('defender_id', $oppMemberIds)
+        ->selectRaw('attacker_id,
+            COUNT(*) as total_attacks,
+            SUM(CASE WHEN result = "Attacked" OR result = "Hospitalized" THEN 1 ELSE 0 END) as successful,
+            SUM(CASE WHEN result = "Lost" OR result = "Stalemate" THEN 1 ELSE 0 END) as failed,
+            SUM(CASE WHEN result = "Interrupted" THEN 1 ELSE 0 END) as interrupted,
+            SUM(respect_gain) as total_score')
+        ->groupBy('attacker_id')
+        ->get()
+        ->keyBy('attacker_id');
+
+    $attacks = WarAttack::where('war_id', $warId)->orderByDesc('timestamp')->paginate(10);
+
+    $retaliationTargets = WarAttack::where('war_id', $warId)
+        ->whereIn('defender_id', $ourMemberIds)
+        ->whereIn('attacker_id', $oppMemberIds)
+        ->whereIn('result', ['Attacked', 'Hospitalized'])
+        ->where('timestamp', '>=', now()->subMinutes(5))
+        ->orderByDesc('timestamp')
+        ->get()
+        ->map(function ($attack) {
+            $attackTime = $attack->timestamp;
+            $windowEnd = $attackTime->copy()->addSeconds(300);
+            $retaliationHit = WarAttack::where('war_id', $attack->war_id)
+                ->where('attacker_id', $attack->defender_id)
+                ->where('defender_id', $attack->attacker_id)
+                ->where('timestamp', '>', $attackTime)
+                ->where('timestamp', '<=', $windowEnd)
+                ->whereIn('result', ['Attacked', 'Hospitalized'])
+                ->exists();
+
+            return [
+                'target_id' => $attack->attacker_id,
+                'target_name' => $attack->attacker_name,
+                'attacked_by' => $attack->defender_name,
+                'timestamp' => $attackTime,
+                'expires_at' => $windowEnd,
+                'retaliated' => $retaliationHit,
+            ];
+        })
+        ->filter(fn($r) => !$r['retaliated']);
+
+$ourChain = WarChain::where('war_id', $warId)->where('faction_id', $ourFactionId)->first();
+    $chainStats = [
+        'chain_hits' => $ourChain?->chain_hits ?? 0,
+        'max_chain' => $ourChain?->max_chain ?? 0,
+        'chain_respect' => $ourChain?->chain_respect ?? 0,
+        'avg_bonus' => 1.0,
+    ];
+
+    $activeChain = null;
+    if ($ourChain && $ourChain->expires_at && $ourChain->expires_at > now()) {
+        $activeChain = [
+            'level' => $ourChain->current_chain,
+            'expires_at' => $ourChain->expires_at,
+        ];
+    }
+
+    return view('dashboard.war-detail', compact('settings', 'war', 'ourMembers', 'opponentMembers', 'attackStats', 'attacks', 'retaliationTargets', 'chainStats', 'activeChain'));
     }
 
     public function warStats(int $warId)
@@ -97,16 +152,16 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('attacker_id');
 
-        $stats = [];
-        foreach ($attackStats as $playerId => $stat) {
-            $stats[$playerId] = [
-                'hits' => (int) $stat->total_attacks,
-                'successful' => (int) $stat->successful,
-                'failed' => (int) $stat->failed,
-                'interrupted' => (int) $stat->interrupted,
-                'score' => round($stat->total_score, 2)
-            ];
-        }
+$stats = [];
+    foreach ($attackStats as $playerId => $stat) {
+        $stats[$playerId] = [
+            'hits' => (int) $stat->successful,
+            'successful' => (int) $stat->successful,
+            'failed' => (int) $stat->failed,
+            'interrupted' => (int) $stat->interrupted,
+            'score' => round($stat->total_score, 2)
+        ];
+    }
 
         return response()->json([
             'stats' => $stats,

@@ -3,6 +3,11 @@
 @section('title', 'War Details - TornOps')
 
 @section('content')
+<style>
+@media (max-width: 768px) {
+    .two-cols, .three-cols { grid-template-columns: 1fr !important; }
+}
+</style>
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
@@ -18,16 +23,21 @@
             @else
                 <span class="px-4 py-2 rounded bg-yellow-900 text-yellow-400 font-semibold">{{ ucfirst($war->status) }}</span>
             @endif
-            @if(in_array($war->status, ['in progress', 'pending']))
-                <span id="live-indicator" class="flex items-center gap-1.5 px-3 py-1 rounded bg-green-900/50 text-green-400 text-sm font-medium">
-                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                    LIVE
-                </span>
-            @endif
+            <button onclick="location.reload()" class="px-3 py-2 rounded bg-blue-800 text-blue-300 hover:bg-blue-700">Refresh</button>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    @php
+    $target = $war->data['war']['target'] ?? 1900;
+    $ours = $war->score_ours ?? 0;
+    $them = $war->score_them ?? 0;
+    $diff = $ours - $them;
+    $remaining = max(0, $target - $diff);
+    $percent = $diff >= 0 ? round(($diff / $target) * 100, 1) : 0;
+    $width = min(100, max(0, $percent));
+    @endphp
+
+    <div class="grid gap-6 three-cols" style="display: grid; grid-template-columns: repeat(3, 1fr);">
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-2">Start Date (UTC)</h3>
             <p class="text-xl font-mono">{{ $war->start_date ? $war->start_date->format('d M Y H:i') : 'Unknown' }}</p>
@@ -36,136 +46,147 @@
         </div>
 
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-2">End Date (UTC)</h3>
-            <p class="text-xl font-mono">{{ $war->end_date ? $war->end_date->format('d M Y H:i') : 'Ongoing' }}</p>
+            <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-4">War Progress</h3>
+            <div class="text-center">
+                <div class="flex items-center justify-center space-x-6">
+                    <div>
+                        <p class="text-4xl font-bold text-green-400" id="score-ours">{{ $ours }}</p>
+                        <p class="text-gray-400 mt-1 text-sm">Our Faction</p>
+                    </div>
+                    <div class="text-2xl text-gray-500">-</div>
+                    <div>
+                        <p class="text-4xl font-bold text-red-400" id="score-them">{{ $them }}</p>
+                        <p class="text-gray-400 mt-1 text-sm">{{ $war->opponent_faction_name ?? 'Opponent' }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                    <span>Target: {{ $target }} pts</span>
+                    <span id="progress-percent">{{ $percent }}%</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-3">
+                    <div class="{{ $diff >= 0 ? 'bg-green-500' : 'bg-yellow-500' }} h-3 rounded-full transition-all duration-300" style="width: {{ $width }}%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span class="{{ $diff >= 0 ? 'text-green-400' : 'text-yellow-400' }}">{{ $diff >= 0 ? '+' . $diff : $diff }} lead</span>
+                    <span>{{ $remaining }} to win</span>
+                </div>
+            </div>
         </div>
 
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-2">War Duration</h3>
-            <p class="text-2xl font-bold font-mono" id="duration-display"></p>
-        </div>
-    </div>
-
-    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-4">War Progress</h3>
-        <div class="text-center">
-            <div class="flex items-center justify-center space-x-8">
-                <div>
-                    <p class="text-5xl font-bold text-green-400" id="score-ours">{{ $war->score_ours ?? 0 }}</p>
-                    <p class="text-gray-400 mt-2">Our Faction</p>
-                </div>
-                <div class="text-3xl text-gray-500">-</div>
-                <div>
-                    <p class="text-5xl font-bold text-red-400" id="score-them">{{ $war->score_them ?? 0 }}</p>
-                    <p class="text-gray-400 mt-2">{{ $war->opponent_faction_name ?? 'Opponent' }}</p>
-                </div>
+            <div class="mb-6">
+                <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-2">End Date (UTC)</h3>
+                <p class="text-xl font-mono">{{ $war->end_date ? $war->end_date->format('d M Y H:i') : 'Ongoing' }}</p>
             </div>
-        </div>
-        @php
-            $target = $war->data['war']['target'] ?? 1900;
-            $ours = $war->score_ours ?? 0;
-            $them = $war->score_them ?? 0;
-            $diff = $ours - $them;
-            $combinedTarget = $target * 2;
-            $percent = round((0.5 + ($diff / $combinedTarget)) * 100, 1);
-            $width = min(100, max(0, $percent));
-            $moreToWin = $diff >= 0 ? ($target - $diff) : ($target - $diff);
-        @endphp
-        <div class="mt-6">
-            <div class="flex justify-between text-sm text-gray-400 mb-2">
-                <span>Target: {{ $target }} pts</span>
-                <span id="progress-percent">{{ $percent }}%</span>
-            </div>
-            <div class="w-full bg-gray-700 rounded-full h-4">
-                <div class="{{ $diff >= 0 ? 'bg-green-500' : 'bg-yellow-500' }} h-4 rounded-full transition-all duration-300" style="width: {{ $width }}%"></div>
-            </div>
-            <div class="flex justify-between text-xs text-gray-500 mt-1">
-                <span class="{{ $diff >= 0 ? 'text-green-400' : 'text-yellow-400' }}">{{ $diff >= 0 ? '+' . $diff : $diff }} pts lead</span>
-                <span>{{ $moreToWin }} more to win</span>
+            <div>
+                <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-2">War Duration</h3>
+                <p class="text-2xl font-bold font-mono" id="duration-display"></p>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    @php $hasRetaliations = $retaliationTargets->isNotEmpty(); @endphp
+    <div class="grid gap-6 two-cols" style="display: grid; grid-template-columns: 1fr 1fr;">
+        <div class="bg-gray-800 rounded-lg p-4" style="border: 1px solid {{ $hasRetaliations ? '#ea580c' : '#374151' }}">
+            <h3 class="text-sm uppercase tracking-wide mb-1 flex items-center gap-2" style="color: {{ $hasRetaliations ? '#f97316' : '#9ca3af' }}">
+                Retaliation Targets
+            </h3>
+            <p class="text-gray-500 text-xs mb-3">Click target to attack. Please HOSPITALIZE target to get bonus</p>
+            <div class="space-y-2">
+                @forelse($retaliationTargets as $target)
+                <div class="flex items-center justify-between bg-orange-900/20 rounded p-3 border border-orange-800/50" data-retaliation-expires="{{ $target['expires_at']->timestamp }}">
+                    <div>
+                        <a href="https://www.torn.com/loader.php?sid=attack&user2ID={{ $target['target_id'] }}" target="_blank" class="font-medium text-orange-300 hover:text-orange-200">{{ $target['target_name'] }}</a>
+                        <span class="text-gray-400 text-sm ml-2">hit {{ $target['attacked_by'] }}</span>
+                    </div>
+                    <div class="font-mono text-orange-400 text-lg retaliation-timer"></div>
+                </div>
+                @empty
+                <div class="text-gray-500 text-sm">No active retaliation targets</div>
+                @endforelse
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-4 border border-gray-700">
+            <h3 class="text-sm uppercase tracking-wide mb-1 flex items-center gap-2 text-purple-400">
+                Chaining
+            </h3>
+            @if($activeChain)
+            <div class="bg-green-900/30 rounded p-3 mb-3 border border-green-700/50" data-chain-expires="{{ $activeChain['expires_at']->timestamp }}">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-green-400 font-bold text-lg">Chain {{ $activeChain['level'] }}+</span>
+                        <span class="text-gray-400 text-sm ml-2">active</span>
+                    </div>
+                    <div class="font-mono text-green-300 text-lg chain-timer"></div>
+                </div>
+            </div>
+            @else
+            <div class="bg-gray-700/30 rounded p-2 mb-3 text-center text-gray-500 text-sm">
+                No active chain
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="grid gap-6 two-cols" style="display: grid; grid-template-columns: 1fr 1fr;">
         <div class="bg-gray-800 rounded-lg border border-gray-700">
             <div class="p-4 border-b border-gray-700">
                 <h2 class="text-xl font-semibold text-green-400" id="header-our">Our Faction (<span id="pts-our">{{ $war->score_ours ?? 0 }}</span> pts)</h2>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
-<thead class="sticky top-0 bg-gray-700 cursor-pointer select-none" id="thead-our">
+                    <thead class="sticky top-0 bg-gray-700 cursor-pointer select-none" id="thead-our">
                         <tr class="text-left text-gray-400 text-sm">
-                            <th class="p-3" data-sort="name" data-dir="asc">Name <span class="sort-icon text-gray-500">↑</span></th>
-                            <th class="p-3" data-sort="level" data-dir="desc">Level <span class="sort-icon text-gray-500">↓</span></th>
-                            <th class="p-3 text-right" data-sort="ff" data-dir="desc">FF Score <span class="sort-icon text-gray-500">↓</span></th>
-                            <th class="p-3 text-right" data-sort="stats" data-dir="desc">Est. Stats <span class="sort-icon text-gray-500">↓</span></th>
-                            <th class="p-3 text-right" data-sort="hits" data-dir="desc">Hits <span class="sort-icon text-gray-500">↓</span></th>
-                            <th class="p-3 text-right" data-sort="pwar" data-dir="desc">War Score <span class="sort-icon text-gray-500">↓</span></th>
-                            <th class="p-3" data-sort="status" data-dir="asc">Status <span class="sort-icon text-gray-500">↑</span></th>
+                            <th class="p-3" data-sort="name" data-dir="asc">Name <span class="sort-icon">↑</span></th>
+                            <th class="p-3" data-sort="level" data-dir="desc">Level <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right" data-sort="ff" data-dir="desc">FF <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right" data-sort="stats" data-dir="desc">Stats <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right" data-sort="hits" data-dir="desc">Hits <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right" data-sort="pwar" data-dir="desc">Score <span class="sort-icon">↓</span></th>
+                            <th class="p-3" data-sort="status" data-dir="asc">Status <span class="sort-icon">↑</span></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700" id="tbody-our">
                         @foreach($ourMembers as $member)
                         @php
                             $stats = $attackStats[$member->player_id] ?? null;
-                            $hits = $stats->total_attacks ?? 0;
+                            $hits = $stats->successful ?? 0;
                             $successful = $stats->successful ?? 0;
                             $failed = $stats->failed ?? 0;
                             $interrupted = $stats->interrupted ?? 0;
                             $warScore = $stats->total_score ?? 0;
                         @endphp
-                        <tr class="hover:bg-gray-700/30" data-player-id="{{ $member->player_id }}" data-name="{{ strtolower($member->name) }}" data-level="{{ $member->level }}" data-ff="{{ $member->ff_score ?? 0 }}" data-stats="{{ $member->estimated_stats ?? '' }}" data-status="{{ $member->status_description ?? '' }}" data-hits="{{ $hits }}" data-warscore="{{ $warScore }}">
+                        <tr class="hover:bg-gray-700/30" data-name="{{ strtolower($member->name) }}" data-level="{{ $member->level }}" data-ff="{{ $member->ff_score ?? 0 }}" data-stats="{{ $member->estimated_stats ?? '' }}" data-hits="{{ $hits }}" data-pwar="{{ $warScore }}" data-status="{{ $member->status_description ?? '' }}">
                             <td class="p-3">
-                                <span class="inline-block w-2 h-2 rounded-full mr-2
-                                    @if($member->online_status === 'Online') bg-green-500
-                                    @elseif($member->online_status === 'Idle') bg-yellow-500
-                                    @else bg-gray-500
-                                    @endif"></span>
+                                <span class="inline-block w-2 h-2 rounded-full mr-2 @if($member->online_status === 'Online') bg-green-500 @elseif($member->online_status === 'Idle') bg-yellow-500 @else bg-gray-500 @endif"></span>
                                 <span class="font-medium">{{ $member->name }}</span>
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
-                                @if($member->online_description)
-                                    <span class="block text-xs text-gray-500 ml-4 last-action">Last action: {{ $member->online_description }}</span>
-                                @endif
                             </td>
                             <td class="p-3">{{ $member->level }}</td>
-                            <td class="p-3 text-right">
-                                <span class="font-mono text-green-400">{{ $member->ff_score ?? '-' }}</span>
-                                @if($member->ff_updated_at)
-                                    <span class="block text-xs text-gray-500">{{ $member->ff_updated_at->diffForHumans() }}</span>
-                                @endif
-                            </td>
+                            <td class="p-3 text-right font-mono text-green-400">{{ $member->ff_score ?? '-' }}</td>
                             <td class="p-3 text-right font-mono text-gray-400 text-sm">{{ $member->estimated_stats ?? '-' }}</td>
                             <td class="p-3 text-right">
-                                <span class="font-mono text-blue-400 text-lg cursor-help" title="War Stats:&#10;Total: {{ $hits }}&#10;Success: {{ $successful }}&#10;Fail: {{ $failed }}&#10;Interrupt: {{ $interrupted }}&#10;Score: {{ $warScore > 0 ? round($warScore, 2) : '0.00' }}">{{ $hits }}</span>
+                                <span class="font-mono text-blue-400 text-lg">{{ $hits }}</span>
                                 <span class="block text-xs text-gray-500">S:{{ $successful }} F:{{ $failed }} I:{{ $interrupted }}</span>
                             </td>
-                            <td class="p-3 text-right font-mono text-purple-400">{{ $warScore > 0 ? round($warScore, 1) : '-' }}</td>
+                            <td class="p-3 text-right font-mono text-purple-400">{{ $warScore > 0 ? number_format($warScore, 2) : '-' }}</td>
                             <td class="p-3">
-                                @if($member->status_color === 'red' && isset($member->data['status']['until']))
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer cursor-help" data-until="{{ $member->data['status']['until'] }}" title="{{ $member->status_description ?? 'In hospital' }}">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span>
-                                        <span class="hospital-desc">{{ $member->status_description ?? 'Hospital' }}</span>
-                                    </span>
+                                @php $statusData = is_array($member->data) ? $member->data : json_decode($member->data, true); @endphp
+                                @if($member->status_color === 'red' && isset($statusData['status']['until']))
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $statusData['status']['until'] }}">{{ $member->status_description ?? 'Hospital' }}</span>
                                 @elseif($member->status_color === 'blue')
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-900/50 text-blue-400 text-xs font-medium travel-bubble cursor-help" 
-                                          title="{{ $member->status_description ?? 'Traveling' }}"
-                                          data-status-changed="{{ $member->status_changed_at?->timestamp }}"
-                                          data-travel-time="60">
-                                        <span class="torn-icon" style="display:inline-block;width:14px;height:14px;border:1px solid currentColor;border-radius:50%;text-align:center;line-height:12px;font-size:10px;">T</span>
-                                        <svg class="w-3 h-3 plane-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-                                        <span class="travel-desc" data-original="{{ $member->status_description ?? 'Offline' }}"></span>
-                                        <span class="travel-eta ml-1 font-mono"></span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-900/50 text-blue-400 text-xs font-medium travel-bubble" data-status-changed="{{ $member->status_changed_at?->timestamp }}" data-travel-time="60">
+                                        <span class="torn-icon" style="display:none;width:12px;height:12px;border:1px solid currentColor;border-radius:50%;text-align:center;line-height:10px;font-size:8px;">T</span>
+                                        <svg class="w-3 h-3 plane-icon" style="display:none;" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span>
                                     </span>
                                 @elseif($member->status_color === 'green')
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium cursor-help" title="{{ $member->status_description ?? 'Okay' }}">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
-                                        <span class="status-desc">{{ $member->status_description ?? 'Okay' }}</span>
-                                    </span>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">{{ $member->status_description ?? 'Okay' }}</span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 text-xs font-medium cursor-help" title="{{ $member->status_description ?? 'Offline' }}">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-                                        <span class="status-desc">{{ $member->status_description ?? 'Offline' }}</span>
-                                    </span>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 text-xs font-medium">{{ $member->status_description ?? 'Offline' }}</span>
                                 @endif
                             </td>
                         </tr>
@@ -178,79 +199,61 @@
         <div class="bg-gray-800 rounded-lg border border-gray-700">
             <div class="p-4 border-b border-gray-700">
                 <h2 class="text-xl font-semibold text-red-400" id="header-opp">{{ $war->opponent_faction_name ?? 'Opponent' }} (<span id="pts-opp">{{ $war->score_them ?? 0 }}</span> pts)</h2>
+                <p class="text-gray-500 text-xs mt-1">Click opponent name to attack</p>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead class="sticky top-0 bg-gray-700 cursor-pointer select-none" id="thead-opp">
                         <tr class="text-left text-gray-400 text-sm">
-                            <th class="p-3" data-sort="name" data-dir="asc">Name <span class="sort-icon text-gray-500">↑</span></th>
-                            <th class="p-3" data-sort="level" data-dir="desc">Level <span class="sort-icon text-gray-500">↓</span></th>
-                            <th class="p-3 text-right" data-sort="ff" data-dir="desc">FF Score <span class="sort-icon text-gray-500">↓</span></th>
-                            <th class="p-3 text-right" data-sort="stats" data-dir="desc">Est. Stats <span class="sort-icon text-gray-500">↓</span></th>
-                            <th class="p-3 text-right" data-sort="hits" data-dir="desc">Hits <span class="sort-icon text-gray-500">↓</span></th>
-                            <th class="p-3" data-sort="status" data-dir="asc">Status <span class="sort-icon text-gray-500">↑</span></th>
+                            <th class="p-3" data-sort="name" data-dir="asc">Name <span class="sort-icon">↑</span></th>
+                            <th class="p-3" data-sort="level" data-dir="desc">Level <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right" data-sort="ff" data-dir="desc">FF <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right" data-sort="stats" data-dir="desc">Stats <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right" data-sort="hits" data-dir="desc">Hits <span class="sort-icon">↓</span></th>
+                            <th class="p-3" data-sort="status" data-dir="asc">Status <span class="sort-icon">↑</span></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700" id="tbody-opp">
                         @foreach($opponentMembers as $member)
                         @php
                             $stats = $attackStats[$member->player_id] ?? null;
-                            $hits = $stats->total_attacks ?? 0;
+                            $hits = $stats->successful ?? 0;
                             $successful = $stats->successful ?? 0;
                             $failed = $stats->failed ?? 0;
                             $interrupted = $stats->interrupted ?? 0;
+                            $leavingSoon = false;
+                            if ($member->status_color === 'red' && isset($member->data['status']['until'])) {
+                                $until = $member->data['status']['until'];
+                                $leavingSoon = $until > 0 && ($until - time()) <= 300;
+                            }
                         @endphp
-                        <tr class="hover:bg-gray-700/30" data-player-id="{{ $member->player_id }}" data-name="{{ strtolower($member->name) }}" data-level="{{ $member->level }}" data-ff="{{ $member->ff_score ?? 0 }}" data-stats="{{ $member->estimated_stats ?? '' }}" data-status="{{ $member->status_description ?? '' }}" data-hits="{{ $hits }}">
+                        <tr class="hover:bg-gray-700/30 {{ $leavingSoon ? 'bg-red-900/20' : '' }}" data-name="{{ strtolower($member->name) }}" data-level="{{ $member->level }}" data-ff="{{ $member->ff_score ?? 0 }}" data-stats="{{ $member->estimated_stats ?? '' }}" data-hits="{{ $hits }}" data-status="{{ $member->status_description ?? '' }}">
                             <td class="p-3">
-                                <span class="inline-block w-2 h-2 rounded-full mr-2
-                                    @if($member->online_status === 'Online') bg-green-500
-                                    @elseif($member->online_status === 'Idle') bg-yellow-500
-                                    @else bg-gray-500
-                                    @endif"></span>
-                                <span class="font-medium">{{ $member->name }}</span>
+                                <span class="inline-block w-2 h-2 rounded-full mr-2 @if($member->online_status === 'Online') bg-green-500 @elseif($member->online_status === 'Idle') bg-yellow-500 @else bg-gray-500 @endif"></span>
+                                <a href="https://www.torn.com/loader.php?sid=attack&user2ID={{ $member->player_id }}" target="_blank" class="font-medium hover:text-blue-400">{{ $member->name }}</a>
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
-                                @if($member->online_description)
-                                    <span class="block text-xs text-gray-500 ml-4 last-action">Last action: {{ $member->online_description }}</span>
-                                @endif
                             </td>
                             <td class="p-3">{{ $member->level }}</td>
-                            <td class="p-3 text-right">
-                                <span class="font-mono text-red-400">{{ $member->ff_score ?? '-' }}</span>
-                                @if($member->ff_updated_at)
-                                    <span class="block text-xs text-gray-500">{{ $member->ff_updated_at->diffForHumans() }}</span>
-                                @endif
-                            </td>
+                            <td class="p-3 text-right font-mono text-red-400">{{ $member->ff_score ?? '-' }}</td>
                             <td class="p-3 text-right font-mono text-gray-400 text-sm">{{ $member->estimated_stats ?? '-' }}</td>
                             <td class="p-3 text-right">
-                                <span class="font-mono text-blue-400 text-lg cursor-help" title="War Stats:&#10;Total: {{ $hits }}&#10;Success: {{ $successful }}&#10;Fail: {{ $failed }}&#10;Interrupt: {{ $interrupted }}">{{ $hits }}</span>
+                                <span class="font-mono text-blue-400 text-lg">{{ $hits }}</span>
                                 <span class="block text-xs text-gray-500">S:{{ $successful }} F:{{ $failed }} I:{{ $interrupted }}</span>
                             </td>
                             <td class="p-3">
-                                @if($member->status_color === 'red' && isset($member->data['status']['until']))
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer cursor-help" data-until="{{ $member->data['status']['until'] }}" title="{{ $member->status_description ?? 'In hospital' }}">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span>
-                                        <span class="hospital-desc">{{ $member->status_description ?? 'Hospital' }}</span>
-                                    </span>
+                                @php $statusData = is_array($member->data) ? $member->data : json_decode($member->data, true); @endphp
+                                @if($member->status_color === 'red' && isset($statusData['status']['until']))
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $statusData['status']['until'] }}">{{ $member->status_description ?? 'Hospital' }}</span>
                                 @elseif($member->status_color === 'blue')
-                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-900/50 text-blue-400 text-xs font-medium travel-bubble cursor-help" 
-                                          title="{{ $member->status_description ?? 'Traveling' }}"
-                                          data-status-changed="{{ $member->status_changed_at?->timestamp }}"
-                                          data-travel-time="60">
-                                        <span class="torn-icon" style="display:inline-block;width:14px;height:14px;border:1px solid currentColor;border-radius:50%;text-align:center;line-height:12px;font-size:10px;">T</span>
-                                        <svg class="w-3 h-3 plane-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-                                        <span class="travel-desc" data-original="{{ $member->status_description ?? 'Offline' }}"></span>
-                                        <span class="travel-eta ml-1 font-mono"></span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-900/50 text-blue-400 text-xs font-medium travel-bubble" data-status-changed="{{ $member->status_changed_at?->timestamp }}" data-travel-time="60">
+                                        <span class="torn-icon" style="display:none;width:12px;height:12px;border:1px solid currentColor;border-radius:50%;text-align:center;line-height:10px;font-size:8px;">T</span>
+                                        <svg class="w-3 h-3 plane-icon" style="display:none;" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span>
                                     </span>
                                 @elseif($member->status_color === 'green')
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium cursor-help" title="{{ $member->status_description ?? 'Okay' }}">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
-                                        <span class="status-desc">{{ $member->status_description ?? 'Okay' }}</span>
-                                    </span>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">{{ $member->status_description ?? 'Okay' }}</span>
                                 @else
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 text-xs font-medium cursor-help" title="{{ $member->status_description ?? 'Offline' }}">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-                                        <span class="status-desc">{{ $member->status_description ?? 'Offline' }}</span>
-                                    </span>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 text-xs font-medium">{{ $member->status_description ?? 'Offline' }}</span>
                                 @endif
                             </td>
                         </tr>
@@ -276,40 +279,32 @@
                         <th class="p-4">Time (UTC)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-700" id="war-attacks-table">
-                    @forelse($war->attacks as $attack)
+                <tbody class="divide-y divide-gray-700">
+                    @forelse($attacks as $attack)
                     <tr class="hover:bg-gray-700/30">
-                        <td class="p-4{{ $attack->attacker_name === 'Stealthed' ? ' italic text-gray-500' : '' }}">{{ $attack->attacker_name ?? 'Unknown' }}</td>
+                        <td class="p-4">{{ $attack->attacker_name ?? 'Unknown' }}</td>
                         <td class="p-4">
                             @if($attack->result === 'Attacked' || $attack->result === 'Hospitalized')
                                 <span class="px-2 py-1 rounded text-xs bg-green-900 text-green-400">{{ $attack->result }}</span>
                             @elseif($attack->result === 'Lost' || $attack->result === 'Stalemate')
                                 <span class="px-2 py-1 rounded text-xs bg-red-900 text-red-400">{{ $attack->result }}</span>
-                            @elseif($attack->result === 'Interrupted')
-                                <span class="px-2 py-1 rounded text-xs bg-yellow-900 text-yellow-400">{{ $attack->result }}</span>
                             @else
-                                <span class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">{{ $attack->result ?? '-' }}</span>
+                                <span class="px-2 py-1 rounded text-xs bg-gray-700 text-gray-400">{{ $attack->result }}</span>
                             @endif
                         </td>
                         <td class="p-4">{{ $attack->defender_name ?? 'Unknown' }}</td>
-                        <td class="p-4 font-mono">{{ $attack->respect_gain ?? 0 }}</td>
-                        <td class="p-4 text-gray-400 text-sm font-mono">
-                            {{ $attack->timestamp ? $attack->timestamp->format('d M Y H:i:s') : '-' }}
-                        </td>
+                        <td class="p-4 font-mono text-purple-400">{{ $attack->respect_gain > 0 ? '+' . $attack->respect_gain : '-' }}</td>
+                        <td class="p-4 text-gray-400">{{ $attack->timestamp ? $attack->timestamp->format('H:i:s') : '-' }}</td>
                     </tr>
                     @empty
-                    <tr>
-                        <td colspan="5" class="p-8 text-center text-gray-400">
-                            No attacks found for this war.
-                        </td>
-                    </tr>
+                    <tr><td class="p-4 text-gray-500" colspan="5">No attacks recorded</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        {{ $attacks->links() }}
     </div>
 </div>
-
 @endsection
 
 @section('scripts')
@@ -464,9 +459,47 @@ etaEl.textContent = '(' + h + ':' + m.toString().padStart(2, '0') + ':' + s.toSt
 etaEl.textContent = '(' + m + ':' + s.toString().padStart(2, '0') + ')';
 }
 } else {
-etaEl.textContent = '';
+            etaEl.textContent = '';
+        }
+    }
 }
+
+function updateRetaliationTimers() {
+    var now = Math.floor(Date.now() / 1000);
+    var timers = document.querySelectorAll('[data-retaliation-expires]');
+    timers.forEach(function(row) {
+        var expires = parseInt(row.getAttribute('data-retaliation-expires'));
+        var timerEl = row.querySelector('.retaliation-timer');
+        if (!timerEl) return;
+        var remaining = expires - now;
+        if (remaining > 0) {
+            var m = Math.floor(remaining / 60);
+            var s = remaining % 60;
+            timerEl.textContent = m + ':' + s.toString().padStart(2, '0');
+        } else {
+            timerEl.textContent = 'EXPIRED';
+            row.classList.add('opacity-50');
+        }
+    });
 }
+
+function updateChainTimer() {
+    var now = Math.floor(Date.now() / 1000);
+    var chainRow = document.querySelector('[data-chain-expires]');
+    if (!chainRow) return;
+    var expires = parseInt(chainRow.getAttribute('data-chain-expires'));
+    var timerEl = chainRow.querySelector('.chain-timer');
+    if (!timerEl) return;
+    var remaining = expires - now;
+    if (remaining > 0) {
+        var m = Math.floor(remaining / 60);
+        var s = remaining % 60;
+        timerEl.textContent = m + ':' + s.toString().padStart(2, '0');
+    } else {
+        timerEl.textContent = 'EXPIRED';
+        chainRow.classList.remove('bg-green-900/30', 'border-green-700/50');
+        chainRow.classList.add('bg-gray-700/30', 'opacity-50');
+    }
 }
 
 function parseStats(str) {
@@ -631,33 +664,26 @@ return { direction: 'right', country: original, isTraveling: false };
 }
 
 function initTravelBubbles() {
-document.querySelectorAll('.travel-desc').forEach(el => {
-var original = el.getAttribute('data-original');
-if (!original) return;
-var result = simplifyTravelStatus(original);
-var bubble = el.closest('.travel-bubble');
-if (!bubble) return;
+document.querySelectorAll('.travel-bubble').forEach(bubble => {
+var text = bubble.querySelector('.travel-text').textContent.trim();
+var result = simplifyTravelStatus(text);
+bubble.dataset.travelTime = result.travelTime;
 
 var planeIcon = bubble.querySelector('.plane-icon');
 var tornIcon = bubble.querySelector('.torn-icon');
-
-bubble.dataset.travelTime = result.travelTime;
+var travelText = bubble.querySelector('.travel-text');
 
 if (result.isTraveling) {
 if (planeIcon) {
 planeIcon.style.display = 'inline';
-if (result.direction === 'left') {
-planeIcon.style.transform = 'rotate(-90deg)';
-} else {
-planeIcon.style.transform = 'rotate(90deg)';
-}
+planeIcon.style.transform = result.direction === 'left' ? 'rotate(-90deg)' : 'rotate(90deg)';
 }
 if (tornIcon) tornIcon.style.display = 'inline';
-el.textContent = result.country;
+travelText.textContent = result.country + ' ';
 } else {
 if (planeIcon) planeIcon.style.display = 'none';
 if (tornIcon) tornIcon.style.display = 'none';
-el.textContent = 'In ' + result.country;
+travelText.textContent = 'In ' + result.country + ' ';
 }
 });
 }
@@ -683,10 +709,16 @@ updateHospitalTimers();
 setInterval(updateHospitalTimers, 1000);
 
 initTravelBubbles();
-updateTravelTimers();
-setInterval(updateTravelTimers, 1000);
+        updateTravelTimers();
+        setInterval(updateTravelTimers, 1000);
 
-if (isActiveWar) {
+        updateRetaliationTimers();
+        setInterval(updateRetaliationTimers, 1000);
+
+        updateChainTimer();
+        setInterval(updateChainTimer, 1000);
+
+        if (isActiveWar) {
 setInterval(function() {
 location.reload();
 }, 30000);

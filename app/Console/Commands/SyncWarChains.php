@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\FactionSettings;
+use App\Models\RankedWar;
+use App\Models\WarChain;
+use App\Services\TornApiService;
+use Illuminate\Console\Command;
+
+class SyncWarChains extends Command
+{
+    protected $signature = 'torn:sync-chains';
+    protected $description = 'Sync chain data from Torn API for active wars';
+
+    public function handle(TornApiService $tornApi): int
+    {
+        $factionId = FactionSettings::value('faction_id');
+        if (!$factionId) {
+            return Command::FAILURE;
+        }
+
+        $activeWars = RankedWar::whereIn('status', ['in progress', 'pending'])->get();
+        if ($activeWars->isEmpty()) {
+            return Command::SUCCESS;
+        }
+
+        $this->info("Syncing chains for {$activeWars->count()} active war(s)...");
+
+        foreach ($activeWars as $war) {
+            $this->syncWarChain($war, $factionId, $tornApi);
+            $this->syncWarChain($war, $war->opponent_faction_id, $tornApi);
+        }
+
+        return Command::SUCCESS;
+    }
+
+    private function syncWarChain(RankedWar $war, int $factionId, TornApiService $tornApi): void
+    {
+        $chain = $tornApi->getFactionChain($factionId);
+        if (!$chain) {
+            return;
+        }
+
+        $now = now();
+        $currentChain = $chain['current'] ?? 0;
+        $timeout = $chain['timeout'] ?? 0;
+
+        $expiresAt = null;
+        if ($currentChain > 0 && $timeout > 0) {
+            $expiresAt = $now->addSeconds($timeout);
+        }
+
+        $maxChain = $chain['max'] ?? 0;
+
+        $existing = WarChain::where('war_id', $war->war_id)->where('faction_id', $factionId)->first();
+        if ($existing && $existing->max_chain > $maxChain) {
+            $maxChain = $existing->max_chain;
+        }
+
+        WarChain::updateOrCreate(
+            ['war_id' => $war->war_id, 'faction_id' => $factionId],
+            [
+                'current_chain' => $currentChain,
+                'max_chain' => $maxChain,
+                'last_hit_at' => ($chain['end'] ?? 0) > 0 ? $now->createFromTimestamp($chain['end']) : null,
+                'expires_at' => $expiresAt,
+            ]
+        );
+    }
+}

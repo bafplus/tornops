@@ -67,13 +67,18 @@ class SyncActiveWars extends Command
             $status = 'in progress';
         }
 
+$target = $warInfo['target'] ?? 1900;
+        $warDataArray = $war->data ?? [];
+        $warDataArray['war'] = array_merge($warDataArray['war'] ?? [], ['target' => $target]);
+
         $war->update([
             'status' => $status,
             'score_ours' => $scoreOurs,
             'score_them' => $scoreThem,
-            'end_date' => isset($warInfo['end']) && $warInfo['end'] > 0 
-                ? now()->createFromTimestamp($warInfo['end']) 
+            'end_date' => isset($warInfo['end']) && $warInfo['end'] > 0
+                ? now()->createFromTimestamp($warInfo['end'])
                 : null,
+            'data' => $warDataArray,
         ]);
 
         $warMemberIds = WarMember::where('war_id', $war->war_id)

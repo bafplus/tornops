@@ -1,5 +1,8 @@
 # TornOps
 
+> ⚠️ **Early Development Warning**  
+> This project is currently in early stages of development. It may not function correctly or have complete features. Use at your own risk.
+
 TornOps is a web portal for Torn City faction members to aggregate, analyze, and visualize data from Torn City APIs and third-party services.
 
 ## Features

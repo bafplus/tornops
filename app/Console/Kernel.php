@@ -24,10 +24,15 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
 
-        $schedule->command('torn:sync-attacks')
-            ->everyMinute()
-            ->withoutOverlapping()
-            ->runInBackground();
+$schedule->command('torn:sync-attacks')
+        ->everyMinute()
+        ->withoutOverlapping()
+        ->runInBackground();
+
+        $schedule->command('torn:sync-chains')
+        ->everyMinute()
+        ->withoutOverlapping()
+        ->runInBackground();
     }
 
     protected function commands(): void
