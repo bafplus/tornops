@@ -172,6 +172,7 @@
         <div class="bg-gray-800 rounded-lg border border-gray-700">
             <div class="p-4 border-b border-gray-700">
                 <h2 class="text-xl font-semibold text-green-400" id="header-our">{{ $settings->faction_name ?? 'Our Faction' }} (<span id="pts-our">{{ $war->score_ours ?? 0 }}</span> pts)</h2>
+                <p class="text-gray-500 text-xs mt-1">War score based on hits on opponent members from attack logs</p>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full">
