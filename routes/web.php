@@ -8,6 +8,12 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\WarApiController;
 use App\Http\Controllers\GymAssistantController;
+use App\Http\Controllers\TravelController;
+use App\Http\Controllers\ItemsController;
+use App\Http\Controllers\StocksController;
+use App\Http\Controllers\JumpsController;
+use App\Http\Controllers\ScriptsController;
+use App\Http\Controllers\ToolsController;
 
 Route::get('/setup', [SetupController::class, 'index'])->name('setup');
 Route::post('/setup', [SetupController::class, 'store']);
@@ -52,6 +58,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/gym/update', [GymAssistantController::class, 'update']);
     Route::post('/gym/program', [GymAssistantController::class, 'selectProgram']);
     
+    Route::get('/travel', [TravelController::class, 'index']);
+    Route::get('/items', [ItemsController::class, 'index']);
+    Route::get('/stocks', [StocksController::class, 'index']);
+    Route::get('/jumps', [JumpsController::class, 'index']);
+    Route::get('/scripts', [ScriptsController::class, 'index']);
+    Route::get('/tools', [ToolsController::class, 'index']);
+    
     Route::middleware(['admin'])->group(function () {
         Route::get('/admin', [AdminController::class, 'index']);
         Route::put('/admin/settings', [AdminController::class, 'updateFactionSettings']);
@@ -68,5 +81,8 @@ Route::middleware(['auth'])->group(function () {
             \Illuminate\Support\Facades\Artisan::call('torn:sync-wars');
             return back()->with('status', 'War sync completed.');
         });
+
+        Route::post('/admin/check-updates', [AdminController::class, 'checkForUpdates']);
+        Route::post('/admin/upgrade', [AdminController::class, 'upgrade']);
     });
 });

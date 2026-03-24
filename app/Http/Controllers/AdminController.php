@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Http;
 
 class AdminController extends Controller
 {
@@ -70,5 +71,119 @@ class AdminController extends Controller
         }
         $user->delete();
         return back()->with('status', 'User deleted.');
+    }
+
+    public function checkForUpdates()
+    {
+        $currentVersion = config('tornops.version');
+        $currentCommit = config('tornops.commit', '');
+        $repo = config('tornops.github_repo');
+
+        try {
+            $response = Http::timeout(10)
+                ->withHeaders(['User-Agent' => 'TornOps'])
+                ->get("https://api.github.com/repos/{$repo}/releases/latest");
+            
+            if ($response->successful()) {
+                $latestVersion = ltrim($response->json()['tag_name'] ?? 'v1.0.0', 'v');
+                $releaseUrl = $response->json()['html_url'] ?? null;
+
+                $updateAvailable = version_compare($latestVersion, $currentVersion, '>');
+
+                return back()->with([
+                    'update_check' => true,
+                    'current_version' => $currentVersion,
+                    'current_commit' => $currentCommit,
+                    'latest_version' => $latestVersion,
+                    'update_available' => $updateAvailable,
+                    'release_url' => $releaseUrl,
+                ]);
+            }
+
+            if ($response->status() === 404) {
+                $commitResponse = Http::timeout(10)
+                    ->withHeaders(['User-Agent' => 'TornOps'])
+                    ->get("https://api.github.com/repos/{$repo}/commits?per_page=1");
+                
+                if ($commitResponse->successful()) {
+                    $latestCommit = $commitResponse->json()[0]['sha'] ?? null;
+                    $commitUrl = $commitResponse->json()[0]['html_url'] ?? null;
+
+                    $updateAvailable = $latestCommit !== null && $latestCommit !== $currentCommit;
+
+                    return back()->with([
+                        'update_check' => true,
+                        'current_version' => $currentVersion,
+                        'current_commit' => $currentCommit,
+                        'latest_version' => 'commit: ' . substr($latestCommit, 0, 7),
+                        'update_available' => $updateAvailable,
+                        'release_url' => $commitUrl,
+                        'no_releases' => true,
+                    ]);
+                }
+            }
+
+            $status = $response->status();
+            $body = $response->body();
+            return back()->with('error', "GitHub API error (HTTP {$status}): {$body}");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to connect to GitHub: ' . $e->getMessage());
+        }
+    }
+
+    public function upgrade()
+    {
+        $repo = config('tornops.github_repo');
+        
+        try {
+            $response = Http::timeout(10)
+                ->withHeaders(['User-Agent' => 'TornOps'])
+                ->get("https://api.github.com/repos/{$repo}/commits?per_page=1");
+            
+            if (!$response->successful()) {
+                return back()->with('error', 'Could not fetch latest commit from GitHub.');
+            }
+
+            $latestCommit = $response->json()[0]['sha'] ?? null;
+            $latestCommitShort = $latestCommit ? substr($latestCommit, 0, 7) : null;
+            
+            if (!$latestCommit) {
+                return back()->with('error', 'Could not determine latest commit.');
+            }
+
+            $currentCommit = config('tornops.commit');
+            
+            if ($currentCommit === $latestCommit) {
+                return back()->with('status', 'Already up to date.');
+            }
+
+            $output = [];
+            $returnCode = 0;
+            exec('cd /var/www/html && git pull 2>&1', $output, $returnCode);
+            
+            if ($returnCode === 0) {
+                $configPath = base_path('config/tornops.php');
+                $configContent = file_get_contents($configPath);
+                $newContent = preg_replace(
+                    "/'commit' => '[^']*'/",
+                    "'commit' => '{$latestCommit}'",
+                    $configContent
+                );
+                file_put_contents($configPath, $newContent);
+
+                exec('composer install --no-dev --quiet 2>&1', $composerOutput, $composerReturn);
+                
+                $message = 'Application upgraded to ' . $latestCommitShort;
+                if ($composerReturn === 0) {
+                    $message .= '. Composer dependencies updated.';
+                }
+                
+                return back()->with('status', $message);
+            }
+            
+            return back()->with('error', 'Git pull failed: ' . implode("\n", $output));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Upgrade failed: ' . $e->getMessage());
+        }
     }
 }
