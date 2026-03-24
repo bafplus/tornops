@@ -160,6 +160,8 @@ class AdminController extends Controller
             $output = [];
             $returnCode = 0;
             
+            exec('chown -R www-data:www-data /var/www/html/.git 2>&1', $chownOutput, $chownReturn);
+            
             $gitPullCmd = 'HOME=/root /usr/bin/git -C /var/www/html -c safe.directory=/var/www/html remote set-url origin https://github.com/bafplus/tornorps.git 2>&1; HOME=/root /usr/bin/git -C /var/www/html -c safe.directory=/var/www/html pull 2>&1';
             exec($gitPullCmd, $output, $returnCode);
             
