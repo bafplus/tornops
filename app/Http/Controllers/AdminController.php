@@ -159,7 +159,7 @@ class AdminController extends Controller
 
             $output = [];
             $returnCode = 0;
-            exec('cd /var/www/html && git pull 2>&1', $output, $returnCode);
+            exec('git config --global --add safe.directory /var/www/html && cd /var/www/html && git pull 2>&1', $output, $returnCode);
             
             if ($returnCode === 0) {
                 $configPath = base_path('config/tornops.php');
