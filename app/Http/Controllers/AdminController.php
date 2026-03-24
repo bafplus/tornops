@@ -162,7 +162,7 @@ class AdminController extends Controller
             
             exec('chown -R www-data:www-data /var/www/html/.git 2>&1', $chownOutput, $chownReturn);
             
-            $gitPullCmd = 'mkdir -p /tmp/git-www-data && HOME=/tmp/git-www-data USER=www-data /usr/bin/git -C /var/www/html -c safe.directory=/var/www/html -c init.defaultBranch=main remote set-url origin https://github.com/bafplus/tornorps.git 2>&1; HOME=/tmp/git-www-data USER=www-data /usr/bin/git -C /var/www/html -c safe.directory=/var/www/html pull 2>&1';
+            $gitPullCmd = 'mkdir -p /tmp/git-home && HOME=/tmp/git-home GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0="safe.directory" GIT_CONFIG_VALUE_0="/var/www/html" /usr/bin/git -C /var/www/html remote set-url origin https://github.com/bafplus/tornorps.git 2>&1; HOME=/tmp/git-home GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0="safe.directory" GIT_CONFIG_VALUE_0="/var/www/html" /usr/bin/git -C /var/www/html pull 2>&1';
             exec($gitPullCmd, $output, $returnCode);
             
             if ($returnCode === 0) {
