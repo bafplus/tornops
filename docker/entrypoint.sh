@@ -31,6 +31,11 @@ if [ "$APP_DIR" != "/var/www/html" ]; then
         rm -rf /var/www/html
     fi
     ln -sf "$APP_DIR" /var/www/html
+    
+    # Fix ownership of mounted volume
+    if [ -d "$DATA_DIR" ]; then
+        chown -R www-data:www-data "$DATA_DIR"
+    fi
 fi
 
 chmod -R 775 "$APP_DIR/storage"
