@@ -18,95 +18,120 @@ TornOps is a web portal for Torn City faction members to aggregate, analyze, and
 
 - **Framework:** Laravel 11
 - **PHP:** 8.3
-- **Database:** MariaDB
+- **Database:** SQLite (file-based, no server required)
 - **Web Server:** Apache (in Docker)
 - **Container:** Docker (single container deployment)
-- **Admin Panel:** Filament 3.x
 
 ## Requirements
 
-- Docker & Docker Compose
+- Docker
 - Torn API Key
-- FFScouter API Key (optional)
 
-## Quick Start
+## Quick Start (Prebuilt Image)
 
-### 1. Clone & Setup
-
-```bash
-git clone https://github.com/bafplus/tornorps.git
-cd tornorps
-```
-
-### 2. Configure Environment
+### 1. Create data folder
 
 ```bash
-cp .env.example .env
+mkdir tornops-data && cd tornops-data
 ```
 
-Edit `.env` with your API keys:
-```env
-TORN_API_KEY=your-torn-api-key
+### 2. Create .env file
+
+```bash
+cat > .env << 'EOF'
+TORN_API_KEY=your_torn_api_key_here
+DB_CONNECTION=sqlite
+DB_DATABASE=/data/database.sqlite
+EOF
 ```
 
-> **Note:** `APP_KEY` wordt automatisch gegenereerd in stap 4.
+Get your Torn API key from: https://www.torn.com/preferences.php#tab=api
 
-### 3. Start Docker Container
+### 3. Run container
+
+```bash
+docker run -v ./tornops-data:/data -p 8080:80 ghcr.io/bafplus/tornops:latest
+```
+
+### 4. Access application
+
+- **Portal:** http://localhost:8080
+- **Setup:** http://localhost:8080/setup (first time only)
+
+The first time you run the container, it will automatically:
+- Clone the latest code from GitHub
+- Install dependencies
+- Create the SQLite database
+- Run migrations
+
+## Updating
+
+To update to the latest version:
+
+```bash
+# Remove the cloned app (will re-clone on next start)
+docker run --rm -v ./tornops-data:/data alpine rm -rf /data/app
+
+# Restart container (will pull latest code)
+docker restart tornops
+```
+
+Or use the "Check for Updates" button in the admin panel.
+
+## Data Persistence
+
+All data is stored in your mapped `./tornops-data` folder:
+
+```
+tornops-data/
+├── .env              # Your configuration (backup this!)
+├── app/              # Application code (can be deleted to reset)
+└── database.sqlite   # Your data (backup this!)
+```
+
+## Docker Compose (Alternative)
+
+Create `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  tornops:
+    image: ghcr.io/bafplus/tornops:latest
+    container_name: tornops
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./tornops-data:/data
+```
+
+Then run:
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Setup Database
+## Development / Building Locally
+
+If you want to build the image yourself:
 
 ```bash
-docker exec tornops php artisan key:generate
-docker exec tornops php artisan migrate
+# Clone repository
+git clone https://github.com/bafplus/tornorps.git
+cd tornorps
+
+# Build image
+docker build -t tornops .
+
+# Test locally
+mkdir -p test-data
+echo "TORN_API_KEY=test" > test-data/.env
+docker run -v ./test-data:/data -p 8080:80 tornops
 ```
 
-### 5. Access Application
-
-- **Portal:** http://localhost:8080
-- **Admin Panel:** http://localhost:8080/admin
-
-## Project Structure
-
-```
-tornorps/
-├── app/
-│   ├── Console/Commands/    # Artisan commands for syncing
-│   ├── Models/             # Eloquent models
-│   ├── Services/           # API services (Torn, FFScouter)
-│   └── Filament/           # Admin panel resources
-├── database/migrations/    # Database schema
-├── docker/                 # Docker configuration
-├── config/                 # Laravel configuration
-└── resources/views/       # Blade templates
-```
-
-## Artisan Commands
-
-```bash
-# Sync all faction data
-php artisan torn:sync-faction {faction_id}
-
-# Sync members only
-php artisan torn:sync-members {faction_id}
-
-# Sync wars only
-php artisan torn:sync-wars {faction_id}
-```
-
-## Data Sync Schedule
-
-| Data Type | Frequency |
-|-----------|-----------|
-| Faction Members | Every 15 minutes |
-| Active Wars | Every 5 minutes |
-| Ranked Wars | Every 5 minutes |
-| Player Profiles | Every 30 minutes |
-
-## API Keys Setup
+## Configuration
 
 ### Torn API Key
 1. Go to https://www.torn.com/preferences.php#tab=api
@@ -114,27 +139,13 @@ php artisan torn:sync-wars {faction_id}
    - Faction: members, rankedwarreport, warfare, wars, rankedwars
    - User: profile, attacks, battlestats, personalstats, basic
 
-### FFScouter API Key
-1. Go to https://ffscouter.com/
-2. Register and get your API key
-
-## Configuration
-
 ### Faction Settings (Admin Panel)
 - Faction ID
 - Torn API Key
-- FFScouter API Key
 - Auto-sync toggle
-- Sync frequency settings
 
-## Development
+## Logs
 
-### Running Tests
-```bash
-docker exec tornops php artisan test
-```
-
-### Logs
 ```bash
 docker logs tornops
 ```
