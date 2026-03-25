@@ -119,8 +119,8 @@ If you want to build the image yourself:
 
 ```bash
 # Clone repository
-git clone https://github.com/bafplus/tornorps.git
-cd tornorps
+git clone https://github.com/bafplus/tornops.git
+cd tornops
 
 # Build image
 docker build -t tornops .

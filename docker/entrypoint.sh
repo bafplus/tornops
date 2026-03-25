@@ -8,7 +8,7 @@ APP_DIR="${DATA_DIR}/app"
 
 if [ ! -d "$APP_DIR/.git" ]; then
     echo "First run: Cloning repository..."
-    git clone https://github.com/bafplus/tornorps.git "$APP_DIR"
+    git clone https://github.com/bafplus/tornops.git "$APP_DIR"
 else
     echo "Repository already exists at $APP_DIR"
 fi
