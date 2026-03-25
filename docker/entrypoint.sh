@@ -36,8 +36,11 @@ fi
 # Always work in /var/www/html for the web app
 cd /var/www/html
 
-chmod -R 775 storage
-chown -R www-data:www-data storage
+# Fix permissions for Apache - ensure all files are readable and executable
+find . -type f -exec chmod 644 {} \;
+find . -type d -exec chmod 755 {} \;
+chmod -R 775 storage storage/framework storage/logs bootstrap/cache
+chown -R www-data:www-data .
 
 mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views
 chmod -R 775 storage/framework
