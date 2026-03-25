@@ -50,7 +50,7 @@ Get your Torn API key from: https://www.torn.com/preferences.php#tab=api
 ### 3. Run container
 
 ```bash
-docker run -v ./tornops-data:/data -p 8080:80 ghcr.io/bafplus/tornops:latest
+docker run -v ./tornops-data:/data -p 8080:80 ghcr.io/bafplus/tornops/tornops:latest
 ```
 
 ### 4. Access application
@@ -98,7 +98,7 @@ version: '3.8'
 
 services:
   tornops:
-    image: ghcr.io/bafplus/tornops:latest
+    image: ghcr.io/bafplus/tornops/tornops:latest
     container_name: tornops
     restart: unless-stopped
     ports:
