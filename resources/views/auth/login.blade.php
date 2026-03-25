@@ -12,12 +12,18 @@
                 {{ $errors->first() }}
             </div>
         @endif
+
+        @if(session('status'))
+            <div class="bg-green-900/50 border border-green-700 text-green-400 px-4 py-3 rounded mb-4">
+                {{ session('status') }}
+            </div>
+        @endif
         
         <form action="/login" method="POST" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-gray-400 mb-2">Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                <label class="block text-gray-400 mb-2">Username</label>
+                <input type="text" name="name" value="{{ old('name') }}" required autofocus
                        class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500">
             </div>
             <div>
