@@ -9,7 +9,6 @@ APP_DIR="${DATA_DIR}/app"
 # If no /data mounted, use /var/www/html directly
 if [ ! -d "$APP_DIR/.git" ]; then
     if [ -d "/data/app/.git" ]; then
-        # /data exists but different location
         APP_DIR="/data/app"
         echo "Using /data/app"
     else
@@ -30,32 +29,30 @@ if [ "$APP_DIR" != "/var/www/html" ]; then
     if [ -L /var/www/html ] || [ -d /var/www/html ]; then
         rm -rf /var/www/html
     fi
-    ln -sf "$APP_DIR" /var/www/html
-    
-    # Fix ownership of mounted volume
-    if [ -d "$DATA_DIR" ]; then
-        chown -R www-data:www-data "$DATA_DIR"
-    fi
+    # Copy files instead of symlink for better compatibility
+    cp -r . /var/www/html/
 fi
 
-chmod -R 775 "$APP_DIR/storage"
-chown -R www-data:www-data "$APP_DIR/storage"
+# Always work in /var/www/html for the web app
+cd /var/www/html
 
-mkdir -p "$APP_DIR/storage/framework/cache" "$APP_DIR/storage/framework/sessions" "$APP_DIR/storage/framework/views"
-chmod -R 775 "$APP_DIR/storage/framework"
-chown -R www-data:www-data "$APP_DIR/storage/framework"
+chmod -R 775 storage
+chown -R www-data:www-data storage
 
-# Use env from /data if mounted, otherwise use app directory
-if [ -f "${DATA_DIR}/.env" ] && [ "$DATA_DIR" = "/data" ]; then
+mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views
+chmod -R 775 storage/framework
+chown -R www-data:www-data storage/framework
+
+# Use /data/.env if mounted, otherwise use app directory
+if [ -f "${DATA_DIR}/.env" ] && [ -d "$DATA_DIR" ]; then
     echo "Using .env from data directory..."
     cp "${DATA_DIR}/.env" .env
     
-    # Ensure required fields exist
     grep -q "^SESSION_DRIVER=" .env || echo "SESSION_DRIVER=file" >> .env
     grep -q "^CACHE_STORE=" .env || echo "CACHE_STORE=file" >> .env
     
-    # Use database in /data
     DB_PATH="/data/database.sqlite"
+    chown -R www-data:www-data "$DATA_DIR"
 else
     echo "Creating default .env..."
     cat > .env << 'ENVEOF'
@@ -91,7 +88,7 @@ php artisan key:generate --force 2>/dev/null || true
 php artisan migrate --force
 
 echo "Setting up cron..."
-echo "* * * * * root /usr/local/bin/php ${APP_DIR}/artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/laravel-scheduler
+echo "* * * * * root /usr/local/bin/php /var/www/html/artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/laravel-scheduler
 chmod 0644 /etc/cron.d/laravel-scheduler
 
 echo "Starting services..."
