@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FactionSettings;
 use App\Models\User;
+use App\Services\TornApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -26,6 +27,7 @@ class AdminController extends Controller
             'torn_api_key' => ['required', 'string', 'max:100'],
             'ffscouter_api_key' => ['nullable', 'string', 'max:100'],
             'auto_sync_enabled' => ['boolean'],
+            'base_domain' => ['nullable', 'string', 'max:255'],
         ]);
 
         $settings = FactionSettings::first();
@@ -34,6 +36,7 @@ class AdminController extends Controller
             'torn_api_key' => $request->torn_api_key,
             'ffscouter_api_key' => $request->ffscouter_api_key,
             'auto_sync_enabled' => $request->boolean('auto_sync_enabled'),
+            'base_domain' => $request->input('base_domain') ?: null,
         ]);
 
         return back()->with('status', 'Faction settings updated successfully.');
@@ -42,20 +45,72 @@ class AdminController extends Controller
     public function createUser(Request $request)
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'name' => ['required', 'string', 'max:255', 'unique:users'],
+            'torn_player_id' => ['required', 'integer', 'unique:users'],
             'is_admin' => ['boolean'],
         ]);
 
-        User::create([
+        $settings = FactionSettings::first();
+        
+        if (!$settings || !$settings->torn_api_key) {
+            return back()->with('error', 'Torn API key not configured.');
+        }
+
+        $tornApi = new TornApiService();
+        $playerData = $tornApi->getPlayer($request->torn_player_id, 'profile');
+
+        if (!$playerData || !isset($playerData['faction'])) {
+            return back()->with('error', 'Player not found or has no faction.');
+        }
+
+        if (!isset($playerData['faction']['faction_id']) || 
+            $playerData['faction']['faction_id'] != $settings->faction_id) {
+            return back()->with('error', 'Player is not a member of the faction.');
+        }
+
+        $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'torn_player_id' => $request->torn_player_id,
             'is_admin' => $request->boolean('is_admin'),
+            'invited_by' => auth()->id(),
+            'status' => User::STATUS_INVITED,
         ]);
 
-        return back()->with('status', 'User created successfully.');
+        $token = $user->regenerateInvitationToken();
+
+        $inviteUrl = null;
+        $warning = null;
+        
+        if ($settings->base_domain) {
+            $inviteUrl = rtrim($settings->base_domain, '/') . '/invite/' . $token;
+        } else {
+            $warning = 'Base Domain not configured. Full invite link not generated. Configure in Settings to enable automatic link generation.';
+        }
+
+        return back()->with([
+            'status' => 'User created successfully.',
+            'invite_url' => $inviteUrl,
+            'invite_token' => $token,
+            'invited_user_name' => $user->name,
+            'base_domain_warning' => $warning,
+        ]);
+    }
+
+    public function regenerateInvite(User $user)
+    {
+        $settings = FactionSettings::first();
+        $token = $user->regenerateInvitationToken();
+
+        $inviteUrl = null;
+        if ($settings->base_domain) {
+            $inviteUrl = rtrim($settings->base_domain, '/') . '/invite/' . $token;
+        }
+
+        return back()->with([
+            'status' => 'Invitation regenerated.',
+            'invite_url' => $inviteUrl,
+            'invited_user_name' => $user->name,
+        ]);
     }
 
     public function toggleAdmin(User $user)

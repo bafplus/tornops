@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\WarApiController;
 use App\Http\Controllers\GymAssistantController;
 use App\Http\Controllers\TravelController;
@@ -21,6 +22,9 @@ Route::post('/setup', [SetupController::class, 'store']);
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/invite/{token}', [InvitationController::class, 'showInviteForm'])->name('invite');
+Route::post('/invite/{token}', [InvitationController::class, 'acceptInvite']);
 
 Route::middleware(['auth'])->group(function () {
 
@@ -69,6 +73,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin', [AdminController::class, 'index']);
         Route::put('/admin/settings', [AdminController::class, 'updateFactionSettings']);
         Route::post('/admin/users', [AdminController::class, 'createUser']);
+        Route::post('/admin/users/{user}/regenerate', [AdminController::class, 'regenerateInvite']);
         Route::post('/admin/users/{user}/toggle', [AdminController::class, 'toggleAdmin']);
         Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser']);
         

@@ -13,6 +13,7 @@ class FactionSettings extends Model
         'ffscouter_api_key',
         'auto_sync_enabled',
         'sync_settings',
+        'base_domain',
     ];
 
     protected $casts = [

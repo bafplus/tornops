@@ -30,9 +30,14 @@ $schedule->command('torn:sync-attacks')
         ->runInBackground();
 
         $schedule->command('torn:sync-chains')
-        ->everyMinute()
-        ->withoutOverlapping()
-        ->runInBackground();
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->runInBackground();
+
+        $schedule->command('torn:check-faction-membership')
+            ->hourly()
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     protected function commands(): void

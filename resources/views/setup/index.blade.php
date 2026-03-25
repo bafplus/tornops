@@ -42,7 +42,7 @@
                         </label>
                         <input type="number" name="faction_id" id="faction_id" 
                                class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:border-blue-500 focus:outline-none"
-                               placeholder="55772" required>
+                               placeholder="55742" required>
                         <p class="text-gray-500 text-sm mt-1">Your Torn faction ID</p>
                     </div>
 
@@ -70,6 +70,16 @@
                         </p>
                     </div>
 
+                    <div class="mb-6">
+                        <label class="block text-gray-300 mb-2" for="base_domain">
+                            Base Domain <span class="text-gray-500">(optional)</span>
+                        </label>
+                        <input type="url" name="base_domain" id="base_domain" 
+                               class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:border-blue-500 focus:outline-none"
+                               placeholder="https://tornops.example.com">
+                        <p class="text-gray-500 text-sm mt-1">Used for generating invitation links</p>
+                    </div>
+
                     <button type="submit" 
                             class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded transition">
                         Next Step →
@@ -92,12 +102,13 @@
                     </div>
 
                     <div class="mb-6">
-                        <label class="block text-gray-300 mb-2" for="admin_email">
-                            Admin Email
+                        <label class="block text-gray-300 mb-2" for="torn_player_id">
+                            Your Torn Player ID
                         </label>
-                        <input type="email" name="admin_email" id="admin_email" 
+                        <input type="number" name="torn_player_id" id="torn_player_id" 
                                class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:border-blue-500 focus:outline-none"
-                               placeholder="admin@example.com" required>
+                               placeholder="Your Torn player ID" required>
+                        <p class="text-gray-500 text-sm mt-1">Must be a member of the faction</p>
                     </div>
 
                     <div class="mb-6">
@@ -116,15 +127,6 @@
                         <input type="password" name="admin_password_confirmation" id="admin_password_confirmation" 
                                class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:border-blue-500 focus:outline-none"
                                placeholder="Repeat password" required>
-                    </div>
-
-                    <div class="mb-6">
-                        <label class="block text-gray-300 mb-2" for="torn_player_id">
-                            Your Torn Player ID <span class="text-gray-500">(optional)</span>
-                        </label>
-                        <input type="number" name="torn_player_id" id="torn_player_id" 
-                               class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:border-blue-500 focus:outline-none"
-                               placeholder="Your Torn player ID">
                     </div>
 
                     <button type="submit" 
