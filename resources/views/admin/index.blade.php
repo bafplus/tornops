@@ -235,7 +235,7 @@
                         <td class="p-3 text-gray-400">{{ $item['api_calls'] }}</td>
                         <td class="p-3 text-gray-400">{{ $item['description'] }}</td>
                         <td class="p-3">
-                            <form action="/admin/sync/{{ $key === 'faction_sync' ? 'factions' : ($key === 'faction_members' ? 'members' : 'wars') }}" method="POST">
+                            <form action="/admin/sync/{{ $key === 'faction_sync' ? 'factions' : ($key === 'faction_members' ? 'members' : ($key === 'ff_scouter' ? 'ffscouter' : 'wars')) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-xs">
                                     Run Now
@@ -251,6 +251,7 @@
                         <td class="p-3"><span class="px-2 py-1 rounded text-xs bg-green-900 text-green-400">Active</span></td>
                         <td class="p-3 text-gray-400">1 call</td>
                         <td class="p-3 text-gray-400">Fetches faction info and member list</td>
+                        <td class="p-3"></td>
                     </tr>
                     <tr class="hover:bg-gray-700/30">
                         <td class="p-3 font-mono text-blue-400">faction/{id}/rankedwars</td>
@@ -259,22 +260,7 @@
                         <td class="p-3"><span class="px-2 py-1 rounded text-xs bg-green-900 text-green-400">Active</span></td>
                         <td class="p-3 text-gray-400">1 call</td>
                         <td class="p-3 text-gray-400">Fetches ranked war history</td>
-                    </tr>
-                    <tr class="hover:bg-gray-700/30">
-                        <td class="p-3 font-mono text-blue-400">FF Scouter API</td>
-                        <td class="p-3">Every 5 min</td>
-                        <td class="p-3 text-gray-300">{{ $settings->updated_at?->diffForHumans() ?? 'Never' }}</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded text-xs bg-green-900 text-green-400">Active</span></td>
-                        <td class="p-3 text-gray-400">1 batch call</td>
-                        <td class="p-3 text-gray-400">Fetches Fair Fight scores and estimated stats. Reuses war cache when possible</td>
-                        <td class="p-3">
-                            <form action="/admin/sync/ffscouter" method="POST">
-                                @csrf
-                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-xs">
-                                    Run Now
-                                </button>
-                            </form>
-                        </td>
+                        <td class="p-3"></td>
                     </tr>
                 </tbody>
             </table>

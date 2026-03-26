@@ -45,6 +45,12 @@ class AdminController extends Controller
                 'description' => 'Syncs ranked wars, members, and war data',
                 'api_calls' => '5-20 calls',
             ],
+            'ff_scouter' => [
+                'name' => 'FF Scouter API',
+                'schedule' => 'Every 5 min',
+                'description' => 'Fetches FF scores and stats. Reuses war cache when possible',
+                'api_calls' => '1 batch call',
+            ],
         ];
 
         // Get last run times

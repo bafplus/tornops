@@ -102,6 +102,23 @@ class SyncFactionMembers extends Command
         $this->info("Synced {$count} members ({$reused} from cache, {$skipped} from FF Scouter).");
         
         $log->markComplete($count);
+        
+        // Also log FF Scouter run
+        $ffLog = DataRefreshLog::where('data_type', 'ff_scouter')
+            ->where('status', 'running')
+            ->first();
+        if ($ffLog) {
+            $ffLog->markComplete($skipped);
+        } elseif ($skipped > 0) {
+            DataRefreshLog::create([
+                'data_type' => 'ff_scouter',
+                'status' => 'completed',
+                'records_updated' => $skipped,
+                'started_at' => now(),
+                'completed_at' => now(),
+            ]);
+        }
+        
         return Command::SUCCESS;
     }
 }
