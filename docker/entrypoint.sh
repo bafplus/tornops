@@ -125,6 +125,7 @@ php artisan cache:clear
 sleep 5
 echo "*/5 * * * * root /usr/local/bin/php /var/www/html/artisan torn:sync-faction >> /dev/null 2>&1" > /etc/cron.d/tornops-sync
 echo "* * * * * root /usr/local/bin/php /var/www/html/artisan torn:sync-active >> /dev/null 2>&1" >> /etc/cron.d/tornops-sync
+echo "*/5 * * * * root /usr/local/bin/php /var/www/html/artisan torn:sync-attacks --force >> /dev/null 2>&1" >> /etc/cron.d/tornops-sync
 chmod 644 /etc/cron.d/tornops-sync
 service cron reload
 

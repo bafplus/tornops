@@ -51,6 +51,12 @@ class AdminController extends Controller
                 'description' => 'Real-time war updates (only syncs when war is active)',
                 'api_calls' => '3-10 calls',
             ],
+            'war_attacks' => [
+                'name' => 'torn:sync-attacks',
+                'schedule' => 'Every 5 min (via sync-faction)',
+                'description' => 'Syncs war attack details with FF and results',
+                'api_calls' => '10-50 calls',
+            ],
         ];
 
         // Get last run times

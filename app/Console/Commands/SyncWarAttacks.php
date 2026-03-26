@@ -6,13 +6,14 @@ use App\Models\FactionSettings;
 use App\Models\RankedWar;
 use App\Models\WarAttack;
 use App\Models\WarMember;
+use App\Models\DataRefreshLog;
 use App\Services\TornApiService;
 use Illuminate\Console\Command;
 
 class SyncWarAttacks extends Command
 {
-    protected $signature = 'torn:sync-attacks';
-    protected $description = 'Sync attacks for active ranked wars - runs every minute';
+    protected $signature = 'torn:sync-attacks {--force : Run for recent wars (last 30 days)}';
+    protected $description = 'Sync attacks for ranked wars';
 
     public function handle(TornApiService $tornApi): int
     {
@@ -22,22 +23,39 @@ class SyncWarAttacks extends Command
             return Command::FAILURE;
         }
 
+        $log = DataRefreshLog::logStart('war_attacks');
+
         $activeWars = RankedWar::whereIn('status', ['in progress', 'pending'])->get();
 
-        if ($activeWars->isEmpty()) {
+        if ($activeWars->isEmpty() && !$this->option('force')) {
+            $log->update(['status' => 'skipped', 'completed_at' => now()]);
+            $this->info('No active wars. Use --force to sync recent wars.');
             return Command::SUCCESS;
         }
 
-        $this->info("Syncing attacks for {$activeWars->count()} active war(s)...");
-
-        foreach ($activeWars as $war) {
-            $this->syncWarAttacks($war, $settings, $tornApi);
+        // If force flag, get recent wars (last 30 days)
+        if ($activeWars->isEmpty() && $this->option('force')) {
+            $activeWars = RankedWar::where('start_date', '>', now()->subDays(30))->get();
         }
 
+        if ($activeWars->isEmpty()) {
+            $log->update(['status' => 'skipped', 'completed_at' => now()]);
+            return Command::SUCCESS;
+        }
+
+        $this->info("Syncing attacks for {$activeWars->count()} war(s)...");
+
+        $totalSaved = 0;
+        foreach ($activeWars as $war) {
+            $savedCount = $this->syncWarAttacks($war, $settings, $tornApi);
+            $totalSaved += $savedCount;
+        }
+
+        $log->markComplete($totalSaved);
         return Command::SUCCESS;
     }
 
-    private function syncWarAttacks(RankedWar $war, $settings, TornApiService $tornApi): void
+    private function syncWarAttacks(RankedWar $war, $settings, TornApiService $tornApi): int
     {
         $factionId = $settings->faction_id;
         $warStartTimestamp = $war->start_date?->timestamp ?? 0;
@@ -175,5 +193,6 @@ class SyncWarAttacks extends Command
         }
 
         $this->info("Synced {$savedCount} attacks for war {$war->war_id}");
+        return $savedCount;
     }
 }
