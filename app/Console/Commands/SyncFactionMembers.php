@@ -31,17 +31,43 @@ class SyncFactionMembers extends Command
             return Command::FAILURE;
         }
 
-        // Get FF scores for all members
+        // Get FF scores - first check war_members, then use FF Scouter for missing
         $playerIds = array_keys($data['members']);
-        $ffResults = $ffscouter->getStats($playerIds);
+        
+        // Get existing FF data from war_members table
+        $existingFF = \App\Models\WarMember::whereIn('player_id', $playerIds)
+            ->whereNotNull('ff_score')
+            ->where('ff_score', '>', 0)
+            ->get()
+            ->unique('player_id')
+            ->keyBy('player_id');
+
+        // Only fetch FF Scouter for members without data
+        $missingIds = array_filter($playerIds, fn($id) => !$existingFF->has($id));
         $ffIndex = [];
-        foreach ($ffResults as $ff) {
-            $ffIndex[$ff['player_id']] = $ff;
+        
+        if (!empty($missingIds)) {
+            $ffResults = $ffscouter->getStats($missingIds);
+            foreach ($ffResults as $ff) {
+                $ffIndex[$ff['player_id']] = $ff;
+            }
         }
 
         $count = 0;
         foreach ($data['members'] as $playerId => $member) {
-            $ffData = $ffIndex[$playerId] ?? null;
+            // Use existing data from war_members or new FF data
+            if ($existingFF->has($playerId)) {
+                $ffData = $existingFF->get($playerId);
+                $ffScore = $ffData->ff_score;
+                $estimatedStats = $ffData->estimated_stats;
+            } elseif (isset($ffIndex[$playerId])) {
+                $ffData = $ffIndex[$playerId];
+                $ffScore = $ffData['fair_fight'] ?? null;
+                $estimatedStats = $ffData['bs_estimate_human'] ?? null;
+            } else {
+                $ffScore = null;
+                $estimatedStats = null;
+            }
             
             FactionMember::updateOrCreate(
                 [
@@ -60,8 +86,8 @@ class SyncFactionMembers extends Command
                     'status_changed_at' => isset($member['status']['until']) && $member['status']['until'] > 0 
                         ? \Carbon\Carbon::createFromTimestamp($member['status']['until']) 
                         : null,
-                    'ff_score' => $ffData['fair_fight'] ?? null,
-                    'estimated_stats' => $ffData['bs_estimate_human'] ?? null,
+                    'ff_score' => $ffScore,
+                    'estimated_stats' => $estimatedStats,
                     'data' => $member,
                     'last_synced_at' => now(),
                 ]
@@ -69,7 +95,9 @@ class SyncFactionMembers extends Command
             $count++;
         }
 
-        $this->info("Synced {$count} members.");
+        $skipped = count($missingIds);
+        $reused = $count - $skipped;
+        $this->info("Synced {$count} members ({$reused} from cache, {$skipped} from FF Scouter).");
         return Command::SUCCESS;
     }
 }
