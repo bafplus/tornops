@@ -207,42 +207,5 @@
             </form>
         </div>
     </div>
-
-    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <h2 class="text-xl font-semibold mb-4 text-yellow-400">Updates</h2>
-        <p class="text-gray-400 mb-2">Current version: <span class="font-mono">{{ config('tornops.version') }}</span></p>
-        <p class="text-gray-500 text-sm">Current commit: <span class="font-mono">{{ config('tornops.commit') ? substr(config('tornops.commit'), 0, 7) : 'unknown' }}</span></p>
-        
-        @if(session('update_check'))
-            <div class="mb-4 p-4 rounded {{ session('update_available') ? 'bg-yellow-900/50 border border-yellow-700' : 'bg-green-900/50 border border-green-700' }}">
-                @if(session('update_available'))
-                    <p class="text-yellow-400 font-semibold flex items-center gap-2">
-                        @if(session('no_releases'))
-                            New commits available
-                        @else
-                            New version available
-                        @endif
-                        <span class="text-yellow-500">({{ session('latest_version') }})</span>
-                    </p>
-                    <p class="text-gray-400 text-sm mt-1">
-                        Current: {{ session('current_version') }} ({{ session('current_commit') ? substr(session('current_commit'), 0, 7) : 'unknown' }})
-                    </p>
-                    @if(session('release_url'))
-                        <a href="{{ session('release_url') }}" target="_blank" class="text-blue-400 hover:underline text-sm mt-2 inline-block">
-                            @if(session('no_releases'))
-                                View latest commit
-                            @else
-                                View release notes
-                            @endif
-                        </a>
-                    @endif
-                @else
-                    <p class="text-green-400 font-semibold">
-                        You are up to date ({{ session('current_version') }})
-                    </p>
-                @endif
-            </div>
-            
-    </div>
 </div>
 @endsection
