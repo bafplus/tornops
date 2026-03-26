@@ -92,6 +92,11 @@ Route::middleware(['auth'])->group(function () {
             return back()->with('status', 'War sync completed.');
         });
 
+        Route::post('/admin/sync/active', function () {
+            \Illuminate\Support\Facades\Artisan::call('torn:sync-active');
+            return back()->with('status', 'Active wars sync completed.');
+        });
+
         Route::post('/admin/check-updates', [AdminController::class, 'checkForUpdates']);
         Route::post('/admin/upgrade', [AdminController::class, 'upgrade']);
     });

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\FactionSettings;
 use App\Models\RankedWar;
 use App\Models\WarMember;
+use App\Models\DataRefreshLog;
 use App\Services\TornApiService;
 use App\Services\FFScouterService;
 use Illuminate\Console\Command;
@@ -28,12 +29,14 @@ class SyncActiveWars extends Command
             return Command::SUCCESS;
         }
 
+        $log = DataRefreshLog::logStart('active_wars');
         $this->info("Syncing {$activeWars->count()} active war(s)...");
 
         foreach ($activeWars as $war) {
             $this->syncWar($war, $factionId, $tornApi, $ffscouter);
         }
 
+        $log->markComplete($activeWars->count());
         return Command::SUCCESS;
     }
 

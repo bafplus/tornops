@@ -35,7 +35,7 @@ class AdminController extends Controller
             ],
             'faction_members' => [
                 'name' => 'torn:sync-members',
-                'schedule' => 'Every 5 min',
+                'schedule' => 'Every 15 min',
                 'description' => 'Syncs faction members, FF scores, and stats',
                 'api_calls' => '1-5 calls',
             ],
@@ -44,6 +44,12 @@ class AdminController extends Controller
                 'schedule' => 'Every 5 min',
                 'description' => 'Syncs ranked wars, members, and war data',
                 'api_calls' => '5-20 calls',
+            ],
+            'active_wars' => [
+                'name' => 'torn:sync-active',
+                'schedule' => 'Every 1 min',
+                'description' => 'Quick sync of active wars (scores, online status)',
+                'api_calls' => '3-10 calls',
             ],
         ];
 
