@@ -32,9 +32,9 @@ class SyncActiveWars extends Command
             return Command::SUCCESS;
         }
 
-        // If force flag, get recent wars (last 24 hours)
+        // If force flag, get recent wars (last 30 days)
         if ($activeWars->isEmpty() && $this->option('force')) {
-            $activeWars = RankedWar::where('start_date', '>', now()->subDay())->get();
+            $activeWars = RankedWar::where('start_date', '>', now()->subDays(30))->get();
         }
 
         $log = DataRefreshLog::logStart('active_wars');
