@@ -59,9 +59,10 @@ class AdminController extends Controller
         }
 
         // Sort by next run (last run + 5 minutes)
-        uassoc($schedule, function ($item) {
-            if (!$item['last_run_at']) return 0;
-            return $item['last_run_at']->addMinutes(5)->timestamp;
+        uasort($schedule, function ($a, $b) {
+            $aTime = $a['last_run_at'] ? $a['last_run_at']->addMinutes(5)->timestamp : 0;
+            $bTime = $b['last_run_at'] ? $b['last_run_at']->addMinutes(5)->timestamp : 0;
+            return $aTime - $bTime;
         });
 
         return $schedule;
