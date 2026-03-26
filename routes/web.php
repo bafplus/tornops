@@ -82,6 +82,11 @@ Route::middleware(['auth'])->group(function () {
             return back()->with('status', 'Faction sync completed.');
         });
         
+        Route::post('/admin/sync/members', function () {
+            \Illuminate\Support\Facades\Artisan::call('torn:sync-members');
+            return back()->with('status', 'Member sync completed.');
+        });
+        
         Route::post('/admin/sync/wars', function () {
             \Illuminate\Support\Facades\Artisan::call('torn:sync-wars');
             return back()->with('status', 'War sync completed.');

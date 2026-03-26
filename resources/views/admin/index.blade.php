@@ -222,10 +222,11 @@
                         <th class="p-3">Status</th>
                         <th class="p-3">API Calls</th>
                         <th class="p-3">Description</th>
+                        <th class="p-3">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
-                    @foreach($apiSchedule as $item)
+                    @foreach($apiSchedule as $key => $item)
                     <tr class="hover:bg-gray-700/30">
                         <td class="p-3 font-mono text-blue-400">{{ $item['name'] }}</td>
                         <td class="p-3">{{ $item['schedule'] }}</td>
@@ -233,6 +234,14 @@
                         <td class="p-3"><span class="px-2 py-1 rounded text-xs bg-green-900 text-green-400">Active</span></td>
                         <td class="p-3 text-gray-400">{{ $item['api_calls'] }}</td>
                         <td class="p-3 text-gray-400">{{ $item['description'] }}</td>
+                        <td class="p-3">
+                            <form action="/admin/sync/{{ $key === 'faction_sync' ? 'factions' : ($key === 'faction_members' ? 'members' : 'wars') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-xs">
+                                    Run Now
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                     @endforeach
                     <tr class="hover:bg-gray-700/30">
