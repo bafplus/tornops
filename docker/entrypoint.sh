@@ -99,9 +99,10 @@ export APACHE_RUN_GROUP=www-data
 php artisan key:generate --force 2>/dev/null || true
 php artisan migrate --force
 
-echo "Setting up cron..."
-echo "* * * * * root /usr/local/bin/php /var/www/html/artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/laravel-scheduler
-chmod 0644 /etc/cron.d/laravel-scheduler
+# Setup cron - run sync every 5 minutes
+echo "*/5 * * * * root /usr/local/bin/php /var/www/html/artisan torn:sync-faction >> /dev/null 2>&1" > /etc/cron.d/tornops-sync
+chmod 644 /etc/cron.d/tornops-sync
+service cron reload
 
 echo "Starting services..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
