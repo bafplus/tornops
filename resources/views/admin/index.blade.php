@@ -243,22 +243,6 @@
                 @endif
             </div>
             
-            @if(session('update_available'))
-                <form action="/admin/upgrade" method="POST" onsubmit="return confirm('Are you sure you want to upgrade? This will pull the latest code from GitHub.')">
-                    @csrf
-                    <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded text-white">
-                        Upgrade Now
-                    </button>
-                </form>
-            @endif
-        @endif
-        
-        <form action="/admin/check-updates" method="POST" class="mt-4">
-            @csrf
-            <button type="submit" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-white">
-                Check for Updates
-            </button>
-        </form>
     </div>
 </div>
 @endsection
