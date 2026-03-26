@@ -13,25 +13,36 @@
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
-                    <tr class="text-left text-gray-400 bg-gray-700/50 text-sm">
-                        <th class="p-3">Name</th>
-                        <th class="p-3">Level</th>
-                        <th class="p-3 text-right">FF</th>
-                        <th class="p-3 text-right">Stats</th>
-                        <th class="p-3">Position</th>
-                        <th class="p-3 text-right">Days</th>
-                        <th class="p-3">Status</th>
+                    <tr class="text-left text-gray-400 bg-gray-700/50 text-sm cursor-pointer select-none" id="thead">
+                        <th class="p-3" data-sort="name" data-dir="asc">Name <span class="sort-icon">↑</span></th>
+                        <th class="p-3" data-sort="level" data-dir="desc">Level <span class="sort-icon">↓</span></th>
+                        <th class="p-3 text-right" data-sort="ff" data-dir="desc">FF <span class="sort-icon">↓</span></th>
+                        <th class="p-3 text-right" data-sort="stats" data-dir="desc">Stats <span class="sort-icon">↓</span></th>
+                        <th class="p-3" data-sort="position" data-dir="asc">Position <span class="sort-icon">↑</span></th>
+                        <th class="p-3 text-right" data-sort="days" data-dir="desc">Days <span class="sort-icon">↓</span></th>
+                        <th class="p-3" data-sort="status" data-dir="asc">Status <span class="sort-icon">↑</span></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-700">
+                <tbody class="divide-y divide-gray-700" id="tbody">
                     @forelse($members as $member)
                     @php
                         $data = $member->data ?? [];
                         $statusData = $data['status'] ?? [];
                         $until = $statusData['until'] ?? 0;
                         $remaining = $until > 0 ? max(0, $until - time()) : 0;
+                        $statsNum = 0;
+                        if ($member->estimated_stats) {
+                            $statsStr = strtolower($member->estimated_stats);
+                            if (str_ends_with($statsStr, 'k')) {
+                                $statsNum = floatval($statsStr) * 1000;
+                            } elseif (str_ends_with($statsStr, 'm')) {
+                                $statsNum = floatval($statsStr) * 1000000;
+                            } else {
+                                $statsNum = floatval($statsStr);
+                            }
+                        }
                     @endphp
-                    <tr class="hover:bg-gray-700/30">
+                    <tr class="hover:bg-gray-700/30" data-name="{{ strtolower($member->name) }}" data-level="{{ $member->level }}" data-ff="{{ $member->ff_score ?? 0 }}" data-stats="{{ $statsNum }}" data-position="{{ strtolower($member->position ?? '') }}" data-days="{{ $member->days_in_faction ?? 0 }}" data-status="{{ $member->status_description ?? '' }}">
                         <td class="p-3">
                             <span class="inline-block w-2 h-2 rounded-full mr-2 @if($member->online_status === 'Online') bg-green-500 @elseif($member->online_status === 'Idle') bg-yellow-500 @else bg-gray-500 @endif"></span>
                             <a href="https://www.torn.com/profiles?XID={{ $member->player_id }}" target="_blank" class="text-blue-400 hover:text-blue-300">{{ $member->name ?? 'Unknown' }}</a>
@@ -91,4 +102,47 @@
         @endif
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const thead = document.getElementById('thead');
+    const tbody = document.getElementById('tbody');
+    
+    thead.addEventListener('click', function(e) {
+        const th = e.target.closest('th');
+        if (!th || !th.dataset.sort) return;
+        
+        const sortKey = th.dataset.sort;
+        let dir = th.dataset.dir;
+        
+        // Reset all icons
+        thead.querySelectorAll('th').forEach(h => {
+            h.dataset.dir = h.dataset.sort === sortKey ? (dir === 'asc' ? 'desc' : 'asc') : (h.dataset.dir === 'asc' ? '↑' : '↓');
+        });
+        
+        dir = th.dataset.dir;
+        th.dataset.dir = dir === 'asc' ? 'desc' : 'asc';
+        th.querySelector('.sort-icon').textContent = dir === 'asc' ? '↑' : '↓';
+        
+        // Sort rows
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            let aVal = a.dataset[sortKey] || '';
+            let bVal = b.dataset[sortKey] || '';
+            
+            if (['level', 'ff', 'stats', 'days'].includes(sortKey)) {
+                aVal = parseFloat(aVal) || 0;
+                bVal = parseFloat(bVal) || 0;
+                return dir === 'asc' ? aVal - bVal : bVal - aVal;
+            }
+            
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+            return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+        
+        rows.forEach(row => tbody.appendChild(row));
+    });
+});
+</script>
 @endsection
