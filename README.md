@@ -69,14 +69,17 @@ The first time you run the container, it will automatically:
 To update to the latest version:
 
 ```bash
-# Remove the cloned app (will re-clone on next start)
-docker run --rm -v ./tornops-data:/data alpine rm -rf /data/app
+# Pull latest Docker image
+docker pull ghcr.io/bafplus/tornops/tornops:latest
 
-# Restart container (will pull latest code)
+# Restart container (automatically pulls latest code from GitHub)
 docker restart tornops
 ```
 
-Or use the "Check for Updates" button in the admin panel.
+That's it! The container will:
+1. Pull the latest code from GitHub
+2. Run any new database migrations
+3. Seed any new default data
 
 ## Data Persistence
 

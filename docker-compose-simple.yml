@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   tornops:
-    image: ghcr.io/bafplus/tornops:latest
+    image: ghcr.io/bafplus/tornops/tornops:latest
     container_name: tornops
     restart: unless-stopped
     ports:
@@ -17,5 +17,4 @@ services:
 # 2. Create ./data/.env with your settings (see .env.example)
 # 3. Run: docker compose up -d
 #
-# After first run, data persists in ./data folder including cloned app.
-# To update app code, use the "Check for Updates" button in admin panel.
+# To update: docker compose pull && docker compose restart
