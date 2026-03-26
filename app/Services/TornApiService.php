@@ -37,6 +37,18 @@ class TornApiService
 
     public function get(string $endpoint, array $params = [], ?string $apiKey = null): ?array
     {
+        // Always fetch fresh API key from database for each request
+        if (!$apiKey) {
+            try {
+                $settings = \App\Models\FactionSettings::first();
+                if ($settings && $settings->torn_api_key) {
+                    $apiKey = $settings->torn_api_key;
+                }
+            } catch (\Exception $e) {
+                // Table might not exist yet
+            }
+        }
+        
         $key = $apiKey ?? $this->apiKey;
         $cacheKey = 'torn_api_' . md5($endpoint . json_encode($params) . $key);
 
