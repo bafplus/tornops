@@ -235,7 +235,16 @@
                         <td class="p-3 text-gray-400">{{ $item['api_calls'] }}</td>
                         <td class="p-3 text-gray-400">{{ $item['description'] }}</td>
                         <td class="p-3">
-                            <form action="/admin/sync/{{ $key === 'faction_sync' ? 'factions' : ($key === 'faction_members' ? 'members' : ($key === 'active_wars' ? 'active' : ($key === 'war_attacks' ? 'attacks' : 'wars')) }}" method="POST">
+                            @php
+                                $routeMap = [
+                                    'faction_sync' => 'factions',
+                                    'faction_members' => 'members',
+                                    'active_wars' => 'active',
+                                    'war_attacks' => 'attacks',
+                                ];
+                                $route = $routeMap[$key] ?? 'wars';
+                            @endphp
+                            <form action="/admin/sync/{{ $route }}" method="POST">
                                 @csrf
                                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-xs">
                                     Run Now
