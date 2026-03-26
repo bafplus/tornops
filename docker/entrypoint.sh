@@ -4,41 +4,22 @@ set -e
 echo "=== TornOps Container Starting ==="
 
 DATA_DIR="${DATA_DIR:-/data}"
-APP_DIR="${DATA_DIR}/app"
 
-git config --global --add safe.directory /data/app
 git config --global --add safe.directory /var/www/html
 
-# If no /data mounted, use /var/www/html directly
-if [ ! -d "$APP_DIR/.git" ]; then
-    if [ -d "/data/app/.git" ]; then
-        APP_DIR="/data/app"
-        echo "Using /data/app"
-    else
-        echo "First run: Cloning repository..."
-        if [ -d "/data" ]; then
-            git clone https://github.com/bafplus/tornops.git "$APP_DIR"
-        else
-            git clone https://github.com/bafplus/tornops.git /var/www/html
-            echo "No /data volume - using /var/www/html directly"
-        fi
-    fi
+# Clone or pull repository directly to /var/www/html
+if [ -d "/var/www/html/.git" ]; then
+    echo "Updating repository..."
+    cd /var/www/html
+    git pull origin main || true
 else
-    echo "Repository already exists at $APP_DIR"
-    if [ -d "$APP_DIR/.git" ]; then
-        echo "Updating repository..."
-        cd "$APP_DIR"
-        git pull origin main || true
+    echo "First run: Cloning repository..."
+    if [ -d "/data" ]; then
+        git clone https://github.com/bafplus/tornops.git /var/www/html
+    else
+        git clone https://github.com/bafplus/tornops.git /var/www/html
     fi
-fi
-
-if [ "$APP_DIR" != "/var/www/html" ]; then
-    cd "$APP_DIR"
-    if [ -L /var/www/html ] || [ -d /var/www/html ]; then
-        rm -rf /var/www/html
-    fi
-    # Copy files instead of symlink for better compatibility
-    cp -r . /var/www/html/
+    cd /var/www/html
 fi
 
 # Always work in /var/www/html for the web app
