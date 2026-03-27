@@ -126,7 +126,7 @@
                                             <div class="flex space-x-1 mr-3" id="planned-bar-{{ $meritId }}">
                                                 @for($i = 1; $i <= 10; $i++)
                                                     <div 
-                                                        class="w-4 h-4 rounded cursor-pointer transition-colors planned-seg-{{ $meritId }} {{ $i <= $merit['planned_level'] ? ($merit['has_changes'] ? 'bg-purple-500' : 'bg-green-500') : 'bg-gray-700 hover:bg-gray-600' }}"
+                                                        class="w-4 h-4 rounded cursor-pointer transition-colors planned-seg-{{ $meritId }} {{ $i <= $merit['planned_level'] ? 'bg-purple-500' : 'bg-gray-700 hover:bg-gray-600' }}"
                                                         onclick="updateMerit('{{ $merit['name'] }}', {{ $i }})"
                                                     ></div>
                                                 @endfor
