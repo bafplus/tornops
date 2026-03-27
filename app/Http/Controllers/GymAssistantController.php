@@ -18,9 +18,9 @@ class GymAssistantController extends Controller
             ->orderBy('recorded_at', 'desc')
             ->first();
         
-        // Auto-fetch if no stats exist
+        // Auto-fetch on every page load
         $fetchError = null;
-        if (!$latestStats && $user->torn_api_key && $user->torn_player_id) {
+        if ($user->torn_api_key && $user->torn_player_id) {
             $fetchError = $this->fetchGymStats($user);
             // Re-fetch after auto-fetch
             $latestStats = GymStatsHistory::where('user_id', $user->id)
