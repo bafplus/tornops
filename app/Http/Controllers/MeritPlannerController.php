@@ -110,7 +110,7 @@ class MeritPlannerController extends Controller
             $allMerits = MeritDefinition::getAllMeritNames();
 
             foreach ($allMerits as $meritName) {
-                $currentLevel = $v1Data['merits'][$meritName] ?? 0;
+                $currentLevel = $v1Data[$meritName] ?? 0;
 
                 \DB::table('user_merits')->updateOrInsert(
                     [
@@ -136,11 +136,7 @@ class MeritPlannerController extends Controller
     {
         $user = Auth::user();
         $meritName = $request->input('merit_name');
-        $plannedLevel = (int) $request->input('planned_level', 0);
-
-        if ($plannedLevel < 0 || $plannedLevel > 10) {
-            return response()->json(['error' => 'Invalid level. Must be between 0 and 10.'], 422);
-        }
+        $change = (int) $request->input('planned_level', 0);
 
         $merit = \DB::table('user_merits')
             ->where('user_id', $user->id)
@@ -151,13 +147,25 @@ class MeritPlannerController extends Controller
             return response()->json(['error' => 'Merit not found.'], 404);
         }
 
+        // Handle relative change (+1, -1) or absolute level (0-10)
+        if (in_array($change, [-1, 1])) {
+            // Relative change
+            $newLevel = $merit->planned_level + $change;
+        } else {
+            // Absolute level (from bar click)
+            $newLevel = $change;
+        }
+
+        // Clamp between 0 and 10
+        $newLevel = max(0, min(10, $newLevel));
+
         \DB::table('user_merits')
             ->where('user_id', $user->id)
             ->where('merit_name', $meritName)
-            ->update(['planned_level' => $plannedLevel, 'updated_at' => now()]);
+            ->update(['planned_level' => $newLevel, 'updated_at' => now()]);
 
         $currentCost = MeritDefinition::calculateCost(0, $merit->current_level);
-        $newPlannedCost = MeritDefinition::calculateCost(0, $plannedLevel);
+        $newPlannedCost = MeritDefinition::calculateCost(0, $newLevel);
         $costToPlan = $newPlannedCost - $currentCost;
 
         $totalPlannedCost = 0;
@@ -172,9 +180,9 @@ class MeritPlannerController extends Controller
         $extraNeeded = max(0, $totalPlannedCost - $availablePoints);
 
         return response()->json([
-            'planned_level' => $plannedLevel,
+            'planned_level' => $newLevel,
             'cost_to_plan' => $costToPlan,
-            'planned_bonus' => MeritDefinition::calculateBonus($meritName, $plannedLevel),
+            'planned_bonus' => MeritDefinition::calculateBonus($meritName, $newLevel),
             'total_planned_cost' => $totalPlannedCost,
             'extra_needed' => $extraNeeded,
         ]);
