@@ -92,23 +92,23 @@
                                 </div>
                                 
                                 <div class="flex items-center text-xs mb-1">
-                                    <span class="w-16 text-gray-300">Current</span>
-                                    <span class="w-10 text-gray-400 current-level" id="current-level-{{ $meritId }}">{{ $merit['current_level'] }}/10</span>
-                                    <div class="flex-1 flex mx-1" id="current-bar-{{ $meritId }}">
+                                    <span class="w-14 text-gray-300">Current</span>
+                                    <span class="w-8 text-right text-gray-400 mr-2 current-level" id="current-level-{{ $meritId }}">{{ $merit['current_level'] }}/10</span>
+                                    <div class="flex-1 flex" id="current-bar-{{ $meritId }}">
                                         @for($i = 1; $i <= 10; $i++)
                                             <div class="flex-1 h-3 rounded-sm mr-px current-seg-{{ $meritId }} {{ $i <= $merit['current_level'] ? 'bg-green-500' : 'bg-gray-700' }}"></div>
                                         @endfor
                                     </div>
-                                    <span class="w-12 text-right text-green-400" id="current-bonus-{{ $meritId }}">{{ $merit['current_bonus'] }}</span>
+                                    <span class="w-10 text-right text-green-400 ml-2" id="current-bonus-{{ $meritId }}">{{ $merit['current_bonus'] }}</span>
                                 </div>
                                 
                                 <div class="flex items-center text-xs">
-                                    <span class="w-16 text-gray-300">Planned</span>
-                                    <span class="w-10 text-gray-400 planned-level" id="planned-level-{{ $meritId }}">{{ $merit['planned_level'] }}/10</span>
+                                    <span class="w-14 text-gray-300">Planned</span>
+                                    <span class="w-8 text-right text-gray-400 mr-2 planned-level" id="planned-level-{{ $meritId }}">{{ $merit['planned_level'] }}/10</span>
                                     <button 
                                         type="button"
                                         onclick="updateMerit('{{ $merit['name'] }}', -1)"
-                                        class="w-4 h-4 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded text-white text-xs mr-1 btn-minus-{{ $meritId }}"
+                                        class="w-4 h-4 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded text-white text-xs btn-minus-{{ $meritId }}"
                                         {{ $merit['planned_level'] <= 0 ? 'disabled' : '' }}
                                     >-</button>
                                     <div class="flex-1 flex mx-1" id="planned-bar-{{ $meritId }}">
@@ -122,10 +122,10 @@
                                     <button 
                                         type="button"
                                         onclick="updateMerit('{{ $merit['name'] }}', 1)"
-                                        class="w-4 h-4 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded text-white text-xs ml-1 btn-plus-{{ $meritId }}"
+                                        class="w-4 h-4 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded text-white text-xs btn-plus-{{ $meritId }}"
                                         {{ $merit['planned_level'] >= 10 ? 'disabled' : '' }}
                                     >+</button>
-                                    <span class="w-12 text-right text-purple-400 ml-1 planned-bonus" id="planned-bonus-{{ $meritId }}">{{ $merit['planned_bonus'] }}</span>
+                                    <span class="w-10 text-right text-purple-400 ml-2 planned-bonus" id="planned-bonus-{{ $meritId }}">{{ $merit['planned_bonus'] }}</span>
                                 </div>
                             </div>
                         @endforeach
