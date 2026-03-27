@@ -101,7 +101,7 @@
                                         @endfor
                                     </div>
                                     <div class="w-4"></div>
-                                    <span class="w-10 text-right text-green-400 ml-2" id="current-bonus-{{ $meritId }}">{{ $merit['current_bonus'] }}</span>
+                                    <span class="w-12 text-right text-green-400 ml-2 truncate" title="{{ $merit['current_bonus'] }}" id="current-bonus-{{ $meritId }}">{{ $merit['current_bonus'] }}</span>
                                 </div>
                                 
                                 <div class="flex items-center text-xs">
@@ -127,7 +127,7 @@
                                         class="w-4 h-4 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded text-white text-xs btn-plus-{{ $meritId }}"
                                         {{ $merit['planned_level'] >= 10 ? 'disabled' : '' }}
                                     >+</button>
-                                    <span class="w-10 text-right text-purple-400 ml-2 planned-bonus" id="planned-bonus-{{ $meritId }}">{{ $merit['planned_bonus'] }}</span>
+                                    <span class="w-12 text-right text-purple-400 ml-2 truncate planned-bonus" title="{{ $merit['planned_bonus'] }}" id="planned-bonus-{{ $meritId }}">{{ $merit['planned_bonus'] }}</span>
                                 </div>
                             </div>
                         @endforeach
