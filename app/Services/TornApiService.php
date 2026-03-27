@@ -331,7 +331,7 @@ return $data;
         ]);
     }
 
-    public function getUserMeritsV1(?string $apiKey = null): ?array
+    public function getUserMeritsV1(int $playerId, ?string $apiKey = null): ?array
     {
         $key = $apiKey ?? $this->apiKey;
         if (!$key) {
@@ -339,7 +339,7 @@ return $data;
         }
 
         $response = Http::timeout(10)
-            ->get("{$this->baseUrl}/user/", [
+            ->get("{$this->baseUrl}/user/{$playerId}", [
                 'key' => $key,
                 'selections' => 'merits'
             ]);

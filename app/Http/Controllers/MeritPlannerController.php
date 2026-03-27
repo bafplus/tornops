@@ -87,11 +87,15 @@ class MeritPlannerController extends Controller
             return back()->with('error', 'No API key found. Please add your Torn API key in settings.');
         }
 
+        if (!$user->torn_player_id) {
+            return back()->with('error', 'No player ID found. Please complete setup first.');
+        }
+
         try {
-            $v1Data = $this->tornApi->getUserMeritsV1($user->torn_api_key);
+            $v1Data = $this->tornApi->getUserMeritsV1($user->torn_player_id, $user->torn_api_key);
             $v2Data = $this->tornApi->getUserMeritsV2($user->torn_api_key);
 
-            if (!$v1Data || !isset($v1Data['merits'])) {
+            if (!$v1Data || !is_array($v1Data)) {
                 return back()->with('error', 'Failed to fetch merits from V1 API.');
             }
 
