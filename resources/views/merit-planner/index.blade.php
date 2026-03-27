@@ -61,17 +61,11 @@
                         <div class="text-sm text-gray-400">Extra Needed</div>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4 mt-4 md:mt-0">
-                    <form action="{{ route('merits.fetch') }}" method="POST" class="inline">
+                <div class="flex space-x-3 mt-4 md:mt-0">
+                    <form action="{{ route('merits.reset') }}" method="POST">
                         @csrf
-                        <button type="submit" class="text-blue-400 hover:text-blue-300 text-sm underline">
-                            Refresh
-                        </button>
-                    </form>
-                    <form action="{{ route('merits.reset') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="text-gray-400 hover:text-gray-300 text-sm underline">
-                            Reset
+                        <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-medium">
+                            Reset to Current
                         </button>
                     </form>
                 </div>
