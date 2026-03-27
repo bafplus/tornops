@@ -15,22 +15,28 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-6">
+            {{ session('error') }} - <a href="{{ route('merits.fetch') }}" class="underline hover:text-white">Try again</a>
+        </div>
+    @endif
+
+    @if(isset($fetchError))
+        <div class="bg-red-900/50 border border-red-700 text-red-200 px-4 py-3 rounded mb-6">
+            {{ $fetchError }} - <a href="{{ route('merits.fetch') }}" class="underline hover:text-white">Try again</a>
+        </div>
+    @endif
+
     @if(session('success'))
         <div class="bg-green-900/50 border border-green-700 text-green-200 px-4 py-3 rounded mb-6">
             {{ session('success') }}
         </div>
     @endif
 
-    @if(!$hasData)
+    @if(!$hasData && !isset($fetchError))
         <div class="bg-gray-800 rounded-lg p-8 text-center border border-gray-700">
-            <h2 class="text-xl font-semibold text-white mb-2">No Merit Data</h2>
-            <p class="text-gray-400 mb-6">Fetch your merits from Torn to get started.</p>
-            <form action="{{ route('merits.fetch') }}" method="POST">
-                @csrf
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium">
-                    Fetch from API
-                </button>
-            </form>
+            <h2 class="text-xl font-semibold text-white mb-2">Loading Merit Data...</h2>
+            <p class="text-gray-400">Fetching your merits from Torn.</p>
         </div>
     @else
         <div class="bg-gray-800 rounded-lg p-6 mb-6 border border-gray-700">
@@ -59,7 +65,7 @@
                     <form action="{{ route('merits.fetch') }}" method="POST">
                         @csrf
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
-                            Fetch from API
+                            Refresh from API
                         </button>
                     </form>
                     <form action="{{ route('merits.reset') }}" method="POST">

@@ -25,6 +25,12 @@ class MeritPlannerController extends Controller
             ->get()
             ->keyBy('merit_name');
 
+        // Auto-fetch if no merits exist
+        $fetchError = null;
+        if ($merits->isEmpty() && $user->torn_api_key && $user->torn_player_id) {
+            $fetchError = $this->fetchMeritsFromApi($user);
+        }
+
         $allMerits = MeritDefinition::getAllMeritNames();
         $groupedMerits = [];
 
@@ -69,14 +75,58 @@ class MeritPlannerController extends Controller
         $availablePoints = $user->merit_points_available ?? 0;
         $extraNeeded = max(0, $totalPlannedCost - $availablePoints);
 
+        // Refresh merits after potential auto-fetch
+        $merits = \DB::table('user_merits')
+            ->where('user_id', $user->id)
+            ->get()
+            ->keyBy('merit_name');
+
         return view('merit-planner.index', [
             'groupedMerits' => $groupedMerits,
-            'availablePoints' => $availablePoints,
+            'availablePoints' => $user->merit_points_available ?? 0,
             'usedPoints' => $user->merit_points_used ?? 0,
             'totalPlannedCost' => $totalPlannedCost,
             'extraNeeded' => $extraNeeded,
             'hasData' => $merits->isNotEmpty(),
+            'fetchError' => $fetchError,
         ]);
+    }
+
+    private function fetchMeritsFromApi($user): ?string
+    {
+        if (!$user->torn_api_key || !$user->torn_player_id) {
+            return null;
+        }
+
+        try {
+            $v1Data = $this->tornApi->getUserMeritsV1($user->torn_player_id, $user->torn_api_key);
+            $v2Data = $this->tornApi->getUserMeritsV2($user->torn_api_key);
+
+            if (!$v1Data || !is_array($v1Data)) {
+                return 'Failed to fetch merits from V1 API';
+            }
+
+            if (!$v2Data || !isset($v2Data['available'])) {
+                return 'Failed to fetch merits from V2 API';
+            }
+
+            $user->merit_points_available = $v2Data['available'] ?? 0;
+            $user->merit_points_used = $v2Data['used'] ?? 0;
+            $user->save();
+
+            $allMerits = MeritDefinition::getAllMeritNames();
+            foreach ($allMerits as $meritName) {
+                $currentLevel = $v1Data[$meritName] ?? 0;
+                \DB::table('user_merits')->updateOrInsert(
+                    ['user_id' => $user->id, 'merit_name' => $meritName],
+                    ['current_level' => $currentLevel, 'planned_level' => $currentLevel, 'updated_at' => now()]
+                );
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            return 'Error: ' . $e->getMessage();
+        }
     }
 
     public function fetch(Request $request)
@@ -91,45 +141,13 @@ class MeritPlannerController extends Controller
             return back()->with('error', 'No player ID found. Please complete setup first.');
         }
 
-        try {
-            $v1Data = $this->tornApi->getUserMeritsV1($user->torn_player_id, $user->torn_api_key);
-            $v2Data = $this->tornApi->getUserMeritsV2($user->torn_api_key);
+        $error = $this->fetchMeritsFromApi($user);
 
-            if (!$v1Data || !is_array($v1Data)) {
-                return back()->with('error', 'Failed to fetch merits from V1 API.');
-            }
-
-            if (!$v2Data || !isset($v2Data['available'])) {
-                return back()->with('error', 'Failed to fetch merits from V2 API.');
-            }
-
-            $user->merit_points_available = $v2Data['available'] ?? 0;
-            $user->merit_points_used = $v2Data['used'] ?? 0;
-            $user->save();
-
-            $allMerits = MeritDefinition::getAllMeritNames();
-
-            foreach ($allMerits as $meritName) {
-                $currentLevel = $v1Data[$meritName] ?? 0;
-
-                \DB::table('user_merits')->updateOrInsert(
-                    [
-                        'user_id' => $user->id,
-                        'merit_name' => $meritName,
-                    ],
-                    [
-                        'current_level' => $currentLevel,
-                        'planned_level' => $currentLevel,
-                        'updated_at' => now(),
-                    ]
-                );
-            }
-
-            return back()->with('success', 'Merits fetched successfully!');
-
-        } catch (\Exception $e) {
-            return back()->with('error', 'Error: ' . $e->getMessage());
+        if ($error) {
+            return back()->with('error', $error);
         }
+
+        return back()->with('success', 'Merits fetched successfully!');
     }
 
     public function updatePlanned(Request $request)
