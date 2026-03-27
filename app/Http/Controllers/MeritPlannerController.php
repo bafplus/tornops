@@ -72,9 +72,8 @@ class MeritPlannerController extends Controller
 
         $totalPlannedCost = 0;
         foreach ($merits as $merit) {
-            $currentCost = MeritDefinition::calculateCost(0, $merit->current_level);
             $plannedCost = MeritDefinition::calculateCost(0, $merit->planned_level);
-            $totalPlannedCost += ($plannedCost - $currentCost);
+            $totalPlannedCost += $plannedCost;
         }
 
         $availablePoints = $user->merit_points_available ?? 0;
@@ -195,9 +194,7 @@ class MeritPlannerController extends Controller
             $totalPlannedCost = 0;
             $allMerits = \DB::table('user_merits')->where('user_id', $user->id)->get();
             foreach ($allMerits as $m) {
-                $cCost = MeritDefinition::calculateCost(0, $m->current_level);
-                $pCost = MeritDefinition::calculateCost(0, $m->planned_level);
-                $totalPlannedCost += ($pCost - $cCost);
+                $totalPlannedCost += MeritDefinition::calculateCost(0, $m->planned_level);
             }
 
             $availablePoints = $user->merit_points_available ?? 0;
