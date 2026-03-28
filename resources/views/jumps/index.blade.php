@@ -114,9 +114,77 @@
         </div>
     </div>
 
-    <div class="mt-6 p-4 bg-yellow-900/20 border border-yellow-700/50 rounded-lg">
-        <p class="text-yellow-400 text-sm">Calculator coming soon - ready to build!</p>
+    <!-- Jump Calculations -->
+    @if(isset($jump_results) && count($jump_results) > 0)
+    <div class="mt-6">
+        <h2 class="text-xl font-semibold mb-4 text-purple-400">Jump Calculations</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            @foreach($jump_results as $type => $result)
+            <div class="bg-gray-800 rounded-lg border border-gray-700 p-4">
+                <h3 class="text-lg font-semibold mb-3 {{ $type === 'candy' ? 'text-green-400' : ($type === 'choco' ? 'text-yellow-400' : 'text-pink-400') }}">
+                    {{ $result['name'] }}
+                </h3>
+                
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Money Cost</span>
+                        <span class="font-mono text-green-400">${{ number_format($result['money_cost']) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Points Cost</span>
+                        <span class="font-mono text-blue-400">{{ $result['points_cost'] }} pts</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Total Time</span>
+                        <span class="font-mono">{{ $result['total_time_hours'] }} hrs</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Total Energy</span>
+                        <span class="font-mono">{{ number_format($result['total_energy']) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Number of Trains</span>
+                        <span class="font-mono">{{ $result['num_trains'] }}</span>
+                    </div>
+                    
+                    <div class="border-t border-gray-700 pt-2 mt-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Est. Total Gain</span>
+                            <span class="font-mono text-yellow-400">{{ number_format($result['total_gain'], 0) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Gain per Train</span>
+                            <span class="font-mono">{{ number_format($result['gain_per_train'], 2) }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-700 pt-2 mt-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Price per Train</span>
+                            <span class="font-mono text-green-400">${{ number_format($result['price_per_train'], 0) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Points per Train</span>
+                            <span class="font-mono text-blue-400">{{ number_format($result['points_per_train'], 2) }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-700 pt-2 mt-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Starting Happy</span>
+                            <span class="font-mono text-green-400">{{ number_format($result['starting_happy']) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Happy from Items</span>
+                            <span class="font-mono">+{{ number_format($result['happy_from_items']) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
     </div>
+    @endif
     @endif
 </div>
 @endsection
