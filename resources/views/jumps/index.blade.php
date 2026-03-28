@@ -151,7 +151,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-400">Total Time</span>
-                        <span class="font-mono">{{ $result['total_time_hours'] }} hrs</span>
+                        <span class="font-mono">{{ $result['total_time_min'] }}-{{ $result['total_time_max'] }} hrs</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-400">Total Energy</span>

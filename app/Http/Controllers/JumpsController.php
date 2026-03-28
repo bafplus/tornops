@@ -275,8 +275,9 @@ class JumpsController extends Controller
             // Calculate points cost (refill is optional, but we include it)
             $pointsCost = $jump['materials']['refill'] * $refillPoints;
 
-            // Calculate total time (4 xanax cooldowns, 6-8 hours each, use 7 hours average)
-            $totalTimeHours = 4 * 7; // 28 hours
+            // Calculate total time (4 xanax cooldowns, 6-8 hours each)
+            $totalTimeMin = 4 * 6; // 24 hours minimum
+            $totalTimeMax = 4 * 8; // 36 hours maximum
 
             // Calculate happy after items
             $happyFromItems = $jump['happy_from_items'];
@@ -378,7 +379,8 @@ class JumpsController extends Controller
                 'name' => $jump['name'],
                 'money_cost' => $moneyCost,
                 'points_cost' => $pointsCost,
-                'total_time_hours' => $totalTimeHours,
+                'total_time_min' => $totalTimeMin,
+                'total_time_max' => $totalTimeMax,
                 'total_energy' => $availableEnergy,
                 'num_trains' => $numTrains,
                 'total_gain' => $totalGain,
