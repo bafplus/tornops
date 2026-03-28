@@ -96,22 +96,28 @@
         </div>
     </div>
 
-    <div class="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-8">
-        <h2 class="text-lg font-semibold mb-4 text-gray-300">Training Program</h2>
-        
-        <form action="/gym/program" method="POST" class="space-y-4">
-            @csrf
-            <div class="flex flex-wrap items-end gap-4">
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm text-gray-400 mb-1">Select Program</label>
-                    <select name="program_id" id="programSelect" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white" onchange="toggleCustomInputs()">
-                        <option value="">-- Select --</option>
-                        @foreach($programs as $program)
-                            <option value="{{ $program->id }}" {{ $selectedProgram && $selectedProgram->id == $program->id ? 'selected' : '' }}>
-                                {{ $program->name }} - {{ $program->description }}{{ !$program->is_custom ? ' (' . $program->str_percent . '/' . $program->def_percent . '/' . $program->spd_percent . '/' . $program->dex_percent . ')' : '' }}
-                            </option>
-                        @endforeach
-                    </select>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
+            <h2 class="text-lg font-semibold mb-4 text-gray-300">Training Program</h2>
+            
+            <form action="/gym/program" method="POST" class="space-y-4">
+                @csrf
+                <div class="flex flex-wrap items-end gap-4">
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-sm text-gray-400 mb-1">Select Program</label>
+                        <select name="program_id" id="programSelect" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white" onchange="toggleCustomInputs()">
+                            <option value="">-- Select --</option>
+                            @foreach($programs as $program)
+                                <option value="{{ $program->id }}" {{ $selectedProgram && $selectedProgram->id == $program->id ? 'selected' : '' }}>
+                                    {{ $program->name }}{{ !$program->is_custom ? ' (' . $program->str_percent . '/' . $program->def_percent . '/' . $program->spd_percent . '/' . $program->dex_percent . ')' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium">
+                        Save
+                    </button>
                 </div>
                 
                 <div id="customInputs" class="flex gap-2 {{ $selectedProgram && $selectedProgram->is_custom ? '' : 'hidden' }}">
@@ -133,23 +139,68 @@
                     </div>
                 </div>
                 
-                <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium">
-                    Save
-                </button>
+                @if($percentages)
+                <div class="mt-4 p-3 bg-gray-700/50 rounded-lg">
+                    <div class="flex gap-4 text-sm">
+                        <span class="text-blue-400">STR: {{ $percentages['str'] }}%</span>
+                        <span class="text-green-400">DEF: {{ $percentages['def'] }}%</span>
+                        <span class="text-yellow-400">SPD: {{ $percentages['spd'] }}%</span>
+                        <span class="text-purple-400">DEX: {{ $percentages['dex'] }}%</span>
+                    </div>
+                </div>
+                @endif
+            </form>
+        </div>
+
+        @if($trainRecommendation)
+        <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
+            <h2 class="text-lg font-semibold mb-4 text-gray-300">Train Recommendation</h2>
+            
+            <form method="GET" action="/gym" class="mb-4">
+                <div class="flex items-center gap-4">
+                    <label class="text-sm text-gray-400">Training at:</label>
+                    <select name="gym_id" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white" onchange="this.form.submit()">
+                        @foreach($gyms as $gym)
+                            <option value="{{ $gym['id'] }}" {{ $trainRecommendation['gym_id'] == $gym['id'] ? 'selected' : '' }}>
+                                {{ $gym['name'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @if($latestStats && $latestStats->gym_name)
+                        <span class="text-xs text-gray-500">(Current: {{ $latestStats->gym_name }})</span>
+                    @endif
+                </div>
+            </form>
+            
+            <div class="mb-4">
+                <div class="text-xs text-gray-500">Gym gains: STR +{{ $trainRecommendation['gym_gains']['strength'] }}, DEF +{{ $trainRecommendation['gym_gains']['defense'] }}, SPD +{{ $trainRecommendation['gym_gains']['speed'] }}, DEX +{{ $trainRecommendation['gym_gains']['dexterity'] }}</div>
             </div>
-        </form>
-        
-        @if($percentages)
-        <div class="mt-4 p-3 bg-gray-700/50 rounded-lg">
-            <div class="text-sm text-gray-400 mb-2">Current Target:</div>
-            <div class="flex gap-4 text-sm">
-                <span class="text-blue-400">STR: {{ $percentages['str'] }}%</span>
-                <span class="text-green-400">DEF: {{ $percentages['def'] }}%</span>
-                <span class="text-yellow-400">SPD: {{ $percentages['spd'] }}%</span>
-                <span class="text-purple-400">DEX: {{ $percentages['dex'] }}%</span>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-blue-400">{{ $trainRecommendation['trains']['str'] }}</div>
+                    <div class="text-sm text-gray-400">Strength</div>
+                </div>
+                <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-green-400">{{ $trainRecommendation['trains']['def'] }}</div>
+                    <div class="text-sm text-gray-400">Defense</div>
+                </div>
+                <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-yellow-400">{{ $trainRecommendation['trains']['spd'] }}</div>
+                    <div class="text-sm text-gray-400">Speed</div>
+                </div>
+                <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-400">{{ $trainRecommendation['trains']['dex'] }}</div>
+                    <div class="text-sm text-gray-400">Dexterity</div>
+                </div>
+            </div>
+            
+            <div class="text-center p-4 bg-blue-900/30 rounded-lg">
+                <div class="text-lg font-bold text-white">Total: {{ $trainRecommendation['trains']['total'] }} trains</div>
             </div>
         </div>
         @endif
+    </div>
     </div>
 
     @if($trainRecommendation)
