@@ -43,10 +43,10 @@
                             <th class="p-3">ID</th>
                             <th class="p-3">Stock</th>
                             <th class="p-3 text-right">Price</th>
-                            <th class="p-3 text-right">Change</th>
                             <th class="p-3 text-right">Market Cap</th>
-                            <th class="p-3 text-right">Volume</th>
+                            <th class="p-3 text-right">Investors</th>
                             <th class="p-3 text-right">Shares</th>
+                            <th class="p-3">Bonus</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
@@ -54,22 +54,29 @@
                         <tr class="hover:bg-gray-700/30">
                             <td class="p-3 font-mono text-gray-400">{{ $stock['id'] }}</td>
                             <td class="p-3">
-                                <div class="font-medium">{{ $stock['name'] }}</div>
-                                <div class="text-gray-500 text-sm">{{ $stock['acronym'] }}</div>
+                                <div class="flex items-center gap-2">
+                                    @if($stock['logo'])
+                                        <img src="{{ $stock['logo'] }}" class="w-6 h-6" alt="">
+                                    @endif
+                                    <div>
+                                        <div class="font-medium">{{ $stock['name'] }}</div>
+                                        <div class="text-gray-500 text-sm">{{ $stock['acronym'] }}</div>
+                                    </div>
+                                </div>
                             </td>
                             <td class="p-3 text-right font-mono">${{ number_format($stock['price'], 2) }}</td>
-                            <td class="p-3 text-right">
-                                @if($stock['profit'] > 0)
-                                    <span class="text-green-400">+${{ number_format($stock['profit'], 2) }}%</span>
-                                @elseif($stock['profit'] < 0)
-                                    <span class="text-red-400">${{ number_format($stock['profit'], 2) }}%</span>
-                                @else
-                                    <span class="text-gray-400">0.00%</span>
-                                @endif
-                            </td>
                             <td class="p-3 text-right font-mono text-gray-400">${{ number_format($stock['market_cap']) }}</td>
                             <td class="p-3 text-right font-mono text-gray-400">{{ number_format($stock['volume']) }}</td>
                             <td class="p-3 text-right font-mono text-gray-400">{{ number_format($stock['shares']) }}</td>
+                            <td class="p-3 text-xs">
+                                @if($stock['bonus'])
+                                    <span class="px-2 py-1 rounded bg-blue-900/50 text-blue-400">
+                                        {{ $stock['bonus']['description'] ?? 'Bonus' }}
+                                    </span>
+                                @else
+                                    <span class="text-gray-500">-</span>
+                                @endif
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

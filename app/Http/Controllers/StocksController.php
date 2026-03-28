@@ -37,20 +37,21 @@ class StocksController extends Controller
         }
 
         $stocks = collect($rawStocks)->map(function ($stock) {
-            $price = $stock['current_price'] ?? 0;
-            $prevPrice = $stock['previous_price'] ?? $price;
-            $profit = ($prevPrice > 0) ? (($price - $prevPrice) / $prevPrice * 100) : 0;
+            $market = $stock['market'] ?? [];
+            $price = $market['price'] ?? 0;
             
             return [
-                'id' => $stock['stock_id'] ?? 0,
+                'id' => $stock['id'] ?? 0,
                 'acronym' => $stock['acronym'] ?? '',
                 'name' => $stock['name'] ?? '',
                 'price' => $price,
-                'previous_price' => $prevPrice,
-                'market_cap' => $stock['market_cap'] ?? 0,
-                'volume' => $stock['volume'] ?? 0,
-                'shares' => $stock['total_shares'] ?? 0,
-                'profit' => $profit,
+                'previous_price' => $price,
+                'market_cap' => $market['cap'] ?? 0,
+                'volume' => $market['investors'] ?? 0,
+                'shares' => $market['shares'] ?? 0,
+                'bonus' => $stock['bonus'] ?? null,
+                'logo' => $stock['images']['logo'] ?? null,
+                'profit' => 0, // No previous price in v2 API
             ];
         })->sortByDesc('market_cap')->values();
 
