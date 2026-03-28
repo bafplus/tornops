@@ -393,7 +393,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>console.log('INLINE TEST - scripts section loaded');</script>
 <script>
 (function() {
@@ -865,4 +865,4 @@ syncRealtime();
 setInterval(syncRealtime, syncInterval);
 })();
 </script>
-@endsection
+@endpush
