@@ -65,6 +65,18 @@ document.addEventListener('DOMContentLoaded', function() {
         </form>
     </div>
 
+    <div class="mb-4 p-4 bg-gray-800 rounded-lg border border-gray-700">
+        <button type="button" onclick="document.getElementById('stock-help').classList.toggle('hidden')" class="text-yellow-400 font-semibold hover:text-yellow-300 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            How Stock Benefits Work
+        </button>
+        <div id="stock-help" class="hidden mt-3 text-sm text-gray-300 space-y-2">
+            <p><span class="text-green-400 font-semibold">Passive:</span> Need correct shares for 7 days before activating.</p>
+            <p><span class="text-blue-400 font-semibold">Active:</span> Pay dividends every 7 or 31 days. Can buy multiple increments (each costs 2x previous).</p>
+            <p><span class="text-yellow-400">Note:</span> Must claim dividends within 24h or lose progression. Excess dividends beyond Energy (1000) or Happiness (99999) limits will be wasted.</p>
+        </div>
+    </div>
+
     @if(session('success'))
         <div class="mb-4 p-4 bg-green-900/50 border border-green-700 rounded-lg text-green-400">
             {{ session('success') }}
