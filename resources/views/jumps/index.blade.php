@@ -117,7 +117,10 @@
     <!-- Jump Calculations -->
     @if(isset($jump_results) && count($jump_results) > 0)
     <div class="mt-6">
-        <h2 class="text-xl font-semibold mb-4 text-purple-400">Jump Calculations</h2>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-purple-400">Jump Calculations</h2>
+            <span class="text-xs text-gray-500 italic">* Estimates only - actual gains vary based on factors like critical hits, happy loss variance (40-60%), and cooldown timing</span>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @foreach($jump_results as $type => $result)
             <div class="bg-gray-800 rounded-lg border border-gray-700 p-4">
