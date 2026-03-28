@@ -256,6 +256,9 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+console.log('Chart.js loaded:', typeof Chart);
+console.log('Chart exists:', Chart !== undefined);
+
 function toggleCustomInputs() {
     var select = document.getElementById('programSelect');
     var customInputs = document.getElementById('customInputs');
@@ -269,6 +272,8 @@ function toggleCustomInputs() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, checking chart conditions');
+    console.log('chartData exists:', typeof chartData !== 'undefined');
     setTimeout(function() {
         var successAlert = document.getElementById('success-alert');
         var errorAlert = document.getElementById('error-alert');
@@ -284,6 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 4000);
     
+    var chartData = @json($chartData && $chartData->count() > 1);
     @if($chartData && $chartData->count() > 1)
     console.log('Chart data:', @json($chartData));
     var ctx = document.getElementById('progressChart');
