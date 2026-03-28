@@ -113,16 +113,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!th || !th.dataset.sort) return;
         
         const sortKey = th.dataset.sort;
-        let dir = th.dataset.dir;
+        let dir = th.dataset.dir === 'asc' ? 'desc' : 'asc';
         
-        // Reset all icons
+        // Reset all icons and set new direction for clicked column
         thead.querySelectorAll('th').forEach(h => {
-            h.dataset.dir = h.dataset.sort === sortKey ? (dir === 'asc' ? 'desc' : 'asc') : (h.dataset.dir === 'asc' ? '↑' : '↓');
+            const isClicked = h.dataset.sort === sortKey;
+            const newDir = isClicked ? dir : (h.dataset.sort === 'name' || h.dataset.sort === 'position' || h.dataset.sort === 'status' ? 'asc' : 'desc');
+            h.dataset.dir = newDir;
+            h.querySelector('.sort-icon').textContent = newDir === 'asc' ? '↑' : '↓';
         });
-        
-        dir = th.dataset.dir;
-        th.dataset.dir = dir === 'asc' ? 'desc' : 'asc';
-        th.querySelector('.sort-icon').textContent = dir === 'asc' ? '↑' : '↓';
         
         // Sort rows
         const rows = Array.from(tbody.querySelectorAll('tr'));
