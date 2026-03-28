@@ -267,7 +267,8 @@ var chartData = {
     strength: {!! json_encode($chartData->pluck('strength')) !!},
     defense: {!! json_encode($chartData->pluck('defense')) !!},
     speed: {!! json_encode($chartData->pluck('speed')) !!},
-    dexterity: {!! json_encode($chartData->pluck('dexterity')) !!}
+    dexterity: {!! json_encode($chartData->pluck('dexterity')) !!},
+    total: {!! json_encode($chartData->map(fn($r) => $r->strength + $r->defense + $r->speed + $r->dexterity)) !!}
 };
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -277,6 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: chartData.labels,
             datasets: [
+                { label: 'Total', data: chartData.total, borderColor: '#ffffff', backgroundColor: 'rgba(255, 255, 255, 0.1)', fill: false, tension: 0.3, borderWidth: 3 },
                 { label: 'Strength', data: chartData.strength, borderColor: '#60a5fa', backgroundColor: 'rgba(96, 165, 250, 0.1)', fill: true, tension: 0.3 },
                 { label: 'Defense', data: chartData.defense, borderColor: '#4ade80', backgroundColor: 'rgba(74, 222, 128, 0.1)', fill: true, tension: 0.3 },
                 { label: 'Speed', data: chartData.speed, borderColor: '#facc15', backgroundColor: 'rgba(250, 204, 21, 0.1)', fill: true, tension: 0.3 },
