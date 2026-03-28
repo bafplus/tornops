@@ -106,21 +106,24 @@ class StocksController extends Controller
 
         // Generate investment recommendations for passive income
         $recommendations = $stocks->filter(function ($stock) {
-            return $stock['bonus_passive'] && $stock['bonus_requirement'] > 0 && !empty($stock['bonus_payout']);
+            return ($stock['bonus_passive'] ?? false) 
+                && ($stock['bonus_requirement'] ?? 0) > 0 
+                && !empty($stock['bonus_payout'])
+                && $stock['price'] > 0;
         })->map(function ($stock) {
             $costToUnlock = $stock['price'] * $stock['bonus_requirement'];
             $payoutStr = $stock['bonus_payout'];
             
-            // Parse payout amount - handle various formats like "$50,000,000", "50m", "$100"
+            // Parse payout amount - handle formats like "$50,000,000", "50m", "$100"
             $cleaned = preg_replace('/[^0-9.]/', '', $payoutStr);
             $payoutAmount = (float) $cleaned;
             
-            // Handle "m" suffix for millions
-            if (stripos($payoutStr, 'm') !== false && is_numeric($cleaned)) {
+            // Handle "m" suffix for millions  
+            if (stripos(strtolower($payoutStr), 'm') !== false && is_numeric($cleaned)) {
                 $payoutAmount = (float) $cleaned * 1000000;
             }
             
-            // Calculate ROI
+            // Calculate ROI: payout value / investment cost
             $roi = $costToUnlock > 0 ? ($payoutAmount / $costToUnlock * 100) : 0;
             
             return [
@@ -132,7 +135,6 @@ class StocksController extends Controller
                 'cost_to_unlock' => $costToUnlock,
                 'payout' => $payoutStr,
                 'payout_amount' => $payoutAmount,
-                'frequency' => 'passive (7 day hold)',
                 'roi_percent' => $roi,
             ];
         })->sortByDesc('roi_percent')->values();

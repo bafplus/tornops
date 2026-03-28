@@ -201,6 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td class="p-3 text-right font-mono text-yellow-400">${{ number_format($rec['cost_to_unlock'], 0) }}</td>
                         <td class="p-3 text-right text-xs">
                             <span class="text-green-400 font-medium">{{ $rec['payout'] }}</span>
+                            <div class="text-gray-500 text-xs">${{ number_format($rec['payout_amount'], 0) }} value</div>
                         </td>
                         <td class="p-3 text-right font-bold">
                             <span class="@if($rec['roi_percent'] >= 50) text-green-400 @elseif($rec['roi_percent'] >= 20) text-yellow-400 @else text-gray-400 @endif">
