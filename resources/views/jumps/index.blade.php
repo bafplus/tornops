@@ -78,6 +78,27 @@ document.addEventListener('DOMContentLoaded', function() {
     @endif
 
     @if($stats && $bars)
+    <!-- Gym Info -->
+    <div class="mb-6 bg-gray-800 rounded-lg border border-purple-700/50 p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-900/50 rounded-lg flex items-center justify-center">
+                    <span class="text-purple-400 font-bold">{{ $gym_level }}</span>
+                </div>
+                <div>
+                    <div class="font-semibold text-purple-400">{{ $gym_name }}</div>
+                    <div class="text-gray-500 text-xs">Gym Level {{ $gym_level }}</div>
+                </div>
+            </div>
+            <div class="flex gap-4 text-xs">
+                @if($gym_str_bonus > 0)<span class="text-red-400">STR +{{ number_format($gym_str_bonus * 100, 1) }}%</span>@endif
+                @if($gym_def_bonus > 0)<span class="text-blue-400">DEF +{{ number_format($gym_def_bonus * 100, 1) }}%</span>@endif
+                @if($gym_spd_bonus > 0)<span class="text-yellow-400">SPD +{{ number_format($gym_spd_bonus * 100, 1) }}%</span>@endif
+                @if($gym_dex_bonus > 0)<span class="text-green-400">DEX +{{ number_format($gym_dex_bonus * 100, 1) }}%</span>@endif
+            </div>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Current Stats -->
         <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">

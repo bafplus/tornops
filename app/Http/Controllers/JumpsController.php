@@ -25,14 +25,27 @@ class JumpsController extends Controller
         
         // Fetch user battle stats
         $stats = $tornApi->getUserStats($apiKey);
+        
+        // Fetch user gym info
+        $gymData = $tornApi->getUserGym($apiKey);
 
         if (!$bars || !$stats) {
             return view('jumps.index', [
                 'error' => 'Failed to fetch user data. Check your API key.',
                 'bars' => null,
                 'stats' => null,
+                'gym' => null,
             ]);
         }
+
+        // Extract gym info
+        $currentGym = $gymData['gym'] ?? null;
+        $gymName = $currentGym['name'] ?? 'Unknown';
+        $gymLevel = $currentGym['level'] ?? 1;
+        $gymStrengthBonus = $currentGym['strength_boost'] ?? 0;
+        $gymDefenseBonus = $currentGym['defense_boost'] ?? 0;
+        $gymSpeedBonus = $currentGym['speed_boost'] ?? 0;
+        $gymDexterityBonus = $currentGym['dexterity_boost'] ?? 0;
 
         // Extract battle stats - handle both formats (direct value or object with 'total')
         $battleStats = $stats['battlestats'] ?? [];
@@ -68,6 +81,12 @@ class JumpsController extends Controller
             'speed' => $speed,
             'dexterity' => $dexterity,
             'total_stats' => $totalStats,
+            'gym_name' => $gymName,
+            'gym_level' => $gymLevel,
+            'gym_str_bonus' => $gymStrengthBonus,
+            'gym_def_bonus' => $gymDefenseBonus,
+            'gym_spd_bonus' => $gymSpeedBonus,
+            'gym_dex_bonus' => $gymDexterityBonus,
         ]);
     }
 }
