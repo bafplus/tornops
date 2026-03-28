@@ -111,9 +111,79 @@ class StocksController extends Controller
             ->get()
             ->groupBy('stock_id');
 
+        // Get user's portfolio
+        $userStocks = [];
+        $userApiKey = $this->getApiKey();
+        if ($userApiKey) {
+            $rawUserStocks = Cache::remember('user_stocks_data', 3600, function () use ($tornApi, $userApiKey) {
+                return $tornApi->getUserStocks($userApiKey);
+            });
+            
+            if ($rawUserStocks) {
+                $stockPrices = collect($stocks)->keyBy('id');
+                
+                foreach ($rawUserStocks as $userStock) {
+                    $stockId = $userStock['id'];
+                    $shares = $userStock['shares'];
+                    $avgPrice = 0;
+                    $totalCost = 0;
+                    
+                    if (isset($userStock['transactions']) && count($userStock['transactions']) > 0) {
+                        $totalShares = 0;
+                        $totalCost = 0;
+                        foreach ($userStock['transactions'] as $tx) {
+                            $totalShares += $tx['shares'];
+                            $totalCost += $tx['shares'] * $tx['price'];
+                        }
+                        $avgPrice = $totalShares > 0 ? $totalCost / $totalShares : 0;
+                    }
+                    
+                    $currentPrice = $stockPrices[$stockId]['price'] ?? 0;
+                    $value = $shares * $currentPrice;
+                    $costBasis = $shares * $avgPrice;
+                    $profitLoss = $value - $costBasis;
+                    $profitLossPct = $costBasis > 0 ? ($profitLoss / $costBasis * 100) : 0;
+                    
+                    $userStocks[] = [
+                        'id' => $stockId,
+                        'name' => $stockPrices[$stockId]['name'] ?? 'Unknown',
+                        'acronym' => $stockPrices[$stockId]['acronym'] ?? '',
+                        'shares' => $shares,
+                        'avg_price' => $avgPrice,
+                        'current_price' => $currentPrice,
+                        'value' => $value,
+                        'profit_loss' => $profitLoss,
+                        'profit_loss_pct' => $profitLossPct,
+                        'bonus' => $userStock['bonus'] ?? null,
+                    ];
+                }
+                
+                // Store in history
+                $today = now()->toDateString();
+                $userId = Auth::id();
+                foreach ($userStocks as $us) {
+                    \App\Models\UserStockHolding::updateOrCreate(
+                        ['user_id' => $userId, 'stock_id' => $us['id'], 'recorded_at' => $today],
+                        [
+                            'name' => $us['name'],
+                            'acronym' => $us['acronym'],
+                            'shares' => $us['shares'],
+                            'avg_price' => $us['avg_price'],
+                            'current_price' => $us['current_price'],
+                            'value' => $us['value'],
+                            'profit_loss' => $us['profit_loss'],
+                            'profit_loss_pct' => $us['profit_loss_pct'],
+                            'bonus' => $us['bonus'],
+                        ]
+                    );
+                }
+            }
+        }
+
         return view('stocks.index', [
             'stocks' => $stocks,
             'history' => $history,
+            'userStocks' => $userStocks,
             'error' => null
         ]);
     }

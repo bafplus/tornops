@@ -108,6 +108,62 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     @endif
 
+    @if(!empty($userStocks))
+    <div class="mb-6 bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+        <div class="p-4 border-b border-gray-700">
+            <h2 class="text-xl font-semibold text-green-400">Your Portfolio</h2>
+            <p class="text-gray-500 text-xs">Your current stock holdings</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-700">
+                    <tr class="text-left text-gray-400 text-sm">
+                        <th class="p-3">Stock</th>
+                        <th class="p-3 text-right">Shares</th>
+                        <th class="p-3 text-right">Avg Price</th>
+                        <th class="p-3 text-right">Current</th>
+                        <th class="p-3 text-right">Value</th>
+                        <th class="p-3 text-right">P/L</th>
+                        <th class="p-3">Bonus</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    @foreach($userStocks as $us)
+                    <tr class="hover:bg-gray-700/30">
+                        <td class="p-3">
+                            <div class="font-medium">{{ $us['name'] }}</div>
+                            <div class="text-gray-500 text-xs">{{ $us['acronym'] }}</div>
+                        </td>
+                        <td class="p-3 text-right font-mono">{{ number_format($us['shares']) }}</td>
+                        <td class="p-3 text-right font-mono">${{ number_format($us['avg_price'], 2) }}</td>
+                        <td class="p-3 text-right font-mono">${{ number_format($us['current_price'], 2) }}</td>
+                        <td class="p-3 text-right font-mono text-white">${{ number_format($us['value'], 2) }}</td>
+                        <td class="p-3 text-right font-mono">
+                            @if($us['profit_loss'] > 0)
+                                <span class="text-green-400">+${{ number_format($us['profit_loss'], 2) }}<br><span class="text-xs">(+{{ number_format($us['profit_loss_pct'], 2) }}%)</span></span>
+                            @elseif($us['profit_loss'] < 0)
+                                <span class="text-red-400">${{ number_format($us['profit_loss'], 2) }}<br><span class="text-xs">({{ number_format($us['profit_loss_pct'], 2) }}%)</span></span>
+                            @else
+                                <span class="text-gray-500">-</span>
+                            @endif
+                        </td>
+                        <td class="p-3 text-xs">
+                            @if(isset($us['bonus']['available']) && $us['bonus']['available'])
+                                <span class="text-green-400 bg-green-900/30 px-2 py-1 rounded">Ready!</span>
+                            @elseif(isset($us['bonus']['progress']) && $us['bonus']['progress'])
+                                <span class="text-yellow-400">{{ $us['bonus']['progress'] }}%</span>
+                            @else
+                                <span class="text-gray-600">-</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
     @if(empty($stocks))
         <div class="bg-gray-800 rounded-lg border border-gray-700 p-8 text-center">
             <p class="text-gray-400">No stock data available. Click refresh to load.</p>

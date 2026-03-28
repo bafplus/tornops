@@ -427,4 +427,31 @@ return $data;
 
         return $data['stocks'] ?? null;
     }
+
+    public function getUserStocks(string $apiKey): ?array
+    {
+        $response = Http::timeout(10)
+            ->get("{$this->baseUrl}/v2/user/stocks", ['key' => $apiKey]);
+
+        if ($response->failed()) {
+            Log::error('Torn V2 API Error (user stocks)', [
+                'endpoint' => 'v2/user/stocks',
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+            return null;
+        }
+
+        $data = $response->json();
+
+        if (isset($data['error'])) {
+            Log::error('Torn V2 API Error (user stocks)', [
+                'endpoint' => 'v2/user/stocks',
+                'error' => $data['error']
+            ]);
+            return null;
+        }
+
+        return $data['stocks'] ?? null;
+    }
 }
