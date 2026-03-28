@@ -180,6 +180,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                         $min = min($prices);
                                         $max = max($prices);
                                         $range = $max - $min ?: 1;
+                                        $firstPrice = $prices[0];
+                                        $lastPrice = end($prices);
+                                        $chartChange = $firstPrice > 0 ? (($lastPrice - $firstPrice) / $firstPrice * 100) : 0;
                                         $w = 90;
                                         $h = 30;
                                         $pad = 4;
@@ -190,8 +193,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                             $y = $pad + ($h - 2 * $pad) - (($price - $min) / $range * ($h - 2 * $pad));
                                             $points[] = round($x, 1) . ',' . round($y, 1);
                                         }
-                                        $lineColor = $stock['change_7d'] > 0 ? '#4ade80' : ($stock['change_7d'] < 0 ? '#f87171' : '#6b7280');
-                                        $fillColor = $stock['change_7d'] > 0 ? 'rgba(74,222,128,0.3)' : ($stock['change_7d'] < 0 ? 'rgba(248,113,113,0.3)' : 'rgba(107,114,128,0.3))');
+                                        $lineColor = $chartChange > 0 ? '#4ade80' : ($chartChange < 0 ? '#f87171' : '#6b7280');
+                                        $fillColor = $chartChange > 0 ? 'rgba(74,222,128,0.3)' : ($chartChange < 0 ? 'rgba(248,113,113,0.3)' : 'rgba(107,114,128,0.3)');
                                         $lastPoint = end($points);
                                         $lastCoords = explode(',', $lastPoint);
                                     @endphp
