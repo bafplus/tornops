@@ -7,8 +7,40 @@
 document.addEventListener('DOMContentLoaded', function() {
     const thead = document.querySelector('thead');
     const tbody = document.querySelector('tbody');
-    let sortCol = 'market_cap';
+    let sortCol = 'shares';
     let sortDir = 'desc';
+
+    function updateSortIcons() {
+        thead.querySelectorAll('th').forEach(h => {
+            if (h.dataset.sort === sortCol) {
+                h.dataset.dir = sortDir;
+                h.querySelector('.sort-icon').textContent = sortDir === 'asc' ? '↑' : '↓';
+            } else {
+                h.dataset.dir = h.dataset.sort === 'name' ? 'asc' : 'desc';
+                h.querySelector('.sort-icon').textContent = h.dataset.dir === 'asc' ? '↑' : '↓';
+            }
+        });
+    }
+
+    function sortTable() {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            let aVal = a.dataset[sortCol] || '0';
+            let bVal = b.dataset[sortCol] || '0';
+            
+            if (['price', 'investors', 'id'].includes(sortCol)) {
+                aVal = parseFloat(aVal.replace(/[^0-9.-]/g, '')) || 0;
+                bVal = parseFloat(bVal.replace(/[^0-9.-]/g, '')) || 0;
+                return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+            }
+            
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+            return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+        
+        rows.forEach(row => tbody.appendChild(row));
+    }
 
     thead.addEventListener('click', function(e) {
         const th = e.target.closest('th[data-sort]');
@@ -22,29 +54,13 @@ document.addEventListener('DOMContentLoaded', function() {
             sortDir = 'desc';
         }
         
-        thead.querySelectorAll('th').forEach(h => {
-            h.dataset.dir = h.dataset.sort === sortCol ? sortDir : (h.dataset.sort === 'name' ? 'asc' : 'desc');
-            h.querySelector('.sort-icon').textContent = h.dataset.dir === 'asc' ? '↑' : '↓';
-        });
-        
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        rows.sort((a, b) => {
-            let aVal = a.dataset[col] || '0';
-            let bVal = b.dataset[col] || '0';
-            
-            if (['price', 'market_cap', 'investors', 'shares', 'id'].includes(col)) {
-                aVal = parseFloat(aVal.replace(/[^0-9.-]/g, '')) || 0;
-                bVal = parseFloat(bVal.replace(/[^0-9.-]/g, '')) || 0;
-                return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
-            }
-            
-            aVal = aVal.toLowerCase();
-            bVal = bVal.toLowerCase();
-            return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-        });
-        
-        rows.forEach(row => tbody.appendChild(row));
+        updateSortIcons();
+        sortTable();
     });
+
+    // Initial sort
+    updateSortIcons();
+    sortTable();
 });
 </script>
 @endpush
