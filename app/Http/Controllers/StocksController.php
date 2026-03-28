@@ -24,9 +24,25 @@ class StocksController extends Controller
             return $tornApi->getStocks($apiKey);
         });
 
-        // Debug: log the first stock to see structure
-        if ($rawStocks && count($rawStocks) > 0) {
-            \Illuminate\Support\Facades\Log::info('Stock API response sample', ['first' => array_first($rawStocks)]);
+        // Save to history if not already saved today
+        if ($rawStocks) {
+            $today = now()->toDateString();
+            $existsToday = \App\Models\StockHistory::where('recorded_at', $today)->exists();
+            
+            if (!$existsToday) {
+                foreach ($rawStocks as $stock) {
+                    \App\Models\StockHistory::create([
+                        'stock_id' => $stock['id'] ?? 0,
+                        'name' => $stock['name'] ?? '',
+                        'acronym' => $stock['acronym'] ?? '',
+                        'price' => $stock['market']['price'] ?? 0,
+                        'investors' => $stock['market']['investors'] ?? 0,
+                        'shares' => $stock['market']['shares'] ?? 0,
+                        'market_cap' => $stock['market']['cap'] ?? 0,
+                        'recorded_at' => $today,
+                    ]);
+                }
+            }
         }
 
         if (!$rawStocks) {
