@@ -398,13 +398,9 @@ return $data;
 
     public function getStocks(?string $apiKey = null): ?array
     {
-        $params = [];
-        if ($apiKey) {
-            $params['key'] = $apiKey;
-        }
-
+        // This endpoint is public - no key needed
         $response = Http::timeout(10)
-            ->get("{$this->baseUrl}/v2/torn/stocks", $params);
+            ->get("{$this->baseUrl}/v2/torn/stocks");
 
         if ($response->failed()) {
             Log::error('Torn V2 API Error (stocks)', [
