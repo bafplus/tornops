@@ -254,7 +254,7 @@
 </div>
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 function toggleCustomInputs() {
     var select = document.getElementById('programSelect');
@@ -285,8 +285,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 4000);
     
     @if($chartData && $chartData->count() > 1)
-    var ctx = document.getElementById('progressChart').getContext('2d');
-    var historyData = @json($chartData->values());
+    console.log('Chart data:', @json($chartData));
+    var ctx = document.getElementById('progressChart');
+    if (ctx) {
+        console.log('Canvas found, creating chart');
+        var historyData = @json($chartData->values());
     
     var labels = historyData.map(function(item) {
         return new Date(item.recorded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -365,6 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+    }
     @endif
 });
 </script>
