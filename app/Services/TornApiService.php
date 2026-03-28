@@ -396,10 +396,15 @@ return $data;
         return $data['merits'] ?? null;
     }
 
-    public function getStocks(): ?array
+    public function getStocks(?string $apiKey = null): ?array
     {
+        $params = [];
+        if ($apiKey) {
+            $params['key'] = $apiKey;
+        }
+
         $response = Http::timeout(10)
-            ->get("{$this->baseUrl}/v2/torn/stocks");
+            ->get("{$this->baseUrl}/v2/torn/stocks", $params);
 
         if ($response->failed()) {
             Log::error('Torn V2 API Error (stocks)', [
