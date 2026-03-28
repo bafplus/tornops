@@ -289,7 +289,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 4000);
     
-    var chartData = @json($chartData && $chartData->count() > 1);
     @if($chartData && $chartData->count() > 1)
     console.log('Chart data:', @json($chartData));
     var ctx = document.getElementById('progressChart');
@@ -297,87 +296,86 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Canvas found, creating chart');
         var historyData = @json($chartData->values());
     
-    var labels = historyData.map(function(item) {
-        return new Date(item.recorded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    });
+        var labels = historyData.map(function(item) {
+            return new Date(item.recorded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        });
     
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Strength',
-                    data: historyData.map(function(item) { return item.strength; }),
-                    borderColor: '#60a5fa',
-                    backgroundColor: 'rgba(96, 165, 250, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: false
-                },
-                {
-                    label: 'Defense',
-                    data: historyData.map(function(item) { return item.defense; }),
-                    borderColor: '#4ade80',
-                    backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: false
-                },
-                {
-                    label: 'Speed',
-                    data: historyData.map(function(item) { return item.speed; }),
-                    borderColor: '#facc15',
-                    backgroundColor: 'rgba(250, 204, 21, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: false
-                },
-                {
-                    label: 'Dexterity',
-                    data: historyData.map(function(item) { return item.dexterity; }),
-                    borderColor: '#c084fc',
-                    backgroundColor: 'rgba(192, 132, 252, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: false
-                },
-                {
-                    label: 'Total',
-                    data: historyData.map(function(item) { return item.strength + item.defense + item.speed + item.dexterity; }),
-                    borderColor: '#ffffff',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderWidth: 2,
-                    borderDash: [5, 5],
-                    tension: 0.3,
-                    fill: false
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    labels: { color: '#9ca3af' }
-                }
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Strength',
+                        data: historyData.map(function(item) { return item.strength; }),
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Defense',
+                        data: historyData.map(function(item) { return item.defense; }),
+                        borderColor: '#4ade80',
+                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Speed',
+                        data: historyData.map(function(item) { return item.speed; }),
+                        borderColor: '#facc15',
+                        backgroundColor: 'rgba(250, 204, 21, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Dexterity',
+                        data: historyData.map(function(item) { return item.dexterity; }),
+                        borderColor: '#c084fc',
+                        backgroundColor: 'rgba(192, 132, 252, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false
+                    },
+                    {
+                        label: 'Total',
+                        data: historyData.map(function(item) { return item.strength + item.defense + item.speed + item.dexterity; }),
+                        borderColor: '#ffffff',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.3,
+                        fill: false
+                    }
+                ]
             },
-            scales: {
-                x: {
-                    ticks: { color: '#9ca3af' },
-                    grid: { color: '#374151' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#9ca3af' }
+                    }
                 },
-                y: {
-                    ticks: { color: '#9ca3af' },
-                    grid: { color: '#374151' }
+                scales: {
+                    x: {
+                        ticks: { color: '#9ca3af' },
+                        grid: { color: '#374151' }
+                    },
+                    y: {
+                        ticks: { color: '#9ca3af' },
+                        grid: { color: '#374151' }
+                    }
                 }
             }
-        }
-    });
+        });
     }
     @endif
 });
 </script>
 @endpush
-@endif
 @endsection
