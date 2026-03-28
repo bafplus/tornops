@@ -395,4 +395,31 @@ return $data;
 
         return $data['merits'] ?? null;
     }
+
+    public function getStocks(): ?array
+    {
+        $response = Http::timeout(10)
+            ->get("{$this->baseUrl}/v2/torn/stocks");
+
+        if ($response->failed()) {
+            Log::error('Torn V2 API Error (stocks)', [
+                'endpoint' => 'v2/torn/stocks',
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+            return null;
+        }
+
+        $data = $response->json();
+
+        if (isset($data['error'])) {
+            Log::error('Torn V2 API Error (stocks)', [
+                'endpoint' => 'v2/torn/stocks',
+                'error' => $data['error']
+            ]);
+            return null;
+        }
+
+        return $data['stocks'] ?? null;
+    }
 }
