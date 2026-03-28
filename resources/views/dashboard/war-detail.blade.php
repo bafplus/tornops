@@ -780,13 +780,15 @@ const urlParams = getUrlParams();
 let currentSort = { field: urlParams.sort, dir: urlParams.dir };
 
 document.addEventListener('DOMContentLoaded', function() {
+console.log('DOM loaded, setting up sort handlers');
 document.getElementById('thead-our').querySelectorAll('th').forEach(th => {
-th.addEventListener('click', () => handleSortClick(th));
+th.addEventListener('click', () => { console.log('Sort clicked:', th.dataset.sort); handleSortClick(th); });
 });
 document.getElementById('thead-opp').querySelectorAll('th').forEach(th => {
-th.addEventListener('click', () => handleSortClick(th));
+th.addEventListener('click', () => { console.log('Sort clicked:', th.dataset.sort); handleSortClick(th); });
 });
 
+console.log('Initial sort:', currentSort);
 updateAllTheads(currentSort.field, currentSort.dir);
 sortTable(document.getElementById('tbody-our'), currentSort.field, currentSort.dir);
 sortTable(document.getElementById('tbody-opp'), currentSort.field, currentSort.dir);
