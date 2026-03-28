@@ -253,7 +253,7 @@
     @endif
 </div>
 
-@section('scripts')
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 console.log('Chart.js loaded:', typeof Chart);
@@ -378,5 +378,6 @@ document.addEventListener('DOMContentLoaded', function() {
     @endif
 });
 </script>
-@endsection
+@endpush
+@endif
 @endsection
