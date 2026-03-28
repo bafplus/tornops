@@ -38,6 +38,15 @@ $schedule->command('torn:sync-attacks')
             ->hourly()
             ->withoutOverlapping()
             ->runInBackground();
+
+        $schedule->call(function () {
+            $controller = app()->make(\App\Http\Controllers\StocksController::class);
+            $tornApi = app()->make(\App\Services\TornApiService::class);
+            $controller->sync($tornApi);
+        })
+            ->dailyAt('00:15')
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     protected function commands(): void
