@@ -95,6 +95,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
@@ -171,7 +172,7 @@
                     @endif
                 </div>
             </form>
-            
+
             <div class="mb-4">
                 <div class="text-xs text-gray-500">Gym gains: STR +{{ $trainRecommendation['gym_gains']['strength'] }}, DEF +{{ $trainRecommendation['gym_gains']['defense'] }}, SPD +{{ $trainRecommendation['gym_gains']['speed'] }}, DEX +{{ $trainRecommendation['gym_gains']['dexterity'] }}</div>
             </div>
@@ -289,93 +290,6 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() { errorAlert.remove(); }, 500);
         }
     }, 4000);
-    
-    @if($chartData && $chartData->count() > 1)
-    console.log('Chart data:', @json($chartData));
-    var ctx = document.getElementById('progressChart');
-    if (ctx) {
-        console.log('Canvas found, creating chart');
-        var historyData = @json($chartData->values());
-    
-        var labels = historyData.map(function(item) {
-            return new Date(item.recorded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        });
-    
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Strength',
-                        data: historyData.map(function(item) { return item.strength; }),
-                        borderColor: '#60a5fa',
-                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: false
-                    },
-                    {
-                        label: 'Defense',
-                        data: historyData.map(function(item) { return item.defense; }),
-                        borderColor: '#4ade80',
-                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: false
-                    },
-                    {
-                        label: 'Speed',
-                        data: historyData.map(function(item) { return item.speed; }),
-                        borderColor: '#facc15',
-                        backgroundColor: 'rgba(250, 204, 21, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: false
-                    },
-                    {
-                        label: 'Dexterity',
-                        data: historyData.map(function(item) { return item.dexterity; }),
-                        borderColor: '#c084fc',
-                        backgroundColor: 'rgba(192, 132, 252, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: false
-                    },
-                    {
-                        label: 'Total',
-                        data: historyData.map(function(item) { return item.strength + item.defense + item.speed + item.dexterity; }),
-                        borderColor: '#ffffff',
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        tension: 0.3,
-                        fill: false
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: { color: '#9ca3af' }
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: { color: '#9ca3af' },
-                        grid: { color: '#374151' }
-                    },
-                    y: {
-                        ticks: { color: '#9ca3af' },
-                        grid: { color: '#374151' }
-                    }
-                }
-            }
-        });
-    }
-    @endif
 });
 </script>
 @endpush
