@@ -202,55 +202,56 @@
         @endif
     </div>
 
-    @if($chartData && $chartData->count() > 1)
-    <div class="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-8">
-        <h2 class="text-lg font-semibold mb-4 text-gray-300">Progress Chart</h2>
-        <div class="h-80">
-            <canvas id="progressChart"></canvas>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @if($chartData && $chartData->count() > 1)
+        <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
+            <h2 class="text-lg font-semibold mb-4 text-gray-300">Progress Chart</h2>
+            <div class="h-80">
+                <canvas id="progressChart"></canvas>
+            </div>
         </div>
-    </div>
-    @endif
-
-    <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
-        <h2 class="text-lg font-semibold mb-4 text-gray-300">History</h2>
-        @if($history->count() > 0)
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="text-left text-gray-400 text-sm border-b border-gray-700">
-                        <th class="pb-3">Date</th>
-                        <th class="pb-3 text-right">STR</th>
-                        <th class="pb-3 text-right">DEF</th>
-                        <th class="pb-3 text-right">SPD</th>
-                        <th class="pb-3 text-right">DEX</th>
-                        <th class="pb-3 text-right">Total</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-700">
-                    @foreach($history as $record)
-                    @php
-                        $rowTotal = $record->strength + $record->defense + $record->speed + $record->dexterity;
-                    @endphp
-                    <tr class="hover:bg-gray-700/30">
-                        <td class="py-3 text-gray-400">{{ $record->recorded_at->format('d M H:i') }}</td>
-                        <td class="py-3 text-right font-mono text-blue-400">{{ number_format($record->strength) }}</td>
-                        <td class="py-3 text-right font-mono text-green-400">{{ number_format($record->defense) }}</td>
-                        <td class="py-3 text-right font-mono text-yellow-400">{{ number_format($record->speed) }}</td>
-                        <td class="py-3 text-right font-mono text-purple-400">{{ number_format($record->dexterity) }}</td>
-                        <td class="py-3 text-right font-mono text-white">{{ number_format($rowTotal) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        <div class="mt-4">
-            {{ $history->links() }}
-        </div>
-        @else
-        <p class="text-gray-500 text-center py-8">No history yet. Click "Update Stats" to start tracking.</p>
         @endif
+
+        <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
+            <h2 class="text-lg font-semibold mb-4 text-gray-300">History</h2>
+            @if($history->count() > 0)
+            <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-left text-gray-400 text-sm border-b border-gray-700">
+                            <th class="pb-3">Date</th>
+                            <th class="pb-3 text-right">STR</th>
+                            <th class="pb-3 text-right">DEF</th>
+                            <th class="pb-3 text-right">SPD</th>
+                            <th class="pb-3 text-right">DEX</th>
+                            <th class="pb-3 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        @foreach($history as $record)
+                        @php
+                            $rowTotal = $record->strength + $record->defense + $record->speed + $record->dexterity;
+                        @endphp
+                        <tr class="hover:bg-gray-700/30">
+                            <td class="py-2 text-gray-400 text-sm">{{ $record->recorded_at->format('d M H:i') }}</td>
+                            <td class="py-2 text-right font-mono text-blue-400 text-sm">{{ number_format($record->strength) }}</td>
+                            <td class="py-2 text-right font-mono text-green-400 text-sm">{{ number_format($record->defense) }}</td>
+                            <td class="py-2 text-right font-mono text-yellow-400 text-sm">{{ number_format($record->speed) }}</td>
+                            <td class="py-2 text-right font-mono text-purple-400 text-sm">{{ number_format($record->dexterity) }}</td>
+                            <td class="py-2 text-right font-mono text-white text-sm">{{ number_format($rowTotal) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2">
+                {{ $history->links() }}
+            </div>
+            @else
+            <p class="text-gray-500 text-center py-8">No history yet.</p>
+            @endif
+        </div>
     </div>
-    @endif
 </div>
 
 @push('scripts')
