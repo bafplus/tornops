@@ -2,6 +2,53 @@
 
 @section('title', 'Stocks - TornOps')
 
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const thead = document.querySelector('thead');
+    const tbody = document.querySelector('tbody');
+    let sortCol = 'market_cap';
+    let sortDir = 'desc';
+
+    thead.addEventListener('click', function(e) {
+        const th = e.target.closest('th[data-sort]');
+        if (!th) return;
+        
+        const col = th.dataset.sort;
+        if (sortCol === col) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortCol = col;
+            sortDir = 'desc';
+        }
+        
+        thead.querySelectorAll('th').forEach(h => {
+            h.dataset.dir = h.dataset.sort === sortCol ? sortDir : (h.dataset.sort === 'name' ? 'asc' : 'desc');
+            h.querySelector('.sort-icon').textContent = h.dataset.dir === 'asc' ? '↑' : '↓';
+        });
+        
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+            let aVal = a.dataset[col] || '0';
+            let bVal = b.dataset[col] || '0';
+            
+            if (['price', 'market_cap', 'investors', 'shares', 'id'].includes(col)) {
+                aVal = parseFloat(aVal.replace(/[^0-9.-]/g, '')) || 0;
+                bVal = parseFloat(bVal.replace(/[^0-9.-]/g, '')) || 0;
+                return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+            }
+            
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+            return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        });
+        
+        rows.forEach(row => tbody.appendChild(row));
+    });
+});
+</script>
+@endpush
+
 @section('content')
 <div class="max-w-6xl mx-auto">
     <div class="flex items-center justify-between mb-6">
@@ -40,18 +87,18 @@
                 <table class="w-full">
                     <thead class="bg-gray-700">
                         <tr class="text-left text-gray-400 text-sm">
-                            <th class="p-3">ID</th>
-                            <th class="p-3">Stock</th>
-                            <th class="p-3 text-right">Price</th>
-                            <th class="p-3 text-right">Market Cap</th>
-                            <th class="p-3 text-right">Investors</th>
-                            <th class="p-3 text-right">Shares</th>
+                            <th class="p-3 cursor-pointer hover:text-white" data-sort="id" data-dir="asc">ID <span class="sort-icon">↑</span></th>
+                            <th class="p-3 cursor-pointer hover:text-white" data-sort="name" data-dir="asc">Stock <span class="sort-icon">↑</span></th>
+                            <th class="p-3 text-right cursor-pointer hover:text-white" data-sort="price" data-dir="desc">Price <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right cursor-pointer hover:text-white" data-sort="market_cap" data-dir="desc">Market Cap <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right cursor-pointer hover:text-white" data-sort="investors" data-dir="desc">Investors <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right cursor-pointer hover:text-white" data-sort="shares" data-dir="desc">Shares <span class="sort-icon">↓</span></th>
                             <th class="p-3">Bonus</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
                         @foreach($stocks as $stock)
-                        <tr class="hover:bg-gray-700/30">
+                        <tr class="hover:bg-gray-700/30" data-id="{{ $stock['id'] }}" data-name="{{ strtolower($stock['name']) }}" data-price="{{ $stock['price'] }}" data-market_cap="{{ $stock['market_cap'] }}" data-investors="{{ $stock['volume'] }}" data-shares="{{ $stock['shares'] }}">
                             <td class="p-3 font-mono text-gray-400">{{ $stock['id'] }}</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-2">
