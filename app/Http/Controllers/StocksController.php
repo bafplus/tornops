@@ -75,13 +75,26 @@ class StocksController extends Controller
                 ];
             }
             
+            $stockId = $stock['id'] ?? 0;
+            
+            // Get price changes from history
+            $dayAgo = \App\Models\StockHistory::where('stock_id', $stockId)
+                ->where('recorded_at', now()->subDay()->toDateString())
+                ->value('price');
+            $weekAgo = \App\Models\StockHistory::where('stock_id', $stockId)
+                ->where('recorded_at', now()->subDays(7)->toDateString())
+                ->value('price');
+            
             return [
-                'id' => $stock['id'] ?? 0,
+                'id' => $stockId,
                 'acronym' => $stock['acronym'] ?? '',
                 'name' => $stock['name'] ?? '',
                 'price' => $price,
-                'investors' => $market['investors'] ?? 0,
                 'shares' => $market['shares'] ?? 0,
+                'price_24h_ago' => $dayAgo,
+                'change_24h' => $dayAgo > 0 ? (($price - $dayAgo) / $dayAgo * 100) : null,
+                'price_7d_ago' => $weekAgo,
+                'change_7d' => $weekAgo > 0 ? (($price - $weekAgo) / $weekAgo * 100) : null,
                 'bonus_passive' => $bonus['passive'] ?? false,
                 'bonus_requirement' => $bonus['requirement'] ?? 0,
                 'bonus_payout' => $bonus['description'] ?? '',
@@ -91,7 +104,7 @@ class StocksController extends Controller
             ];
         })->sortByDesc('shares')->values();
 
-        // Get history for all stocks
+        // Get history for chart
         $history = \App\Models\StockHistory::selectRaw('stock_id, acronym, name, recorded_at, price')
             ->where('recorded_at', '>=', now()->subDays(7)->toDateString())
             ->orderBy('recorded_at')

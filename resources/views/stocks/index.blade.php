@@ -121,13 +121,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             <th class="p-3 cursor-pointer hover:text-white" data-sort="id" data-dir="asc">ID <span class="sort-icon">↑</span></th>
                             <th class="p-3 cursor-pointer hover:text-white" data-sort="name" data-dir="asc">Stock <span class="sort-icon">↑</span></th>
                             <th class="p-3 text-right cursor-pointer hover:text-white" data-sort="price" data-dir="desc">Price <span class="sort-icon">↓</span></th>
-                            <th class="p-3 text-right cursor-pointer hover:text-white" data-sort="investors" data-dir="desc">Investors <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right cursor-pointer hover:text-white" data-sort="change_24h" data-dir="desc">24h <span class="sort-icon">↓</span></th>
+                            <th class="p-3 text-right cursor-pointer hover:text-white" data-sort="change_7d" data-dir="desc">7d <span class="sort-icon">↓</span></th>
                             <th class="p-3">Bonus</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
                         @foreach($stocks as $stock)
-                        <tr class="hover:bg-gray-700/30" data-id="{{ $stock['id'] }}" data-name="{{ strtolower($stock['name']) }}" data-price="{{ $stock['price'] }}" data-investors="{{ $stock['investors'] }}" data-shares="{{ $stock['shares'] ?? 0 }}">
+                        <tr class="hover:bg-gray-700/30" data-id="{{ $stock['id'] }}" data-name="{{ strtolower($stock['name']) }}" data-price="{{ $stock['price'] }}" data-change_24h="{{ $stock['change_24h'] ?? 0 }}" data-change_7d="{{ $stock['change_7d'] ?? 0 }}" data-shares="{{ $stock['shares'] ?? 0 }}">
                             <td class="p-3 font-mono text-gray-400">{{ $stock['id'] }}</td>
                             <td class="p-3">
                                 <div class="flex items-center gap-2">
@@ -141,8 +142,26 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                             </td>
                             <td class="p-3 text-right font-mono">${{ number_format($stock['price'], 2) }}</td>
-                            <td class="p-3 text-right font-mono text-gray-400">{{ number_format($stock['investors']) }}</td>
-                            <td class="p-3 text-xs">
+                            <td class="p-3 text-right text-xs">
+                                @if($stock['price_24h_ago'] !== null)
+                                    <div class="font-mono">${{ number_format($stock['price_24h_ago'], 2) }}</div>
+                                    <div class="@if($stock['change_24h'] > 0) text-green-400 @elseif($stock['change_24h'] < 0) text-red-400 @else text-gray-500 @endif">
+                                        {{ $stock['change_24h'] > 0 ? '+' : '' }}{{ number_format($stock['change_24h'], 2) }}%
+                                    </div>
+                                @else
+                                    <span class="text-gray-600">-</span>
+                                @endif
+                            </td>
+                            <td class="p-3 text-right text-xs">
+                                @if($stock['price_7d_ago'] !== null)
+                                    <div class="font-mono">${{ number_format($stock['price_7d_ago'], 2) }}</div>
+                                    <div class="@if($stock['change_7d'] > 0) text-green-400 @elseif($stock['change_7d'] < 0) text-red-400 @else text-gray-500 @endif">
+                                        {{ $stock['change_7d'] > 0 ? '+' : '' }}{{ number_format($stock['change_7d'], 2) }}%
+                                    </div>
+                                @else
+                                    <span class="text-gray-600">-</span>
+                                @endif
+                            </td>
                                 @if(is_array($stock['bonus_text']))
                                     <div class="@if($stock['bonus_text']['type'] === 'Passive') text-green-400 bg-green-900/30 @else text-blue-400 bg-blue-900/30 @endif px-2 py-1 rounded">
                                         <span class="font-semibold">{{ $stock['bonus_text']['type'] }}</span>
