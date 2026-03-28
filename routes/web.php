@@ -109,6 +109,8 @@ Route::middleware(['auth'])->group(function () {
             return back()->with('status', 'War attacks sync completed.');
         });
 
+        Route::post('/admin/sync/stocks', [StocksController::class, 'sync']);
+
         Route::post('/admin/check-updates', [AdminController::class, 'checkForUpdates']);
         Route::post('/admin/upgrade', [AdminController::class, 'upgrade']);
     });

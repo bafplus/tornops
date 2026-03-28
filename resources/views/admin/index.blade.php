@@ -241,6 +241,7 @@
                                     'faction_members' => 'members',
                                     'active_wars' => 'active',
                                     'war_attacks' => 'attacks',
+                                    'stocks' => 'stocks',
                                 ];
                                 $route = $routeMap[$key] ?? 'wars';
                             @endphp

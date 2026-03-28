@@ -115,6 +115,40 @@ class StocksController extends Controller
         return back()->with('success', 'Stock data updated!');
     }
 
+    public function sync(TornApiService $tornApi)
+    {
+        $settings = \App\Models\FactionSettings::first();
+        $apiKey = $settings?->torn_api_key;
+        
+        if (!$apiKey) {
+            return back()->with('error', 'No faction API key found.');
+        }
+
+        Cache::forget('stocks_data');
+        $rawStocks = $tornApi->getStocks($apiKey);
+        
+        if (!$rawStocks) {
+            return back()->with('error', 'Failed to fetch stock data.');
+        }
+
+        $today = now()->toDateString();
+        foreach ($rawStocks as $stock) {
+            \App\Models\StockHistory::updateOrCreate(
+                ['stock_id' => $stock['id'] ?? 0, 'recorded_at' => $today],
+                [
+                    'name' => $stock['name'] ?? '',
+                    'acronym' => $stock['acronym'] ?? '',
+                    'price' => $stock['market']['price'] ?? 0,
+                    'investors' => $stock['market']['investors'] ?? 0,
+                    'shares' => $stock['market']['shares'] ?? 0,
+                    'market_cap' => $stock['market']['cap'] ?? 0,
+                ]
+            );
+        }
+
+        return back()->with('success', 'Stocks synced and saved to history!');
+    }
+
     private function getApiKey(): ?string
     {
         // First try logged in user's key

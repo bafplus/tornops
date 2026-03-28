@@ -57,6 +57,12 @@ class AdminController extends Controller
                 'description' => 'Syncs war attack details with FF and results',
                 'api_calls' => '10-50 calls',
             ],
+            'stocks' => [
+                'name' => 'stocks:sync',
+                'schedule' => 'Daily (00:15)',
+                'description' => 'Syncs stock prices and saves to history',
+                'api_calls' => '1 call',
+            ],
         ];
 
         // Get last run times
