@@ -34,12 +34,18 @@ class JumpsController extends Controller
             ]);
         }
 
-        // Extract battle stats
-        $battleStats = $stats['battlestats'] ?? [];
-        $strength = $battleStats['strength'] ?? 0;
-        $defense = $battleStats['defense'] ?? 0;
-        $speed = $battleStats['speed'] ?? 0;
-        $dexterity = $battleStats['dexterity'] ?? 0;
+        // Extract battle stats - handle both formats (direct value or object with 'total')
+        $getValue = function ($stat) {
+            if (is_array($stat)) {
+                return $stat['total'] ?? $stat['value'] ?? 0;
+            }
+            return $stat ?? 0;
+        };
+        
+        $strength = $getValue($battleStats['strength'] ?? 0);
+        $defense = $getValue($battleStats['defense'] ?? 0);
+        $speed = $getValue($battleStats['speed'] ?? 0);
+        $dexterity = $getValue($battleStats['dexterity'] ?? 0);
         $totalStats = $strength + $defense + $speed + $dexterity;
 
         // Extract bars
