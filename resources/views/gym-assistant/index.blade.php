@@ -201,57 +201,6 @@
         </div>
         @endif
     </div>
-    </div>
-
-    @if($trainRecommendation)
-    <div class="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-8">
-        <h2 class="text-lg font-semibold mb-4 text-gray-300">Train Recommendation</h2>
-        
-        <form method="GET" action="/gym" class="mb-4">
-            <div class="flex items-center gap-4">
-                <label class="text-sm text-gray-400">Training at:</label>
-                <select name="gym_id" class="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white" onchange="this.form.submit()">
-                    @foreach($gyms as $gym)
-                        <option value="{{ $gym['id'] }}" {{ $trainRecommendation['gym_id'] == $gym['id'] ? 'selected' : '' }}>
-                            {{ $gym['name'] }}
-                        </option>
-                    @endforeach
-                </select>
-                @if($latestStats && $latestStats->gym_name)
-                    <span class="text-xs text-gray-500">(Current: {{ $latestStats->gym_name }})</span>
-                @endif
-            </div>
-        </form>
-        
-        <div class="mb-4">
-            <div class="text-xs text-gray-500">Gym gains per train: STR +{{ $trainRecommendation['gym_gains']['strength'] }}, DEF +{{ $trainRecommendation['gym_gains']['defense'] }}, SPD +{{ $trainRecommendation['gym_gains']['speed'] }}, DEX +{{ $trainRecommendation['gym_gains']['dexterity'] }}</div>
-        </div>
-        
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                <div class="text-2xl font-bold text-blue-400">{{ $trainRecommendation['trains']['str'] }}</div>
-                <div class="text-sm text-gray-400">Strength trains</div>
-            </div>
-            <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                <div class="text-2xl font-bold text-green-400">{{ $trainRecommendation['trains']['def'] }}</div>
-                <div class="text-sm text-gray-400">Defense trains</div>
-            </div>
-            <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                <div class="text-2xl font-bold text-yellow-400">{{ $trainRecommendation['trains']['spd'] }}</div>
-                <div class="text-sm text-gray-400">Speed trains</div>
-            </div>
-            <div class="bg-gray-700/50 rounded-lg p-4 text-center">
-                <div class="text-2xl font-bold text-purple-400">{{ $trainRecommendation['trains']['dex'] }}</div>
-                <div class="text-sm text-gray-400">Dexterity trains</div>
-            </div>
-        </div>
-        
-        <div class="text-center p-4 bg-blue-900/30 rounded-lg">
-            <div class="text-lg font-bold text-white">Total: {{ $trainRecommendation['trains']['total'] }} trains</div>
-            <div class="text-sm text-gray-400">to reach your target split</div>
-        </div>
-    </div>
-    @endif
 
     @if($chartData && $chartData->count() > 1)
     <div class="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-8">
