@@ -158,6 +158,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 </table>
             </div>
         </div>
+
+        @if($history && $history->count() > 0)
+        <div class="mt-6 bg-gray-800 rounded-lg border border-gray-700 p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-300">Price History (7 days)</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-400">
+                            <th class="p-2">Stock</th>
+                            @foreach($history->first()->sortBy('recorded_at') as $day)
+                                <th class="p-2 text-right">{{ $day->recorded_at->format('d M') }}</th>
+                            @endforeach
+                            <th class="p-2 text-right">Change</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        @foreach($history as $stockId => $records)
+                            @php
+                                $sorted = $records->sortBy('recorded_at');
+                                $first = $sorted->first();
+                                $last = $sorted->last();
+                                $change = $first->price > 0 ? (($last->price - $first->price) / $first->price * 100) : 0;
+                            @endphp
+                            <tr class="hover:bg-gray-700/30">
+                                <td class="p-2">
+                                    <span class="font-medium">{{ $first->name }}</span>
+                                    <span class="text-gray-500 text-xs ml-1">({{ $first->acronym }})</span>
+                                </td>
+                                @foreach($sorted as $day)
+                                    <td class="p-2 text-right font-mono ${{
+                                        $day->price > ($sorted->where('recorded_at', '<', $day->recorded_at)->last()->price ?? $day->price)
+                                            ? 'text-green-400' : 'text-gray-400'
+                                    }}">
+                                        ${{ number_format($day->price, 2) }}
+                                    </td>
+                                @endforeach
+                                <td class="p-2 text-right">
+                                    @if($change > 0)
+                                        <span class="text-green-400">+{{ number_format($change, 2) }}%</span>
+                                    @elseif($change < 0)
+                                        <span class="text-red-400">{{ number_format($change, 2) }}%</span>
+                                    @else
+                                        <span class="text-gray-500">0%</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
     @endif
 </div>
 @endsection

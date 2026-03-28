@@ -91,8 +91,16 @@ class StocksController extends Controller
             ];
         })->sortByDesc('shares')->values();
 
+        // Get history for all stocks
+        $history = \App\Models\StockHistory::selectRaw('stock_id, acronym, name, recorded_at, price')
+            ->where('recorded_at', '>=', now()->subDays(7)->toDateString())
+            ->orderBy('recorded_at')
+            ->get()
+            ->groupBy('stock_id');
+
         return view('stocks.index', [
             'stocks' => $stocks,
+            'history' => $history,
             'error' => null
         ]);
     }
