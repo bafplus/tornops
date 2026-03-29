@@ -25,7 +25,7 @@
                 </div>
                 <div>
                     <div class="font-semibold text-purple-400 text-lg">{{ $gym_name }}</div>
-                    <div class="text-gray-500 text-sm">Energy per train: {{ $gym_energy_cost }} | Multiplier: {{ number_format($gym_multiplier, 1) }}x</div>
+                    <div class="text-gray-500 text-sm">Energy per train: {{ $gym_energy_cost }} | Dots: {{ number_format($gym_dots_display, 1) }}</div>
                 </div>
             </div>
         </div>
@@ -108,7 +108,7 @@
                     <div class="w-full bg-gray-700 rounded-full h-3">
                         <div class="bg-blue-500 h-3 rounded-full transition-all" style="width: {{ min(100, $current_energy / $max_energy * 100) }}%"></div>
                     </div>
-                    <div class="text-xs text-gray-500 mt-1">{{ floor($current_energy / 100) }} gym hits available (100 each)</div>
+                    <div class="text-xs text-gray-500 mt-1">{{ floor($current_energy / $gym_energy_cost) }} gym hits available ({{ $gym_energy_cost }} each)</div>
                 </div>
             </div>
         </div>

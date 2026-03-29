@@ -107,7 +107,7 @@ class JumpsController extends Controller
             'gym_name' => $gymName,
             'gym_id' => $gymId,
             'gym_energy_cost' => $gymData['energy_cost'],
-            'gym_multiplier' => $gymData['multiplier'],
+            'gym_dots_display' => $gymData['dots'],
             'gym_str_bonus' => $gymData['str_bonus'],
             'gym_def_bonus' => $gymData['def_bonus'],
             'gym_spd_bonus' => $gymData['spd_bonus'],
@@ -154,46 +154,56 @@ class JumpsController extends Controller
 
     private function getGymData(?int $gymId): array
     {
-        // Gym data: energy cost per train, multiplier, dots, and stat bonuses
+        // Gym data from Torn documentation
+        // Energy: 5 for light-weight, 10 for middle/heavy, 25 for specialist
+        // Dots: API value / 10 (e.g., 73 -> 7.3)
+        // Stat bonuses: API value / 10 (e.g., 20 -> 2.0)
         $gymData = [
-            1  => ['energy_cost' => 10, 'multiplier' => 1.0, 'dots' => 1.0, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            2  => ['energy_cost' => 15, 'multiplier' => 1.1, 'dots' => 1.1, 'str_bonus' => 1.1, 'def_bonus' => 1.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            3  => ['energy_cost' => 20, 'multiplier' => 1.2, 'dots' => 1.2, 'str_bonus' => 1.0, 'def_bonus' => 1.2, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            4  => ['energy_cost' => 25, 'multiplier' => 1.3, 'dots' => 1.3, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 1.3, 'dex_bonus' => 1.0],
-            5  => ['energy_cost' => 30, 'multiplier' => 1.4, 'dots' => 1.4, 'str_bonus' => 1.5, 'def_bonus' => 1.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            6  => ['energy_cost' => 35, 'multiplier' => 1.5, 'dots' => 1.5, 'str_bonus' => 1.0, 'def_bonus' => 1.5, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            7  => ['energy_cost' => 40, 'multiplier' => 1.6, 'dots' => 1.6, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 1.5, 'dex_bonus' => 1.0],
-            8  => ['energy_cost' => 50, 'multiplier' => 1.7, 'dots' => 1.7, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.5],
-            9  => ['energy_cost' => 60, 'multiplier' => 1.8, 'dots' => 1.8, 'str_bonus' => 2.0, 'def_bonus' => 1.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            10 => ['energy_cost' => 70, 'multiplier' => 1.9, 'dots' => 1.9, 'str_bonus' => 1.0, 'def_bonus' => 2.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            11 => ['energy_cost' => 80, 'multiplier' => 2.0, 'dots' => 2.0, 'str_bonus' => 2.5, 'def_bonus' => 1.5, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            12 => ['energy_cost' => 90, 'multiplier' => 2.1, 'dots' => 2.1, 'str_bonus' => 1.5, 'def_bonus' => 2.5, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            13 => ['energy_cost' => 100, 'multiplier' => 2.2, 'dots' => 2.2, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 2.5, 'dex_bonus' => 1.5],
-            14 => ['energy_cost' => 120, 'multiplier' => 2.3, 'dots' => 2.3, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 1.5, 'dex_bonus' => 2.5],
-            15 => ['energy_cost' => 140, 'multiplier' => 2.4, 'dots' => 2.4, 'str_bonus' => 3.0, 'def_bonus' => 1.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            16 => ['energy_cost' => 160, 'multiplier' => 2.5, 'dots' => 2.5, 'str_bonus' => 1.0, 'def_bonus' => 3.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            17 => ['energy_cost' => 180, 'multiplier' => 2.6, 'dots' => 2.6, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 3.0, 'dex_bonus' => 1.0],
-            18 => ['energy_cost' => 200, 'multiplier' => 2.7, 'dots' => 2.7, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 1.0, 'dex_bonus' => 3.0],
-            19 => ['energy_cost' => 250, 'multiplier' => 2.8, 'dots' => 2.8, 'str_bonus' => 3.5, 'def_bonus' => 1.5, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            20 => ['energy_cost' => 300, 'multiplier' => 2.9, 'dots' => 2.9, 'str_bonus' => 1.5, 'def_bonus' => 3.5, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            21 => ['energy_cost' => 350, 'multiplier' => 3.0, 'dots' => 3.0, 'str_bonus' => 4.0, 'def_bonus' => 1.0, 'spd_bonus' => 2.0, 'dex_bonus' => 1.0],
-            22 => ['energy_cost' => 400, 'multiplier' => 3.2, 'dots' => 3.2, 'str_bonus' => 2.0, 'def_bonus' => 4.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
-            23 => ['energy_cost' => 450, 'multiplier' => 3.4, 'dots' => 3.4, 'str_bonus' => 1.0, 'def_bonus' => 2.0, 'spd_bonus' => 4.0, 'dex_bonus' => 1.0],
-            24 => ['energy_cost' => 500, 'multiplier' => 3.6, 'dots' => 3.6, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 2.0, 'dex_bonus' => 4.0],
-            25 => ['energy_cost' => 600, 'multiplier' => 3.8, 'dots' => 3.8, 'str_bonus' => 4.5, 'def_bonus' => 2.5, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0],
+            // Light-Weight Gyms (5 energy)
+            1  => ['energy_cost' => 5, 'dots' => 2.0, 'str_bonus' => 2.0, 'def_bonus' => 2.0, 'spd_bonus' => 2.0, 'dex_bonus' => 2.0],
+            2  => ['energy_cost' => 5, 'dots' => 2.7, 'str_bonus' => 2.4, 'def_bonus' => 2.8, 'spd_bonus' => 2.4, 'dex_bonus' => 2.4],
+            3  => ['energy_cost' => 5, 'dots' => 3.0, 'str_bonus' => 2.7, 'def_bonus' => 3.0, 'spd_bonus' => 3.2, 'dex_bonus' => 2.7],
+            4  => ['energy_cost' => 5, 'dots' => 3.4, 'str_bonus' => 3.2, 'def_bonus' => 3.2, 'spd_bonus' => 3.2, 'dex_bonus' => 0],
+            5  => ['energy_cost' => 5, 'dots' => 3.7, 'str_bonus' => 3.4, 'def_bonus' => 3.4, 'spd_bonus' => 3.6, 'dex_bonus' => 3.2],
+            6  => ['energy_cost' => 5, 'dots' => 4.0, 'str_bonus' => 3.4, 'def_bonus' => 3.6, 'spd_bonus' => 3.6, 'dex_bonus' => 3.8],
+            7  => ['energy_cost' => 5, 'dots' => 4.2, 'str_bonus' => 3.7, 'def_bonus' => 3.7, 'spd_bonus' => 0, 'dex_bonus' => 3.7],
+            8  => ['energy_cost' => 5, 'dots' => 4.5, 'str_bonus' => 4.0, 'def_bonus' => 4.0, 'spd_bonus' => 4.0, 'dex_bonus' => 4.0],
+            // Middle-Weight Gyms (10 energy)
+            9  => ['energy_cost' => 10, 'dots' => 4.8, 'str_bonus' => 4.8, 'def_bonus' => 4.0, 'spd_bonus' => 4.4, 'dex_bonus' => 4.2],
+            10 => ['energy_cost' => 10, 'dots' => 4.8, 'str_bonus' => 4.4, 'def_bonus' => 4.8, 'spd_bonus' => 4.6, 'dex_bonus' => 4.4],
+            11 => ['energy_cost' => 10, 'dots' => 5.1, 'str_bonus' => 5.0, 'def_bonus' => 5.2, 'spd_bonus' => 4.6, 'dex_bonus' => 4.6],
+            12 => ['energy_cost' => 10, 'dots' => 5.3, 'str_bonus' => 5.0, 'def_bonus' => 5.0, 'spd_bonus' => 5.2, 'dex_bonus' => 5.0],
+            13 => ['energy_cost' => 10, 'dots' => 5.5, 'str_bonus' => 5.0, 'def_bonus' => 4.8, 'spd_bonus' => 5.4, 'dex_bonus' => 5.2],
+            14 => ['energy_cost' => 10, 'dots' => 5.7, 'str_bonus' => 5.5, 'def_bonus' => 5.5, 'spd_bonus' => 5.7, 'dex_bonus' => 5.2],
+            15 => ['energy_cost' => 10, 'dots' => 5.9, 'str_bonus' => 0, 'def_bonus' => 5.5, 'spd_bonus' => 5.5, 'dex_bonus' => 5.7],
+            16 => ['energy_cost' => 10, 'dots' => 6.3, 'str_bonus' => 6.0, 'def_bonus' => 6.0, 'spd_bonus' => 6.0, 'dex_bonus' => 6.0],
+            // Heavy-Weight Gyms (10 energy)
+            17 => ['energy_cost' => 10, 'dots' => 6.5, 'str_bonus' => 6.0, 'def_bonus' => 6.4, 'spd_bonus' => 6.2, 'dex_bonus' => 6.2],
+            18 => ['energy_cost' => 10, 'dots' => 6.7, 'str_bonus' => 6.5, 'def_bonus' => 6.2, 'spd_bonus' => 6.4, 'dex_bonus' => 6.2],
+            19 => ['energy_cost' => 10, 'dots' => 6.9, 'str_bonus' => 6.4, 'def_bonus' => 6.4, 'spd_bonus' => 6.5, 'dex_bonus' => 6.8],
+            20 => ['energy_cost' => 10, 'dots' => 7.0, 'str_bonus' => 6.4, 'def_bonus' => 6.8, 'spd_bonus' => 6.4, 'dex_bonus' => 7.0],
+            21 => ['energy_cost' => 10, 'dots' => 7.1, 'str_bonus' => 7.0, 'def_bonus' => 6.4, 'spd_bonus' => 6.4, 'dex_bonus' => 6.5],
+            22 => ['energy_cost' => 10, 'dots' => 7.2, 'str_bonus' => 6.8, 'def_bonus' => 7.0, 'spd_bonus' => 6.5, 'dex_bonus' => 6.5],
+            23 => ['energy_cost' => 10, 'dots' => 7.3, 'str_bonus' => 6.8, 'def_bonus' => 7.0, 'spd_bonus' => 7.0, 'dex_bonus' => 6.8],
+            24 => ['energy_cost' => 10, 'dots' => 7.3, 'str_bonus' => 7.3, 'def_bonus' => 7.3, 'spd_bonus' => 7.3, 'dex_bonus' => 7.3],
+            // Specialist Gyms (25 energy)
+            25 => ['energy_cost' => 25, 'dots' => 7.5, 'str_bonus' => 0, 'def_bonus' => 7.5, 'spd_bonus' => 0, 'dex_bonus' => 7.5],
         ];
         
-        return $gymData[$gymId] ?? ['energy_cost' => 100, 'multiplier' => 1.0, 'dots' => 1.0, 'str_bonus' => 1.0, 'def_bonus' => 1.0, 'spd_bonus' => 1.0, 'dex_bonus' => 1.0];
+        return $gymData[$gymId] ?? ['energy_cost' => 5, 'dots' => 2.0, 'str_bonus' => 2.0, 'def_bonus' => 2.0, 'spd_bonus' => 2.0, 'dex_bonus' => 2.0];
     }
 
-    private function calculateJumpResults(array $gymData, int $totalStats, int $currentHappy, int $currentEnergy): array
+private function calculateJumpResults(array $gymData, int $totalStats, int $currentHappy, int $currentEnergy): array
     {
-        // Constants for gym gains formula
-        $a = 3.480061091e-7;
-        $b = 250;
-        $c = 3.091619094e-6;
-        $d = 6.82775184551527e-5;
-        $e = -0.0301431777;
+        // Vladar formula constants for each stat
+        // A = (1-(H/99999)^2) * A constant
+        // B = stat-specific offset
+        $statConstants = [
+            'strength' => ['A' => 1600, 'B' => 1700],
+            'defense' => ['A' => 2100, 'B' => -600],
+            'speed' => ['A' => 1600, 'B' => 2000],
+            'dexterity' => ['A' => 1800, 'B' => 1500],
+        ];
 
         // Material costs
         $xanaxCost = 810000; // $810,000
@@ -205,17 +215,16 @@ class JumpsController extends Controller
 
         // Xanax gives 250 energy
         $xanaxEnergy = 250;
-        
+
         // Energy per train (from gym)
         $energyPerTrain = $gymData['energy_cost'];
-        
-        // Gym modifiers
-        $modifiers = $gymData['multiplier'];
+
+        // Gym dots (API returns 0-100, formula uses scale of 10)
         $dots = $gymData['dots'];
 
-        // Calculate starting happy after taking 4 Xanax and happy items
-        // Happy loss per train is 40-60% of energy used (we'll use 50% for estimate)
-        $happyLossPerEnergy = 0.5;
+        // Happy loss per train (average from Vladar docs)
+        // 5 energy: 2.67, 10 energy: 5, 25 energy: 12.67, 50 energy: 25
+        $happyLossPerEnergy = 0.5; // 5/10 = 0.5
         
         // Jump types
         $jumpTypes = [
@@ -297,27 +306,44 @@ class JumpsController extends Controller
                 $availableEnergy += 250; // Refill gives 250 energy
             }
 
-            // Calculate number of trains
-            $numTrains = floor($availableEnergy / $energyPerTrain);
+// Calculate number of trains
+        $numTrains = floor($availableEnergy / $energyPerTrain);
+
+        // Calculate estimated stat gain using Vladar formula
+        // We'll calculate gain per train using average of all 4 stats
+        $totalGain = 0;
+        $currentJumpHappy = $startingHappy;
+        
+        // Calculate average A and B for overall estimate
+        $avgA = ($statConstants['strength']['A'] + $statConstants['defense']['A'] + $statConstants['speed']['A'] + $statConstants['dexterity']['A']) / 4;
+        $avgB = ($statConstants['strength']['B'] + $statConstants['defense']['B'] + $statConstants['speed']['B'] + $statConstants['dexterity']['B']) / 4;
+
+        for ($i = 0; $i < $numTrains; $i++) {
+            // Vladar formula: dS = (S * (1 + 0.07 * LN(1+H/250)) + 8 * H^1.05 + (1-(H/99999)^2) * A + B) * (1/200000) * G * E
+            // S = stat total (capped at 50,000,000)
+            $S = min($totalStats, 50000000);
             
-            // Calculate estimated stat gain using the formula
-            // We'll calculate gain per train and multiply by number of trains
-            $totalGain = 0;
-            $currentJumpHappy = $startingHappy;
+            // S term
+            $Sterm = $S * (1 + 0.07 * log(1 + $currentJumpHappy / 250));
             
-            for ($i = 0; $i < $numTrains; $i++) {
-                // Gym gains formula: (Modifiers)*(Gym Dots)*(Energy Per Train)*[ (a*ln(Happy+b)+c) * (Stat Total) + d*(Happy+b) + e ]
-                $logPart = $a * log($currentJumpHappy + $b) + $c;
-                $statPart = $logPart * $totalStats;
-                $happyPart = $d * ($currentJumpHappy + $b) + $e;
-                
-                $gainPerTrain = $modifiers * $dots * $energyPerTrain * ($statPart + $happyPart);
-                $totalGain += $gainPerTrain;
-                
-                // Reduce happy by 40-60% of energy used (use 50%)
-                $happyLoss = $energyPerTrain * $happyLossPerEnergy;
-                $currentJumpHappy = max(0, $currentJumpHappy - $happyLoss);
-            }
+            // Happy power term
+            $happyTerm = 8 * pow($currentJumpHappy, 1.05);
+            
+            // Happy adjustment term
+            $happyAdjTerm = (1 - pow($currentJumpHappy / 99999, 2)) * $avgA + $avgB;
+            
+            // Base calculation
+            $baseGain = ($Sterm + $happyTerm + $happyAdjTerm) * (1 / 200000);
+            
+            // Apply gym dots and energy
+            $gainPerTrain = $baseGain * ($dots / 10) * $energyPerTrain;
+            
+            $totalGain += $gainPerTrain;
+
+            // Happy loss (average from Vladar docs)
+            $happyLoss = round($energyPerTrain * 0.5);
+            $currentJumpHappy = max(0, $currentJumpHappy - $happyLoss);
+        }
 
             // Calculate price per train
             $pricePerTrain = $numTrains > 0 ? $moneyCost / $numTrains : 0;
