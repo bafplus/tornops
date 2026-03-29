@@ -249,15 +249,18 @@ document.addEventListener('DOMContentLoaded', function() {
         checkKeyStatus();
     }
 
-    document.querySelectorAll('[class*="bg-green"], [class*="bg-red"], [class*="bg-yellow"]').forEach(el => {
-        if (el.id !== 'register-error') {
-            setTimeout(() => {
-                el.style.transition = 'opacity 0.5s';
-                el.style.opacity = '0';
-                setTimeout(() => el.remove(), 500);
-            }, 4000);
-        }
-    });
+    setTimeout(() => {
+        document.querySelectorAll('#api-status-banner.bg-green-900\\/30').forEach(el => {
+            el.style.transition = 'opacity 0.5s';
+            el.style.opacity = '0';
+            setTimeout(() => el.classList.add('hidden'), 500);
+        });
+        document.querySelectorAll('.bg-green-900\\/50, .bg-red-900\\/50, .bg-yellow-900\\/50').forEach(el => {
+            el.style.transition = 'opacity 0.5s';
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 500);
+        });
+    }, 4000);
 });
 
 function toggleSettings() {
