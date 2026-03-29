@@ -16,6 +16,7 @@ use App\Http\Controllers\StocksController;
 use App\Http\Controllers\JumpsController;
 use App\Http\Controllers\ScriptsController;
 use App\Http\Controllers\ToolsController;
+use App\Http\Controllers\TargetFinderController;
 
 Route::get('/setup', [SetupController::class, 'index'])->name('setup');
 Route::post('/setup', [SetupController::class, 'store']);
@@ -72,8 +73,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/items', [ItemsController::class, 'index']);
     Route::get('/stocks', [StocksController::class, 'index']);
     Route::post('/stocks/update', [StocksController::class, 'update']);
-    Route::get('/jumps', [JumpsController::class, 'index']);
-    Route::get('/scripts', [ScriptsController::class, 'index']);
+Route::get('/jumps', [JumpsController::class, 'index']);
+Route::get('/target-finder', [TargetFinderController::class, 'index']);
+Route::post('/target-finder/settings', [TargetFinderController::class, 'saveSettings']);
+Route::get('/target-finder/target/{type}', [TargetFinderController::class, 'getTarget']);
+Route::get('/target-finder/count/{type}', [TargetFinderController::class, 'getTargetCount']);
+Route::get('/scripts', [ScriptsController::class, 'index']);
     Route::get('/tools', [ToolsController::class, 'index']);
     
     Route::middleware(['admin'])->group(function () {

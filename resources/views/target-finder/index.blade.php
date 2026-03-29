@@ -1,0 +1,267 @@
+@extends('layouts.app')
+
+@section('title', 'Target Finder - TornOps')
+
+@section('content')
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold">FFScout Target Finder</h1>
+        <p class="text-gray-400">Find attack targets based on FFscore and level criteria</p>
+    </div>
+
+    @if(session('success'))
+    <div class="mb-4 p-4 bg-green-900/50 border border-green-700 rounded-lg text-green-400">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="mb-4 p-4 bg-red-900/50 border border-red-700 rounded-lg text-red-400">
+        {{ session('error') }}
+    </div>
+    @endif
+
+    @if(!Auth::user()->torn_api_key)
+    <div class="mb-4 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-400">
+        No API key found. Please add your Torn API key in <a href="/settings" class="underline">Settings</a> to use Target Finder.
+    </div>
+    @endif
+
+    <form action="/target-finder/settings" method="POST" class="mb-6">
+        @csrf
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-lg bg-green-900/50 flex items-center justify-center text-xl">⚡</div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-200">Easy Targets</h2>
+                        <span class="text-sm text-gray-500">Lower FFscore opponents</span>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Fair Fight Range</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" step="0.1" min="1" max="5" name="easy[minFF]" value="{{ $settings['easy']['minFF'] }}"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                            <span class="text-gray-500">→</span>
+                            <input type="number" step="0.1" min="1" max="5" name="easy[maxFF]" value="{{ $settings['easy']['maxFF'] }}"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Level Range</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" min="1" max="100" name="easy[minLevel]" value="{{ $settings['easy']['minLevel'] }}"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                            <span class="text-gray-500">→</span>
+                            <input type="number" min="1" max="100" name="easy[maxLevel]" value="{{ $settings['easy']['maxLevel'] }}"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-gray-700">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-400">Available targets:</span>
+                            <span id="easy-count" class="text-gray-500">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-lg bg-orange-900/50 flex items-center justify-center text-xl">🔥</div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-200">Good Targets</h2>
+                        <span class="text-sm text-gray-500">Higher FFscore opponents</span>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Fair Fight Range</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" step="0.1" min="1" max="5" name="good[minFF]" value="{{ $settings['good']['minFF'] }}"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                            <span class="text-gray-500">→</span>
+                            <input type="number" step="0.1" min="1" max="5" name="good[maxFF]" value="{{ $settings['good']['maxFF'] }}"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">Level Range</label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" min="1" max="100" name="good[minLevel]" value="{{ $settings['good']['minLevel'] }}"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                            <span class="text-gray-500">→</span>
+                            <input type="number" min="1" max="100" name="good[maxLevel]" value="{{ $settings['good']['maxLevel'] }}"
+                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-gray-700">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-400">Available targets:</span>
+                            <span id="good-count" class="text-gray-500">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-200 mb-4">Filters</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="inactiveOnly" value="1" {{ $settings['inactiveOnly'] ? 'checked' : '' }}
+                        class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-green-600 focus:ring-green-600">
+                    <div>
+                        <div class="text-gray-200">Inactive Only</div>
+                        <div class="text-sm text-gray-500">Target players inactive 14+ days</div>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="factionlessOnly" value="1" {{ $settings['factionlessOnly'] ? 'checked' : '' }}
+                        class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-green-600 focus:ring-green-600">
+                    <div>
+                        <div class="text-gray-200">Factionless Only</div>
+                        <div class="text-sm text-gray-500">Target players without a faction</div>
+                    </div>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="verifyStatus" value="1" {{ $settings['verifyStatus'] ? 'checked' : '' }}
+                        class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-green-600 focus:ring-green-600">
+                    <div>
+                        <div class="text-gray-200">Verify Status</div>
+                        <div class="text-sm text-gray-500">Check target is Okay (slower)</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                Save Settings
+            </button>
+        </div>
+    </form>
+
+    <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-200 mb-4">Find Targets</h3>
+        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+            <button onclick="fetchTarget('easy')" id="btn-easy" disabled
+                class="flex-1 px-6 py-3 bg-green-700 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium flex items-center justify-center gap-2">
+                <span>⚡</span> Get Easy Target
+            </button>
+            <button onclick="fetchTarget('good')" id="btn-good" disabled
+                class="flex-1 px-6 py-3 bg-orange-700 hover:bg-orange-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium flex items-center justify-center gap-2">
+                <span>🔥</span> Get Good Target
+            </button>
+        </div>
+
+        <div id="result-area" class="hidden">
+            <div class="p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-lg font-semibold text-white" id="result-name"></div>
+                        <div class="text-gray-400">
+                            Level <span id="result-level" class="text-white font-medium"></span> •
+                            FF <span id="result-ff" class="text-green-400 font-medium"></span>
+                        </div>
+                    </div>
+                    <a id="result-attack" href="#" target="_blank"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium">
+                        Attack
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="error-area" class="hidden">
+            <div class="p-4 bg-red-900/30 rounded-lg border border-red-700 text-red-400" id="error-message"></div>
+        </div>
+
+        <div id="loading-area" class="hidden">
+            <div class="flex items-center justify-center gap-3 py-4 text-gray-400">
+                <div class="w-6 h-6 border-2 border-gray-600 border-t-gray-400 rounded-full animate-spin"></div>
+                <span id="loading-text">Finding target...</span>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+const hasApiKey = {{ Auth::user()->torn_api_key ? 'true' : 'false' }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (hasApiKey) {
+        document.getElementById('btn-easy').disabled = false;
+        document.getElementById('btn-good').disabled = false;
+        refreshCounts();
+    }
+});
+
+function refreshCounts() {
+    fetchTargetCount('easy');
+    fetchTargetCount('good');
+}
+
+function fetchTargetCount(type) {
+    fetch(`/target-finder/count/${type}`)
+        .then(res => res.json())
+        .then(data => {
+            const el = document.getElementById(`${type}-count`);
+            if (data.success) {
+                const count = data.count;
+                el.textContent = count >= 50 ? '50+ (max)' : count;
+                el.className = count > 0 ? 'text-green-400 font-medium' : 'text-red-400 font-medium';
+            } else {
+                el.textContent = 'Error';
+                el.className = 'text-red-400 font-medium';
+            }
+        })
+        .catch(() => {
+            document.getElementById(`${type}-count`).textContent = 'Error';
+        });
+}
+
+function fetchTarget(type) {
+    const btn = document.getElementById(`btn-${type}`);
+    const resultArea = document.getElementById('result-area');
+    const errorArea = document.getElementById('error-area');
+    const loadingArea = document.getElementById('loading-area');
+
+    btn.disabled = true;
+    resultArea.classList.add('hidden');
+    errorArea.classList.add('hidden');
+    loadingArea.classList.remove('hidden');
+
+    document.getElementById('loading-text').textContent = type === 'easy' ? 'Finding easy target...' : 'Finding good target...';
+
+    fetch(`/target-finder/target/${type}`)
+        .then(res => res.json())
+        .then(data => {
+            loadingArea.classList.add('hidden');
+
+            if (data.success) {
+                document.getElementById('result-name').textContent = data.target.name;
+                document.getElementById('result-level').textContent = data.target.level;
+                document.getElementById('result-ff').textContent = data.target.fair_fight.toFixed(2);
+                document.getElementById('result-attack').href = data.attackUrl;
+                resultArea.classList.remove('hidden');
+            } else {
+                document.getElementById('error-message').textContent = data.error;
+                errorArea.classList.remove('hidden');
+            }
+        })
+        .catch(err => {
+            loadingArea.classList.add('hidden');
+            document.getElementById('error-message').textContent = 'Request failed: ' + err.message;
+            errorArea.classList.remove('hidden');
+        })
+        .finally(() => {
+            btn.disabled = false;
+        });
+}
+</script>
+@endpush

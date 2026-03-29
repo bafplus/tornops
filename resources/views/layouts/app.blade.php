@@ -36,6 +36,7 @@
                 <a href="/merits" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('merits*') ? 'bg-gray-700 text-white' : '' }}">Merits</a>
                 <a href="/stocks" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('stocks*') ? 'bg-gray-700 text-white' : '' }}">Stocks</a>
                 <a href="/jumps" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('jumps*') ? 'bg-gray-700 text-white' : '' }}">Jump Helper</a>
+                <a href="/target-finder" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('target-finder') ? 'bg-gray-700 text-white' : '' }}">Target Finder</a>
             </div>
                     </div>
                 </div>
@@ -78,11 +79,12 @@
                 
 <div class="py-2">
             <div class="text-gray-500 text-sm px-3">Tools</div>
-            <a href="/gym" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('gym') ? 'bg-gray-700 text-white' : '' }}">- Gym Assistant</a>
-            <a href="/merits" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('merits*') ? 'bg-gray-700 text-white' : '' }}">- Merits</a>
-            <a href="/stocks" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('stocks*') ? 'bg-gray-700 text-white' : '' }}">- Stocks</a>
-            <a href="/jumps" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('jumps*') ? 'bg-gray-700 text-white' : '' }}">- Jump Helper</a>
-        </div>
+<a href="/gym" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('gym') ? 'bg-gray-700 text-white' : '' }}">- Gym Assistant</a>
+        <a href="/merits" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('merits*') ? 'bg-gray-700 text-white' : '' }}">- Merits</a>
+        <a href="/stocks" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('stocks*') ? 'bg-gray-700 text-white' : '' }}">- Stocks</a>
+        <a href="/jumps" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('jumps*') ? 'bg-gray-700 text-white' : '' }}">- Jump Helper</a>
+        <a href="/target-finder" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('target-finder') ? 'bg-gray-700 text-white' : '' }}">- Target Finder</a>
+    </div>
                 
                 @auth
                 <a href="/settings" class="px-3 py-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700">Settings</a>
