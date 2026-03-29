@@ -19,7 +19,24 @@ class AppServiceProvider extends ServiceProvider
             \URL::forceScheme('https');
         }
         
+        $this->ensureStorageDirectories();
         $this->seedTrainingPrograms();
+    }
+    
+    private function ensureStorageDirectories(): void
+    {
+        $directories = [
+            storage_path('framework/cache/data'),
+            storage_path('framework/sessions'),
+            storage_path('framework/views'),
+            storage_path('logs'),
+        ];
+        
+        foreach ($directories as $dir) {
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+        }
     }
 
     private function seedTrainingPrograms(): void
