@@ -58,6 +58,7 @@ $chartData = GymStatsHistory::where('user_id', $user->id)
             $programs = collect($defaultPrograms)->merge($customPrograms);
         
 $selectedProgram = null;
+        $selectedProgramId = null;
         $percentages = null;
         $programId = $user->training_program_id;
 
@@ -79,9 +80,11 @@ $selectedProgram = null;
         if ($programId && isset($defaultPrograms[$programId])) {
             // Default program
             $percentages = $defaultPrograms[$programId];
+            $selectedProgramId = $programId;
         } elseif ($programId) {
             // Custom program from DB
             $selectedProgram = TrainingProgram::find($programId);
+            $selectedProgramId = $programId;
             if ($selectedProgram && $selectedProgram->is_custom && $user->custom_percentages) {
                 $percentages = json_decode($user->custom_percentages, true);
             } elseif ($selectedProgram) {
@@ -104,7 +107,7 @@ $selectedProgram = null;
             return ['id' => $id, 'name' => $this->getGymName($id)];
         });
         
-         return view('gym-assistant.index', compact('latestStats', 'history', 'chartData', 'programs', 'selectedProgram', 'percentages', 'trainRecommendation', 'gyms', 'fetchError'));
+         return view('gym-assistant.index', compact('latestStats', 'history', 'chartData', 'programs', 'selectedProgram', 'selectedProgramId', 'percentages', 'trainRecommendation', 'gyms', 'fetchError'));
     }
 
     private function fetchGymStats($user): ?string
@@ -260,7 +263,12 @@ public function selectProgram(Request $request)
             $user->training_program_id = $programId;
             $user->custom_percentages = null;
         } else {
-            // Custom program from DB
+            // Custom program from DB - validate total is 100%
+            $total = (int) $customStr + (int) $customDef + (int) $customSpd + (int) $customDex;
+            if ($total !== 100) {
+                return back()->with('error', 'Custom percentages must total 100%. Current total: ' . $total . '%');
+            }
+            
             $program = TrainingProgram::find($programId);
             if (!$program) {
                 return back()->with('error', 'Program not found.');
