@@ -20,10 +20,11 @@ class AppServiceProvider extends ServiceProvider
     private function seedTrainingPrograms(): void
     {
         try {
-            $count = DB::table('training_programs')->count();
+            // Get existing custom programs to preserve them
+            $customPrograms = DB::table('training_programs')->where('is_custom', true)->get();
             
-            // Always ensure default programs exist - delete non-custom and re-seed
-            DB::table('training_programs')->where('is_custom', false)->delete();
+            // Clear all and re-seed
+            DB::table('training_programs')->truncate();
             
             $programs = [
                 ['name' => 'All-Rounder', 'str_percent' => 25, 'def_percent' => 25, 'spd_percent' => 25, 'dex_percent' => 25, 'is_custom' => false, 'created_at' => now(), 'updated_at' => now()],
@@ -37,13 +38,8 @@ class AppServiceProvider extends ServiceProvider
                 ['name' => "Hank's Ratio", 'str_percent' => 28, 'def_percent' => 35, 'spd_percent' => 28, 'dex_percent' => 10, 'is_custom' => false, 'created_at' => now(), 'updated_at' => now()],
                 ['name' => "Balder's Ratio", 'str_percent' => 30, 'def_percent' => 30, 'spd_percent' => 20, 'dex_percent' => 20, 'is_custom' => false, 'created_at' => now(), 'updated_at' => now()],
                 ["Duce's Ratio", 'str_percent' => 25, 'def_percent' => 25, 'spd_percent' => 25, 'dex_percent' => 25, 'is_custom' => false, 'created_at' => now(), 'updated_at' => now()],
+                ['name' => 'Custom', 'str_percent' => 25, 'def_percent' => 25, 'spd_percent' => 25, 'dex_percent' => 25, 'is_custom' => true, 'created_at' => now(), 'updated_at' => now()],
             ];
-            
-            // Check if Custom exists
-            $customExists = DB::table('training_programs')->where('name', 'Custom')->where('is_custom', true)->exists();
-            if (!$customExists) {
-                $programs[] = ['name' => 'Custom', 'str_percent' => 25, 'def_percent' => 25, 'spd_percent' => 25, 'dex_percent' => 25, 'is_custom' => true, 'created_at' => now(), 'updated_at' => now()];
-            }
             
             DB::table('training_programs')->insert($programs);
         } catch (\Exception $e) {
