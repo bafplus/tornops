@@ -31,16 +31,12 @@
                             Tools
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
-                        <div class="absolute left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                            <a href="/gym" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('gym') ? 'bg-gray-700 text-white' : '' }}">Gym Assistant</a>
-                            <a href="/merits" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('merits*') ? 'bg-gray-700 text-white' : '' }}">Merits</a>
-                            <a href="/travel" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('travel*') ? 'bg-gray-700 text-white' : '' }}">Travel Items</a>
-                            <a href="/items" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('items*') ? 'bg-gray-700 text-white' : '' }}">Item Prices</a>
-                            <a href="/stocks" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('stocks*') ? 'bg-gray-700 text-white' : '' }}">Stocks</a>
-                            <a href="/jumps" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('jumps*') ? 'bg-gray-700 text-white' : '' }}">Jump Helper</a>
-                            <a href="/scripts" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('scripts*') ? 'bg-gray-700 text-white' : '' }}">Scripts</a>
-                            <a href="/tools" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('tools*') ? 'bg-gray-700 text-white' : '' }}">Tools</a>
-                        </div>
+<div class="absolute left-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <a href="/gym" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('gym') ? 'bg-gray-700 text-white' : '' }}">Gym Assistant</a>
+                <a href="/merits" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('merits*') ? 'bg-gray-700 text-white' : '' }}">Merits</a>
+                <a href="/stocks" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('stocks*') ? 'bg-gray-700 text-white' : '' }}">Stocks</a>
+                <a href="/jumps" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('jumps*') ? 'bg-gray-700 text-white' : '' }}">Jump Helper</a>
+            </div>
                     </div>
                 </div>
                 
@@ -80,17 +76,13 @@
                     <a href="/wars" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('wars*') ? 'bg-gray-700 text-white' : '' }}">- Ranked Wars</a>
                 </div>
                 
-                <div class="py-2">
-                    <div class="text-gray-500 text-sm px-3">Tools</div>
-                    <a href="/gym" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('gym') ? 'bg-gray-700 text-white' : '' }}">- Gym Assistant</a>
-                    <a href="/merits" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('merits*') ? 'bg-gray-700 text-white' : '' }}">- Merits</a>
-                    <a href="/travel" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('travel*') ? 'bg-gray-700 text-white' : '' }}">- Travel Items</a>
-                    <a href="/items" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('items*') ? 'bg-gray-700 text-white' : '' }}">- Item Prices</a>
-                    <a href="/stocks" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('stocks*') ? 'bg-gray-700 text-white' : '' }}">- Stocks</a>
-                    <a href="/jumps" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('jumps*') ? 'bg-gray-700 text-white' : '' }}">- Jump Helper</a>
-                    <a href="/scripts" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('scripts*') ? 'bg-gray-700 text-white' : '' }}">- Scripts</a>
-                    <a href="/tools" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('tools*') ? 'bg-gray-700 text-white' : '' }}">- Tools</a>
-                </div>
+<div class="py-2">
+            <div class="text-gray-500 text-sm px-3">Tools</div>
+            <a href="/gym" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('gym') ? 'bg-gray-700 text-white' : '' }}">- Gym Assistant</a>
+            <a href="/merits" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('merits*') ? 'bg-gray-700 text-white' : '' }}">- Merits</a>
+            <a href="/stocks" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('stocks*') ? 'bg-gray-700 text-white' : '' }}">- Stocks</a>
+            <a href="/jumps" class="block px-6 py-2 text-gray-300 hover:bg-gray-700 {{ request()->is('jumps*') ? 'bg-gray-700 text-white' : '' }}">- Jump Helper</a>
+        </div>
                 
                 @auth
                 <a href="/settings" class="px-3 py-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700">Settings</a>
