@@ -39,151 +39,40 @@
     </div>
     @endif
 
-    <form action="/target-finder/settings" method="POST" class="mb-6">
-        @csrf
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-lg bg-green-900/50 flex items-center justify-center text-xl">⚡</div>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-200">Easy Targets</h2>
-                        <span class="text-sm text-gray-500">Lower FFscore opponents</span>
-                    </div>
+    <div class="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-200">Find Targets</h3>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <label class="text-sm text-gray-400">Targets:</label>
+                    <select id="target-limit" class="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm">
+                        <option value="1">1</option>
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                    </select>
                 </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-2">Fair Fight Range</label>
-                        <div class="flex items-center gap-2">
-                            <input type="number" step="0.1" min="1" max="5" name="easy[minFF]" value="{{ $settings['easy']['minFF'] }}"
-                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
-                            <span class="text-gray-500">→</span>
-                            <input type="number" step="0.1" min="1" max="5" name="easy[maxFF]" value="{{ $settings['easy']['maxFF'] }}"
-                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-2">Level Range</label>
-                        <div class="flex items-center gap-2">
-                            <input type="number" min="1" max="100" name="easy[minLevel]" value="{{ $settings['easy']['minLevel'] }}"
-                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
-                            <span class="text-gray-500">→</span>
-                            <input type="number" min="1" max="100" name="easy[maxLevel]" value="{{ $settings['easy']['maxLevel'] }}"
-                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
-                        </div>
-                    </div>
-                    <div class="pt-2 border-t border-gray-700">
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-gray-400">Available targets:</span>
-                            <span id="easy-count" class="text-gray-500">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-lg bg-orange-900/50 flex items-center justify-center text-xl">🔥</div>
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-200">Good Targets</h2>
-                        <span class="text-sm text-gray-500">Higher FFscore opponents</span>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-2">Fair Fight Range</label>
-                        <div class="flex items-center gap-2">
-                            <input type="number" step="0.1" min="1" max="5" name="good[minFF]" value="{{ $settings['good']['minFF'] }}"
-                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
-                            <span class="text-gray-500">→</span>
-                            <input type="number" step="0.1" min="1" max="5" name="good[maxFF]" value="{{ $settings['good']['maxFF'] }}"
-                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 mb-2">Level Range</label>
-                        <div class="flex items-center gap-2">
-                            <input type="number" min="1" max="100" name="good[minLevel]" value="{{ $settings['good']['minLevel'] }}"
-                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
-                            <span class="text-gray-500">→</span>
-                            <input type="number" min="1" max="100" name="good[maxLevel]" value="{{ $settings['good']['maxLevel'] }}"
-                                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
-                        </div>
-                    </div>
-                    <div class="pt-2 border-t border-gray-700">
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-gray-400">Available targets:</span>
-                            <span id="good-count" class="text-gray-500">Loading...</span>
-                        </div>
-                    </div>
-                </div>
+                <button onclick="toggleSettings()" id="btn-toggle-settings" class="px-4 py-1.5 bg-gray-600 hover:bg-gray-500 text-white rounded-lg font-medium text-sm flex items-center gap-2">
+                    <svg id="settings-chevron" class="w-4 h-4 transform rotate-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    Settings
+                </button>
             </div>
         </div>
 
-        <div class="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6">
-            <h3 class="text-lg font-semibold text-gray-200 mb-4">Filters</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" name="inactiveOnly" value="1" {{ $settings['inactiveOnly'] ? 'checked' : '' }}
-                        class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-green-600 focus:ring-green-600">
-                    <div>
-                        <div class="text-gray-200">Inactive Only</div>
-                        <div class="text-sm text-gray-500">Target players inactive 14+ days</div>
-                    </div>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" name="factionlessOnly" value="1" {{ $settings['factionlessOnly'] ? 'checked' : '' }}
-                        class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-green-600 focus:ring-green-600">
-                    <div>
-                        <div class="text-gray-200">Factionless Only</div>
-                        <div class="text-sm text-gray-500">Target players without a faction</div>
-                    </div>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" name="verifyStatus" value="1" {{ $settings['verifyStatus'] ? 'checked' : '' }}
-                        class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-green-600 focus:ring-green-600">
-                    <div>
-                        <div class="text-gray-200">Verify Status</div>
-                        <div class="text-sm text-gray-500">Check target is Okay (slower)</div>
-                    </div>
-                </label>
-            </div>
-        </div>
-
-        <div class="flex justify-end">
-            <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
-                Save Settings
-            </button>
-        </div>
-    </form>
-
-    <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
-        <h3 class="text-lg font-semibold text-gray-200 mb-4">Find Targets</h3>
         <div class="flex flex-col sm:flex-row gap-4 mb-6">
             <button onclick="fetchTarget('easy')" id="btn-easy" disabled
                 class="flex-1 px-6 py-3 bg-green-700 hover:bg-green-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium flex items-center justify-center gap-2">
-                <span>⚡</span> Get Easy Target
+                <span>⚡</span> Get Easy Targets
             </button>
             <button onclick="fetchTarget('good')" id="btn-good" disabled
                 class="flex-1 px-6 py-3 bg-orange-700 hover:bg-orange-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium flex items-center justify-center gap-2">
-                <span>🔥</span> Get Good Target
+                <span>🔥</span> Get Good Targets
             </button>
         </div>
 
-        <div id="result-area" class="hidden">
-            <div class="p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="text-lg font-semibold text-white" id="result-name"></div>
-                        <div class="text-gray-400">
-                            Level <span id="result-level" class="text-white font-medium"></span> •
-                            FF <span id="result-ff" class="text-green-400 font-medium"></span>
-                        </div>
-                    </div>
-                    <a id="result-attack" href="#" target="_blank"
-                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium">
-                        Attack
-                    </a>
-                </div>
+        <div id="loading-area" class="hidden">
+            <div class="flex items-center justify-center gap-3 py-4 text-gray-400">
+                <div class="w-6 h-6 border-2 border-gray-600 border-t-gray-400 rounded-full animate-spin"></div>
+                <span id="loading-text">Finding targets...</span>
             </div>
         </div>
 
@@ -191,12 +80,128 @@
             <div class="p-4 bg-red-900/30 rounded-lg border border-red-700 text-red-400" id="error-message"></div>
         </div>
 
-        <div id="loading-area" class="hidden">
-            <div class="flex items-center justify-center gap-3 py-4 text-gray-400">
-                <div class="w-6 h-6 border-2 border-gray-600 border-t-gray-400 rounded-full animate-spin"></div>
-                <span id="loading-text">Finding target...</span>
-            </div>
+        <div id="result-area" class="hidden">
+            <div id="targets-list" class="space-y-3"></div>
         </div>
+    </div>
+
+    <div id="settings-panel" class="hidden mb-6">
+        <form action="/target-finder/settings" method="POST">
+            @csrf
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-green-900/50 flex items-center justify-center text-xl">⚡</div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-200">Easy Targets</h2>
+                            <span class="text-sm text-gray-500">Lower FFscore opponents</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Fair Fight Range</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" step="0.1" min="1" max="5" name="easy[minFF]" value="{{ $settings['easy']['minFF'] }}"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                                <span class="text-gray-500">→</span>
+                                <input type="number" step="0.1" min="1" max="5" name="easy[maxFF]" value="{{ $settings['easy']['maxFF'] }}"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Level Range</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" min="1" max="100" name="easy[minLevel]" value="{{ $settings['easy']['minLevel'] }}"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                                <span class="text-gray-500">→</span>
+                                <input type="number" min="1" max="100" name="easy[maxLevel]" value="{{ $settings['easy']['maxLevel'] }}"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-gray-700">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-400">Available targets:</span>
+                                <span id="easy-count" class="text-gray-500">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-orange-900/50 flex items-center justify-center text-xl">🔥</div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-200">Good Targets</h2>
+                            <span class="text-sm text-gray-500">Higher FFscore opponents</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Fair Fight Range</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" step="0.1" min="1" max="5" name="good[minFF]" value="{{ $settings['good']['minFF'] }}"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                                <span class="text-gray-500">→</span>
+                                <input type="number" step="0.1" min="1" max="5" name="good[maxFF]" value="{{ $settings['good']['maxFF'] }}"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-2">Level Range</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" min="1" max="100" name="good[minLevel]" value="{{ $settings['good']['minLevel'] }}"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                                <span class="text-gray-500">→</span>
+                                <input type="number" min="1" max="100" name="good[maxLevel]" value="{{ $settings['good']['maxLevel'] }}"
+                                    class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-center">
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-gray-700">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-400">Available targets:</span>
+                                <span id="good-count" class="text-gray-500">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-200 mb-4">Filters</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="inactiveOnly" value="1" {{ $settings['inactiveOnly'] ? 'checked' : '' }}
+                            class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-green-600 focus:ring-green-600">
+                        <div>
+                            <div class="text-gray-200">Inactive Only</div>
+                            <div class="text-sm text-gray-500">Target players inactive 14+ days</div>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="factionlessOnly" value="1" {{ $settings['factionlessOnly'] ? 'checked' : '' }}
+                            class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-green-600 focus:ring-green-600">
+                        <div>
+                            <div class="text-gray-200">Factionless Only</div>
+                            <div class="text-sm text-gray-500">Target players without a faction</div>
+                        </div>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="verifyStatus" value="1" {{ $settings['verifyStatus'] ? 'checked' : '' }}
+                            class="w-5 h-5 rounded bg-gray-700 border-gray-600 text-green-600 focus:ring-green-600">
+                        <div>
+                            <div class="text-gray-200">Verify Status</div>
+                            <div class="text-sm text-gray-500">Check target is Okay (slower)</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                    Save Settings
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -237,12 +242,34 @@
 @push('scripts')
 <script>
 const hasApiKey = {{ Auth::user()->torn_api_key ? 'true' : 'false' }};
+let settingsOpen = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     if (hasApiKey) {
         checkKeyStatus();
     }
 });
+
+function toggleSettings() {
+    settingsOpen = !settingsOpen;
+    const panel = document.getElementById('settings-panel');
+    const chevron = document.getElementById('settings-chevron');
+    const btn = document.getElementById('btn-toggle-settings');
+
+    if (settingsOpen) {
+        panel.classList.remove('hidden');
+        chevron.classList.remove('rotate-0');
+        chevron.classList.add('-rotate-90');
+        btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+        btn.classList.remove('bg-gray-600', 'hover:bg-gray-500');
+    } else {
+        panel.classList.add('hidden');
+        chevron.classList.remove('-rotate-90');
+        chevron.classList.add('rotate-0');
+        btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        btn.classList.add('bg-gray-600', 'hover:bg-gray-500');
+    }
+}
 
 function checkKeyStatus() {
     fetch('/target-finder/check-key')
@@ -365,24 +392,51 @@ function fetchTarget(type) {
     const resultArea = document.getElementById('result-area');
     const errorArea = document.getElementById('error-area');
     const loadingArea = document.getElementById('loading-area');
+    const limit = document.getElementById('target-limit').value;
 
     btn.disabled = true;
     resultArea.classList.add('hidden');
     errorArea.classList.add('hidden');
     loadingArea.classList.remove('hidden');
 
-    document.getElementById('loading-text').textContent = type === 'easy' ? 'Finding easy target...' : 'Finding good target...';
+    document.getElementById('loading-text').textContent = type === 'easy' ? 'Finding easy targets...' : 'Finding good targets...';
 
-    fetch(`/target-finder/target/${type}`)
+    fetch(`/target-finder/target/${type}?limit=${limit}`)
         .then(res => res.json())
         .then(data => {
             loadingArea.classList.add('hidden');
 
             if (data.success) {
-                document.getElementById('result-name').textContent = data.target.name;
-                document.getElementById('result-level').textContent = data.target.level;
-                document.getElementById('result-ff').textContent = data.target.fair_fight.toFixed(2);
-                document.getElementById('result-attack').href = data.attackUrl;
+                const targetsList = document.getElementById('targets-list');
+                targetsList.innerHTML = '';
+
+                data.targets.forEach((target, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'p-4 bg-gray-700/50 rounded-lg border border-gray-600';
+                    div.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-gray-500 text-sm">#${index + 1}</span>
+                                    <div class="text-lg font-semibold text-white">${target.name}</div>
+                                    <span class="text-gray-500">[${target.player_id}]</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-400 mt-1">
+                                    <span>Level <span class="text-white font-medium">${target.level}</span></span>
+                                    <span>FF <span class="text-green-400 font-medium">${target.fair_fight.toFixed(2)}</span></span>
+                                    <span>Inactive: <span class="text-yellow-400 font-medium">${target.inactiveFormatted}</span></span>
+                                    <span>Est: <span class="text-blue-400 font-medium">${target.estStats}</span></span>
+                                    <span>Public: <span class="text-gray-300 font-medium">${target.publicStats}</span></span>
+                                </div>
+                            </div>
+                            <a href="${target.attackUrl}" target="_blank" class="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium whitespace-nowrap">
+                                Attack
+                            </a>
+                        </div>
+                    `;
+                    targetsList.appendChild(div);
+                });
+
                 resultArea.classList.remove('hidden');
             } else {
                 document.getElementById('error-message').textContent = data.error;

@@ -119,6 +119,8 @@ class TargetFinderController extends Controller
             ], 400);
         }
 
+        $limit = min(max((int) $request->input('limit', 1), 1), 10);
+
         $settings = $this->getUserSettings($user);
         $targetSettings = $settings[$type];
 
@@ -161,21 +163,45 @@ class TargetFinderController extends Controller
                 ], 404);
             }
 
-            $target = $this->findValidTarget($targets, $user->torn_api_key, $settings['verifyStatus']);
+            $resultTargets = [];
+            $checked = 0;
 
-            if (!$target) {
+            foreach ($targets as $target) {
+                if (count($resultTargets) >= $limit) {
+                    break;
+                }
+
+                if ($settings['verifyStatus']) {
+                    $checked++;
+                    $statusOk = $this->checkTargetStatus($target['player_id'], $user->torn_api_key);
+                    if (!$statusOk) {
+                        continue;
+                    }
+                }
+
+                $target['attackUrl'] = 'https://www.torn.com/loader.php?sid=attack&user2ID=' . $target['player_id'];
+                $target['inactiveFormatted'] = $this->formatInactiveTime($target['last_action'] ?? null);
+                $target['estStats'] = $target['bs_estimate_human'] ?? 'N/A';
+                $target['publicStats'] = $target['bss_public'] ? number_format($target['bss_public']) : 'N/A';
+
+                $resultTargets[] = $target;
+            }
+
+            if (empty($resultTargets)) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'No available targets found',
+                    'error' => $settings['verifyStatus']
+                        ? "No available targets found (checked {$checked})"
+                        : 'No available targets found',
                 ], 404);
             }
 
-            $attackUrl = 'https://www.torn.com/loader.php?sid=attack&user2ID=' . $target['player_id'];
-
+            $single = $limit === 1;
             return response()->json([
                 'success' => true,
-                'target' => $target,
-                'attackUrl' => $attackUrl,
+                'targets' => $resultTargets,
+                'count' => count($resultTargets),
+                'checked' => $checked,
             ]);
 
         } catch (\Exception $e) {
@@ -183,6 +209,45 @@ class TargetFinderController extends Controller
                 'success' => false,
                 'error' => 'Error: ' . $e->getMessage(),
             ], 500);
+        }
+    }
+
+    private function checkTargetStatus(int $playerId, string $apiKey): bool
+    {
+        try {
+            $response = Http::timeout(5)->get("https://api.torn.com/v2/user/{$playerId}/basic", [
+                'key' => $apiKey,
+                'striptags' => 'true',
+            ]);
+
+            if ($response->failed()) {
+                return true;
+            }
+
+            $data = $response->json();
+            $state = $data['profile']['status']['state'] ?? null;
+            return $state === 'Okay';
+        } catch (\Exception $e) {
+            return true;
+        }
+    }
+
+    private function formatInactiveTime(?int $timestamp): string
+    {
+        if (!$timestamp) {
+            return 'Unknown';
+        }
+
+        $diff = time() - $timestamp;
+        $days = floor($diff / 86400);
+        $hours = floor(($diff % 86400) / 3600);
+
+        if ($days > 0) {
+            return "{$days}d {$hours}h";
+        } elseif ($hours > 0) {
+            return "{$hours}h";
+        } else {
+            return '<1h';
         }
     }
 
