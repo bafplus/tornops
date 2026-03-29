@@ -32,11 +32,30 @@ class GymAssistantController extends Controller
             ->orderBy('recorded_at', 'desc')
             ->paginate(10);
         
-        $chartData = GymStatsHistory::where('user_id', $user->id)
-            ->orderBy('recorded_at', 'asc')
-            ->get();
-        
-        $programs = TrainingProgram::whereNotNull('name')->where('name', '!=', '')->orderBy('is_custom')->orderBy('name')->get();
+$chartData = GymStatsHistory::where('user_id', $user->id)
+                ->orderBy('recorded_at', 'asc')
+                ->get();
+
+            // Hardcoded default programs
+            $defaultPrograms = [
+                (object)['id' => 1, 'name' => 'All-Rounder', 'str_percent' => 25, 'def_percent' => 25, 'spd_percent' => 25, 'dex_percent' => 25, 'is_custom' => false],
+                (object)['id' => 2, 'name' => 'Strength Focus', 'str_percent' => 40, 'def_percent' => 20, 'spd_percent' => 20, 'dex_percent' => 20, 'is_custom' => false],
+                (object)['id' => 3, 'name' => 'Defense Focus', 'str_percent' => 20, 'def_percent' => 40, 'spd_percent' => 20, 'dex_percent' => 20, 'is_custom' => false],
+                (object)['id' => 4, 'name' => 'Speed Focus', 'str_percent' => 20, 'def_percent' => 20, 'spd_percent' => 40, 'dex_percent' => 20, 'is_custom' => false],
+                (object)['id' => 5, 'name' => 'Dexterity Focus', 'str_percent' => 20, 'def_percent' => 20, 'spd_percent' => 20, 'dex_percent' => 40, 'is_custom' => false],
+                (object)['id' => 6, 'name' => 'STR/DEF Build', 'str_percent' => 35, 'def_percent' => 35, 'spd_percent' => 15, 'dex_percent' => 15, 'is_custom' => false],
+                (object)['id' => 7, 'name' => 'SPD/DEX Build', 'str_percent' => 15, 'def_percent' => 15, 'spd_percent' => 35, 'dex_percent' => 35, 'is_custom' => false],
+                (object)['id' => 8, 'name' => 'Melee Special', 'str_percent' => 45, 'def_percent' => 25, 'spd_percent' => 15, 'dex_percent' => 15, 'is_custom' => false],
+                (object)['id' => 9, 'name' => "Hank's Ratio", 'str_percent' => 28, 'def_percent' => 35, 'spd_percent' => 28, 'dex_percent' => 10, 'is_custom' => false],
+                (object)['id' => 10, 'name' => "Balder's Ratio", 'str_percent' => 30, 'def_percent' => 30, 'spd_percent' => 20, 'dex_percent' => 20, 'is_custom' => false],
+                (object)['id' => 11, 'name' => "Duce's Ratio", 'str_percent' => 25, 'def_percent' => 25, 'spd_percent' => 25, 'dex_percent' => 25, 'is_custom' => false],
+            ];
+            
+            // Get custom programs from DB
+            $customPrograms = TrainingProgram::where('is_custom', true)->get();
+            
+            // Combine: default programs first, then custom
+            $programs = collect($defaultPrograms)->merge($customPrograms);
         
         $selectedProgram = null;
         $percentages = null;
@@ -190,37 +209,54 @@ class GymAssistantController extends Controller
         }
     }
     
-    public function selectProgram(Request $request)
+public function selectProgram(Request $request)
     {
         $user = Auth::user();
-        
-        $programId = $request->input('program_id');
+
+        $programId = (int) $request->input('program_id');
         $customStr = $request->input('custom_str', 25);
         $customDef = $request->input('custom_def', 25);
         $customSpd = $request->input('custom_spd', 25);
         $customDex = $request->input('custom_dex', 25);
-        
-        $program = TrainingProgram::find($programId);
-        
-        if (!$program) {
-            return back()->with('error', 'Program not found.');
-        }
-        
-        $user->training_program_id = $programId;
-        
-        if ($program->is_custom) {
+
+        // Default programs (hardcoded IDs 1-11)
+        $defaultPrograms = [
+            1 => ['name' => 'All-Rounder', 'str' => 25, 'def' => 25, 'spd' => 25, 'dex' => 25, 'is_custom' => false],
+            2 => ['name' => 'Strength Focus', 'str' => 40, 'def' => 20, 'spd' => 20, 'dex' => 20, 'is_custom' => false],
+            3 => ['name' => 'Defense Focus', 'str' => 20, 'def' => 40, 'spd' => 20, 'dex' => 20, 'is_custom' => false],
+            4 => ['name' => 'Speed Focus', 'str' => 20, 'def' => 20, 'spd' => 40, 'dex' => 20, 'is_custom' => false],
+            5 => ['name' => 'Dexterity Focus', 'str' => 20, 'def' => 20, 'spd' => 20, 'dex' => 40, 'is_custom' => false],
+            6 => ['name' => 'STR/DEF Build', 'str' => 35, 'def' => 35, 'spd' => 15, 'dex' => 15, 'is_custom' => false],
+            7 => ['name' => 'SPD/DEX Build', 'str' => 15, 'def' => 15, 'spd' => 35, 'dex' => 35, 'is_custom' => false],
+            8 => ['name' => 'Melee Special', 'str' => 45, 'def' => 25, 'spd' => 15, 'dex' => 15, 'is_custom' => false],
+            9 => ['name' => "Hank's Ratio", 'str' => 28, 'def' => 35, 'spd' => 28, 'dex' => 10, 'is_custom' => false],
+            10 => ['name' => "Balder's Ratio", 'str' => 30, 'def' => 30, 'spd' => 20, 'dex' => 20, 'is_custom' => false],
+            11 => ['name' => "Duce's Ratio", 'str' => 25, 'def' => 25, 'spd' => 25, 'dex' => 25, 'is_custom' => false],
+        ];
+
+        if (isset($defaultPrograms[$programId])) {
+            // Default program selected
+            $program = (object) $defaultPrograms[$programId];
+            $program->id = $programId;
+            $user->training_program_id = $programId;
+            $user->custom_percentages = null;
+        } else {
+            // Custom program from DB
+            $program = TrainingProgram::find($programId);
+            if (!$program) {
+                return back()->with('error', 'Program not found.');
+            }
+            $user->training_program_id = $programId;
             $user->custom_percentages = json_encode([
                 'str' => (int) $customStr,
                 'def' => (int) $customDef,
                 'spd' => (int) $customSpd,
                 'dex' => (int) $customDex,
             ]);
-        } else {
-            $user->custom_percentages = null;
         }
-        
+
         $user->save();
-        
+
         return back()->with('success', 'Training program updated!');
     }
 
