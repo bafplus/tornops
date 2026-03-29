@@ -14,11 +14,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Force HTTPS based on request or APP_URL
-        $appUrl = config('app.url', '');
-        $isHttps = request()->isSecure() || str_starts_with($appUrl, 'https://');
+        // Force HTTPS if request is secure or X-Forwarded-Proto header indicates HTTPS
+        // This handles load balancers and reverse proxies
+        $isSecure = request()->isSecure() || 
+            request()->header('X-Forwarded-Proto') === 'https' ||
+            request()->header('X-Forwarded-Proto') === 'http';
         
-        if ($isHttps) {
+        // Also check if behind a proxy that terminates SSL
+        if ($isSecure || config('app.force_https', false)) {
             \URL::forceScheme('https');
         }
         
