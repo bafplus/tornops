@@ -57,22 +57,41 @@ $chartData = GymStatsHistory::where('user_id', $user->id)
             // Combine: default programs first, then custom
             $programs = collect($defaultPrograms)->merge($customPrograms);
         
-        $selectedProgram = null;
+$selectedProgram = null;
         $percentages = null;
-        
-        if ($user->training_program_id) {
-            $selectedProgram = TrainingProgram::find($user->training_program_id);
-        }
-        
-        if ($selectedProgram && $selectedProgram->is_custom && $user->custom_percentages) {
-            $percentages = json_decode($user->custom_percentages, true);
-        } elseif ($selectedProgram) {
-            $percentages = [
-                'str' => $selectedProgram->str_percent,
-                'def' => $selectedProgram->def_percent,
-                'spd' => $selectedProgram->spd_percent,
-                'dex' => $selectedProgram->dex_percent,
-            ];
+        $programId = $user->training_program_id;
+
+        // Check if it's a default program (hardcoded IDs 1-11)
+        $defaultPrograms = [
+            1 => ['str' => 25, 'def' => 25, 'spd' => 25, 'dex' => 25],
+            2 => ['str' => 40, 'def' => 20, 'spd' => 20, 'dex' => 20],
+            3 => ['str' => 20, 'def' => 40, 'spd' => 20, 'dex' => 20],
+            4 => ['str' => 20, 'def' => 20, 'spd' => 40, 'dex' => 20],
+            5 => ['str' => 20, 'def' => 20, 'spd' => 20, 'dex' => 40],
+            6 => ['str' => 35, 'def' => 35, 'spd' => 15, 'dex' => 15],
+            7 => ['str' => 15, 'def' => 15, 'spd' => 35, 'dex' => 35],
+            8 => ['str' => 45, 'def' => 25, 'spd' => 15, 'dex' => 15],
+            9 => ['str' => 28, 'def' => 35, 'spd' => 28, 'dex' => 10],
+            10 => ['str' => 30, 'def' => 30, 'spd' => 20, 'dex' => 20],
+            11 => ['str' => 20, 'def' => 10, 'spd' => 40, 'dex' => 30],
+        ];
+
+        if ($programId && isset($defaultPrograms[$programId])) {
+            // Default program
+            $percentages = $defaultPrograms[$programId];
+        } elseif ($programId) {
+            // Custom program from DB
+            $selectedProgram = TrainingProgram::find($programId);
+            if ($selectedProgram && $selectedProgram->is_custom && $user->custom_percentages) {
+                $percentages = json_decode($user->custom_percentages, true);
+            } elseif ($selectedProgram) {
+                $percentages = [
+                    'str' => (int) $selectedProgram->str_percent,
+                    'def' => (int) $selectedProgram->def_percent,
+                    'spd' => (int) $selectedProgram->spd_percent,
+                    'dex' => (int) $selectedProgram->dex_percent,
+                ];
+            }
         }
         
         $trainRecommendation = null;
