@@ -36,7 +36,7 @@ class GymAssistantController extends Controller
             ->orderBy('recorded_at', 'asc')
             ->get();
         
-        $programs = TrainingProgram::orderBy('is_custom')->orderBy('name')->get();
+        $programs = TrainingProgram::whereNotNull('name')->where('name', '!=', '')->orderBy('is_custom')->orderBy('name')->get();
         
         $selectedProgram = null;
         $percentages = null;
