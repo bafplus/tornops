@@ -165,16 +165,16 @@
                         <span class="font-mono">{{ $result['num_trains'] }}</span>
                     </div>
                     
-                    <div class="border-t border-gray-700 pt-2 mt-2">
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Est. Total Gain</span>
-                            <span class="font-mono text-yellow-400">{{ number_format($result['total_gain'], 0) }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-400">Gain per Train</span>
-                            <span class="font-mono">{{ number_format($result['gain_per_train'], 2) }}</span>
-                        </div>
-                    </div>
+<div class="border-t border-gray-700 pt-2 mt-2 bg-yellow-900/20 -mx-4 px-4 py-2 -mb-2 rounded-b-lg">
+            <div class="text-center">
+                <div class="text-gray-400 text-xs mb-1">Est. Total Gain</div>
+                <div class="text-2xl font-bold font-mono text-yellow-400">{{ number_format($result['total_gain'], 0) }}</div>
+            </div>
+            <div class="flex justify-between mt-2">
+                <span class="text-gray-500 text-xs">Gain per Train</span>
+                <span class="font-mono text-gray-400 text-xs">{{ number_format($result['gain_per_train'], 2) }}</span>
+            </div>
+        </div>
                     
                     <div class="border-t border-gray-700 pt-2 mt-2">
                         <div class="flex justify-between">
