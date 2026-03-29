@@ -48,7 +48,7 @@ $chartData = GymStatsHistory::where('user_id', $user->id)
                 (object)['id' => 8, 'name' => 'Melee Special', 'str_percent' => 45, 'def_percent' => 25, 'spd_percent' => 15, 'dex_percent' => 15, 'is_custom' => false],
                 (object)['id' => 9, 'name' => "Hank's Ratio", 'str_percent' => 28, 'def_percent' => 35, 'spd_percent' => 28, 'dex_percent' => 10, 'is_custom' => false],
                 (object)['id' => 10, 'name' => "Balder's Ratio", 'str_percent' => 30, 'def_percent' => 30, 'spd_percent' => 20, 'dex_percent' => 20, 'is_custom' => false],
-                (object)['id' => 11, 'name' => "Duce's Ratio", 'str_percent' => 25, 'def_percent' => 25, 'spd_percent' => 25, 'dex_percent' => 25, 'is_custom' => false],
+                (object)['id' => 11, 'name' => "Duce's Ratio", 'str_percent' => 20, 'def_percent' => 10, 'spd_percent' => 40, 'dex_percent' => 30, 'is_custom' => false],
             ];
             
             // Get custom programs from DB
@@ -231,7 +231,7 @@ public function selectProgram(Request $request)
             8 => ['name' => 'Melee Special', 'str' => 45, 'def' => 25, 'spd' => 15, 'dex' => 15, 'is_custom' => false],
             9 => ['name' => "Hank's Ratio", 'str' => 28, 'def' => 35, 'spd' => 28, 'dex' => 10, 'is_custom' => false],
             10 => ['name' => "Balder's Ratio", 'str' => 30, 'def' => 30, 'spd' => 20, 'dex' => 20, 'is_custom' => false],
-            11 => ['name' => "Duce's Ratio", 'str' => 25, 'def' => 25, 'spd' => 25, 'dex' => 25, 'is_custom' => false],
+            11 => ['name' => "Duce's Ratio", 'str' => 20, 'def' => 10, 'spd' => 40, 'dex' => 30, 'is_custom' => false],
         ];
 
         if (isset($defaultPrograms[$programId])) {
