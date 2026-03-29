@@ -163,6 +163,11 @@ class MeritPlannerController extends Controller
                 ->first();
 
             if (!$merit) {
+                // Check if user has any merits at all
+                $hasAnyMerits = \DB::table('user_merits')->where('user_id', $user->id)->exists();
+                if (!$hasAnyMerits) {
+                    return response()->json(['error' => 'No merit data found. Please click "Try again" to fetch your merits from Torn first.'], 404);
+                }
                 return response()->json(['error' => 'Merit not found: ' . $meritName], 404);
             }
 
