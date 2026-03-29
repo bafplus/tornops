@@ -80,36 +80,36 @@
 
         <!-- Current Bars -->
         <div class="bg-gray-800 rounded-lg border border-gray-700 p-6">
-            <h2 class="text-lg font-semibold mb-4 text-green-400">Bars</h2>
+            <h2 class="text-lg font-semibold mb-4 text-blue-400">Bars</h2>
             
             <div class="space-y-4">
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-gray-400">Happy</span>
-                        <div class="text-right">
-                            <span class="font-mono text-green-400">{{ number_format($current_happy) }}</span>
-                            <span class="text-gray-500"> / {{ number_format($max_happy) }}</span>
-                        </div>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
-                        <div class="bg-green-500 h-3 rounded-full transition-all" style="width: {{ min(100, $current_happy / $max_happy * 100) }}%"></div>
-                    </div>
-                    <div class="text-xs text-gray-500 mt-1">{{ floor($current_happy / 250) }} jumps available (250 each)</div>
+<div>
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-gray-400">Happy</span>
+                <div class="text-right">
+                    <span class="font-mono text-yellow-400">{{ number_format($current_happy) }}</span>
+                    <span class="text-gray-500"> / {{ number_format($max_happy) }}</span>
                 </div>
-                
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-gray-400">Energy</span>
-                        <div class="text-right">
-                            <span class="font-mono text-blue-400">{{ number_format($current_energy) }}</span>
-                            <span class="text-gray-500"> / {{ number_format($max_energy) }}</span>
-                        </div>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
-                        <div class="bg-blue-500 h-3 rounded-full transition-all" style="width: {{ min(100, $current_energy / $max_energy * 100) }}%"></div>
-                    </div>
-                    <div class="text-xs text-gray-500 mt-1">{{ floor($current_energy / $gym_energy_cost) }} gym hits available ({{ $gym_energy_cost }} each)</div>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-3">
+                <div class="bg-yellow-500 h-3 rounded-full transition-all" style="width: {{ min(100, $current_happy / $max_happy * 100) }}%"></div>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">{{ floor($current_happy / 250) }} jumps available (250 each)</div>
+        </div>
+
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-gray-400">Energy</span>
+                <div class="text-right">
+                    <span class="font-mono text-green-400">{{ number_format($current_energy) }}</span>
+                    <span class="text-gray-500"> / {{ number_format($max_energy) }}</span>
                 </div>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-3">
+                <div class="bg-green-500 h-3 rounded-full transition-all" style="width: {{ min(100, $current_energy / $max_energy * 100) }}%"></div>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">{{ floor($current_energy / $gym_energy_cost) }} gym hits available ({{ $gym_energy_cost }} each)</div>
+        </div>
             </div>
         </div>
     </div>
