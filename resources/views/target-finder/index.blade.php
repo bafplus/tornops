@@ -41,7 +41,19 @@
 
     <div class="bg-gray-800 rounded-lg border border-gray-700 p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-200">Find Targets</h3>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-200">Find Targets</h3>
+                @if($userFfScore || $userEstStats)
+                <div class="flex items-center gap-4 mt-1 text-sm">
+                    @if($userFfScore)
+                    <span class="text-gray-400">Your FF: <span class="text-green-400 font-medium">{{ number_format($userFfScore, 2) }}</span></span>
+                    @endif
+                    @if($userEstStats)
+                    <span class="text-gray-400">Est: <span class="text-blue-400 font-medium">{{ $userEstStats }}</span></span>
+                    @endif
+                </div>
+                @endif
+            </div>
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
                     <label class="text-sm text-gray-400">Targets:</label>

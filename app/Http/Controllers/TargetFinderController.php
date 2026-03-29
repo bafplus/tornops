@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use App\Models\FactionMember;
 
 class TargetFinderController extends Controller
 {
@@ -47,7 +48,11 @@ class TargetFinderController extends Controller
         $user = Auth::user();
         $settings = $this->getUserSettings($user);
 
-        return view('target-finder.index', compact('settings'));
+        $factionMember = FactionMember::where('player_id', $user->torn_player_id)->first();
+        $userFfScore = $factionMember?->ff_score;
+        $userEstStats = $factionMember?->estimated_stats;
+
+        return view('target-finder.index', compact('settings', 'userFfScore', 'userEstStats'));
     }
 
     public function saveSettings(Request $request)
