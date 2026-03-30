@@ -73,7 +73,7 @@ LOG_CHANNEL=stack
 LOG_LEVEL=warning
 DB_CONNECTION=sqlite
 DB_DATABASE=/data/database.sqlite
-SESSION_DRIVER=array
+SESSION_DRIVER=file
 CACHE_STORE=array
 TORN_API_KEY=${TORN_API_KEY:-dummy}
 FACTION_ID=${FACTION_ID:-}
@@ -94,7 +94,7 @@ LOG_CHANNEL=stack
 LOG_LEVEL=warning
 DB_CONNECTION=sqlite
 DB_DATABASE=/var/www/html/database.sqlite
-SESSION_DRIVER=array
+SESSION_DRIVER=file
 CACHE_STORE=array
 TORN_API_KEY=${TORN_API_KEY:-dummy}
 EOF
