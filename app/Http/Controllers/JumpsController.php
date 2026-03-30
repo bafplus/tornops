@@ -359,8 +359,12 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
                 $startingHappy *= 2;
             }
 
-            // Calculate available energy for training (already includes refill in total_energy)
+            // Calculate available energy for training
             $availableEnergy = $jump['total_energy'];
+            // Add refill energy if present in materials (already in total_energy for xanax/ecstasy, but not for candy/choco/happy)
+            if (isset($jump['materials']['refill']) && $jump['materials']['refill'] > 0 && $type !== 'xanax' && $type !== 'ecstasy') {
+                $availableEnergy += 250;
+            }
 
             // Calculate number of trains
             $numTrains = floor($availableEnergy / $energyPerTrain);
