@@ -10,7 +10,7 @@
     <title>@yield('title', 'TornOps')</title>
     <link rel="icon" type="image/png" href="/images/tornops-shield-transparant.png">
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/images/tornops-shield-transparant.png">
+    <link rel="apple-touch-icon" href="/images/tornops-shield-background.png">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
