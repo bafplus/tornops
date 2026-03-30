@@ -124,7 +124,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @foreach($jump_results as $type => $result)
             <div class="bg-gray-800 rounded-lg border border-gray-700 p-4">
-                <h3 class="text-lg font-semibold mb-3 {{ $type === 'candy' ? 'text-green-400' : ($type === 'choco' ? 'text-yellow-400' : 'text-pink-400') }}">
+                <h3 class="text-lg font-semibold mb-3 {{ $type === 'basic' ? 'text-gray-400' : ($type === 'xanax' ? 'text-cyan-400' : ($type === 'ecstasy' ? 'text-purple-400' : ($type === 'candy' ? 'text-green-400' : ($type === 'choco' ? 'text-yellow-400' : 'text-pink-400')))) }}">
                     {{ $result['name'] }}
                 </h3>
                 
@@ -154,7 +154,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-400">Total Time</span>
-                        <span class="font-mono">{{ $result['total_time_min'] }}-{{ $result['total_time_max'] }} hrs</span>
+                        <span class="font-mono">{{ isset($result['time_based']) && $result['time_based'] ? $result['total_time_min'] . '-' . $result['total_time_max'] . ' hrs' : 'Instant' }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-400">Total Energy</span>

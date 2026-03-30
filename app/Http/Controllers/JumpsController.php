@@ -84,7 +84,7 @@ class JumpsController extends Controller
         $currentEnergy = $energy['current'] ?? 0;
 
 // Calculate jump results
-    $jumpResults = $this->calculateJumpResults($gymData, $totalStats, $maxHappy, $currentEnergy);
+    $jumpResults = $this->calculateJumpResults($gymData, $totalStats, $maxHappy, $currentEnergy, $energy['maximum'] ?? 0);
 
         return view('jumps.index', [
             'error' => null,
@@ -193,7 +193,7 @@ class JumpsController extends Controller
         return $gymData[$gymId] ?? ['energy_cost' => 5, 'dots' => 2.0, 'str_bonus' => 2.0, 'def_bonus' => 2.0, 'spd_bonus' => 2.0, 'dex_bonus' => 2.0];
     }
 
-private function calculateJumpResults(array $gymData, int $totalStats, int $maxHappy, int $currentEnergy): array
+private function calculateJumpResults(array $gymData, int $totalStats, int $maxHappy, int $currentEnergy, int $maxEnergy): array
     {
         // Vladar formula constants for each stat
         // A = (1-(H/99999)^2) * A constant
@@ -219,14 +219,14 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
         // Energy per train (from gym)
         $energyPerTrain = $gymData['energy_cost'];
 
-// Gym dots - use lowest non-zero stat bonus for conservative estimate
-    $bonuses = array_filter([
-        $gymData['str_bonus'],
-        $gymData['def_bonus'],
-        $gymData['spd_bonus'],
-        $gymData['dex_bonus'],
-    ]);
-    $dots = !empty($bonuses) ? min($bonuses) : 2.0;
+        // Gym dots - use lowest non-zero stat bonus for conservative estimate
+        $bonuses = array_filter([
+            $gymData['str_bonus'],
+            $gymData['def_bonus'],
+            $gymData['spd_bonus'],
+            $gymData['dex_bonus'],
+        ]);
+        $dots = !empty($bonuses) ? min($bonuses) : 2.0;
 
         // Happy loss per train (average from Vladar docs)
         // 5 energy: 2.67, 10 energy: 5, 25 energy: 12.67, 50 energy: 25
@@ -234,16 +234,53 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
         
         // Jump types
         $jumpTypes = [
+            'basic' => [
+                'name' => 'Basic Training',
+                'materials' => [],
+                'total_energy' => $maxEnergy, // Uses max energy
+                'happy_from_items' => 0,
+                'has_ecstasy' => false,
+                'has_refill' => false,
+                'time_based' => false, // Not a jump, no xanax cooldown
+            ],
+            'xanax' => [
+                'name' => 'Xanax Jump',
+                'materials' => [
+                    'xanax' => 4,
+                    'refill' => 1,
+                ],
+                'total_energy' => 4 * $xanaxEnergy + 250, // 1000 + 250 from refill
+                'happy_from_items' => 0,
+                'has_ecstasy' => false,
+                'has_refill' => true,
+                'time_based' => true,
+            ],
+            'ecstasy' => [
+                'name' => 'Ecstasy Jump',
+                'materials' => [
+                    'xanax' => 4,
+                    'ecstasy' => 1,
+                    'refill' => 1,
+                ],
+                'total_energy' => 4 * $xanaxEnergy + 250, // 1000 + 250 from refill
+                'happy_from_items' => 0,
+                'has_ecstasy' => true,
+                'has_refill' => true,
+                'time_based' => true,
+            ],
             'candy' => [
                 'name' => 'Candy Jump',
                 'materials' => [
                     'xanax' => 4,
                     'candy' => 48,
                     'ecstasy' => 1,
-                    'refill' => 1, // optional
+                    'refill' => 1,
                 ],
                 'total_energy' => 4 * $xanaxEnergy, // 1000 energy from xanax
                 'happy_from_items' => 48 * 25, // 1200 happy from candy (25 each)
+                'has_ecstasy' => true,
+                'has_refill' => true,
+                'time_based' => true,
             ],
             'choco' => [
                 'name' => 'Choco Jump',
@@ -255,6 +292,9 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
                 ],
                 'total_energy' => 4 * $xanaxEnergy, // 1000 energy from xanax
                 'happy_from_items' => 48 * 50, // 2400 happy from choco kisses (50 each)
+                'has_ecstasy' => true,
+                'has_refill' => true,
+                'time_based' => true,
             ],
             'happy' => [
                 'name' => 'Happy Jump',
@@ -266,6 +306,9 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
                 ],
                 'total_energy' => 4 * $xanaxEnergy, // 1000 energy from xanax
                 'happy_from_items' => 5 * 2500, // 12500 happy from DVDs (2500 each)
+                'has_ecstasy' => true,
+                'has_refill' => true,
+                'time_based' => true,
             ],
         ];
 
@@ -274,9 +317,13 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
         foreach ($jumpTypes as $type => $jump) {
             // Calculate total cost in money
             $moneyCost = 0;
-            $moneyCost += $jump['materials']['xanax'] * $xanaxCost;
-            $moneyCost += $jump['materials']['ecstasy'] * $ecstasyCost;
             
+            if (isset($jump['materials']['xanax'])) {
+                $moneyCost += $jump['materials']['xanax'] * $xanaxCost;
+            }
+            if (isset($jump['materials']['ecstasy'])) {
+                $moneyCost += $jump['materials']['ecstasy'] * $ecstasyCost;
+            }
             if (isset($jump['materials']['candy'])) {
                 $moneyCost += $jump['materials']['candy'] * $candyCost;
             }
@@ -287,69 +334,71 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
                 $moneyCost += $jump['materials']['dvd'] * $dvdCost;
             }
 
-            // Calculate points cost (refill is optional, but we include it)
-            $pointsCost = $jump['materials']['refill'] * $refillPoints;
+            // Calculate points cost
+            $pointsCost = isset($jump['materials']['refill']) ? $jump['materials']['refill'] * $refillPoints : 0;
 
-            // Calculate total time (4 xanax cooldowns, 6-8 hours each)
-            $totalTimeMin = 4 * 6; // 24 hours minimum
-            $totalTimeMax = 4 * 8; // 36 hours maximum
+            // Calculate total time - only for jumps (xanax cooldown)
+            if ($jump['time_based'] ?? false) {
+                $xanaxCount = $jump['materials']['xanax'] ?? 0;
+                $totalTimeMin = $xanaxCount * 6;
+                $totalTimeMax = $xanaxCount * 8;
+            } else {
+                // Basic training - no xanax cooldown
+                $totalTimeMin = 0;
+                $totalTimeMax = 0;
+            }
 
             // Calculate happy after items
-            $happyFromItems = $jump['happy_from_items'];
-            $ecstasyDoublesHappy = true; // Ecstasy doubles current happy
+            $happyFromItems = $jump['happy_from_items'] ?? 0;
             
-// Starting happy is max happy + candy happy (use max for conservative estimate)
-    $startingHappy = $maxHappy + $happyFromItems;
+            // Starting happy is max happy + happy from items
+            $startingHappy = $maxHappy + $happyFromItems;
             
             // Ecstasy doubles the happy
-            if ($ecstasyDoublesHappy) {
+            if ($jump['has_ecstasy'] ?? false) {
                 $startingHappy *= 2;
             }
 
-            // Calculate available energy for training
+            // Calculate available energy for training (already includes refill in total_energy)
             $availableEnergy = $jump['total_energy'];
-            if (isset($jump['materials']['refill']) && $jump['materials']['refill'] > 0) {
-                $availableEnergy += 250; // Refill gives 250 energy
+
+            // Calculate number of trains
+            $numTrains = floor($availableEnergy / $energyPerTrain);
+
+            // Calculate estimated stat gain using Vladar formula
+            $totalGain = 0;
+            $currentJumpHappy = $startingHappy;
+            
+            // Calculate average A and B for overall estimate
+            $avgA = ($statConstants['strength']['A'] + $statConstants['defense']['A'] + $statConstants['speed']['A'] + $statConstants['dexterity']['A']) / 4;
+            $avgB = ($statConstants['strength']['B'] + $statConstants['defense']['B'] + $statConstants['speed']['B'] + $statConstants['dexterity']['B']) / 4;
+
+            for ($i = 0; $i < $numTrains; $i++) {
+                // Vladar formula: dS = (S * (1 + 0.07 * LN(1+H/250)) + 8 * H^1.05 + (1-(H/99999)^2) * A + B) * (1/200000) * G * E
+                // S = stat total (capped at 50,000,000)
+                $S = min($totalStats, 50000000);
+                
+                // S term
+                $Sterm = $S * (1 + 0.07 * log(1 + $currentJumpHappy / 250));
+                
+                // Happy power term
+                $happyTerm = 8 * pow($currentJumpHappy, 1.05);
+                
+                // Happy adjustment term
+                $happyAdjTerm = (1 - pow($currentJumpHappy / 99999, 2)) * $avgA + $avgB;
+                
+                // Base calculation
+                $baseGain = ($Sterm + $happyTerm + $happyAdjTerm) * (1 / 200000);
+                
+                // Apply gym dots (already in scale of 10) and energy
+                $gainPerTrain = $baseGain * $dots * $energyPerTrain;
+                
+                $totalGain += $gainPerTrain;
+
+                // Happy loss (average from Vladar docs)
+                $happyLoss = round($energyPerTrain * 0.5);
+                $currentJumpHappy = max(0, $currentJumpHappy - $happyLoss);
             }
-
-// Calculate number of trains
-        $numTrains = floor($availableEnergy / $energyPerTrain);
-
-        // Calculate estimated stat gain using Vladar formula
-        // We'll calculate gain per train using average of all 4 stats
-        $totalGain = 0;
-        $currentJumpHappy = $startingHappy;
-        
-        // Calculate average A and B for overall estimate
-        $avgA = ($statConstants['strength']['A'] + $statConstants['defense']['A'] + $statConstants['speed']['A'] + $statConstants['dexterity']['A']) / 4;
-        $avgB = ($statConstants['strength']['B'] + $statConstants['defense']['B'] + $statConstants['speed']['B'] + $statConstants['dexterity']['B']) / 4;
-
-        for ($i = 0; $i < $numTrains; $i++) {
-            // Vladar formula: dS = (S * (1 + 0.07 * LN(1+H/250)) + 8 * H^1.05 + (1-(H/99999)^2) * A + B) * (1/200000) * G * E
-            // S = stat total (capped at 50,000,000)
-            $S = min($totalStats, 50000000);
-            
-            // S term
-            $Sterm = $S * (1 + 0.07 * log(1 + $currentJumpHappy / 250));
-            
-            // Happy power term
-            $happyTerm = 8 * pow($currentJumpHappy, 1.05);
-            
-            // Happy adjustment term
-            $happyAdjTerm = (1 - pow($currentJumpHappy / 99999, 2)) * $avgA + $avgB;
-            
-            // Base calculation
-            $baseGain = ($Sterm + $happyTerm + $happyAdjTerm) * (1 / 200000);
-            
-            // Apply gym dots (already in scale of 10) and energy
-            $gainPerTrain = $baseGain * $dots * $energyPerTrain;
-            
-            $totalGain += $gainPerTrain;
-
-            // Happy loss (average from Vladar docs)
-            $happyLoss = round($energyPerTrain * 0.5);
-            $currentJumpHappy = max(0, $currentJumpHappy - $happyLoss);
-        }
 
             // Calculate price per train
             $pricePerTrain = $numTrains > 0 ? $moneyCost / $numTrains : 0;
@@ -359,12 +408,15 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
 
             // Build materials list with costs
             $materialsList = [];
-            $materialsList[] = [
-                'name' => 'Xanax',
-                'qty' => $jump['materials']['xanax'],
-                'cost_each' => $xanaxCost,
-                'cost_total' => $jump['materials']['xanax'] * $xanaxCost,
-            ];
+
+            if (isset($jump['materials']['xanax']) && $jump['materials']['xanax'] > 0) {
+                $materialsList[] = [
+                    'name' => 'Xanax',
+                    'qty' => $jump['materials']['xanax'],
+                    'cost_each' => $xanaxCost,
+                    'cost_total' => $jump['materials']['xanax'] * $xanaxCost,
+                ];
+            }
 
             if (isset($jump['materials']['candy'])) {
                 $materialsList[] = [
@@ -393,19 +445,23 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
                 ];
             }
 
-            $materialsList[] = [
-                'name' => 'Ecstasy',
-                'qty' => $jump['materials']['ecstasy'],
-                'cost_each' => $ecstasyCost,
-                'cost_total' => $jump['materials']['ecstasy'] * $ecstasyCost,
-            ];
+            if (isset($jump['materials']['ecstasy']) && $jump['materials']['ecstasy'] > 0) {
+                $materialsList[] = [
+                    'name' => 'Ecstasy',
+                    'qty' => $jump['materials']['ecstasy'],
+                    'cost_each' => $ecstasyCost,
+                    'cost_total' => $jump['materials']['ecstasy'] * $ecstasyCost,
+                ];
+            }
 
-            $materialsList[] = [
-                'name' => 'Refill Energy Bar (optional)',
-                'qty' => $jump['materials']['refill'],
-                'cost_each' => '30 pts',
-                'cost_total' => $refillPoints . ' pts',
-            ];
+            if (isset($jump['materials']['refill']) && $jump['materials']['refill'] > 0) {
+                $materialsList[] = [
+                    'name' => 'Refill Energy Bar',
+                    'qty' => $jump['materials']['refill'],
+                    'cost_each' => '30 pts',
+                    'cost_total' => $refillPoints . ' pts',
+                ];
+            }
 
             $results[$type] = [
                 'name' => $jump['name'],
@@ -422,6 +478,7 @@ private function calculateJumpResults(array $gymData, int $totalStats, int $maxH
                 'starting_happy' => $startingHappy,
                 'happy_from_items' => $happyFromItems,
                 'materials_list' => $materialsList,
+                'time_based' => $jump['time_based'] ?? false,
             ];
         }
 
