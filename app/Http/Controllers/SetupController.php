@@ -20,39 +20,23 @@ class SetupController extends Controller
             return redirect('/');
         }
 
-        return view('setup.index', [
-            'settings' => $settings,
-            'hasAdmin' => $hasAdmin,
-            'step' => $settings ? 2 : 1,
-        ]);
+        return view('setup.index');
     }
 
     public function store(Request $request)
-    {
-        $step = $request->input('step', 1);
-
-        if ($step == 1) {
-            return $this->setupApiKey($request);
-        }
-
-        if ($step == 2) {
-            return $this->createAdmin($request);
-        }
-
-        return redirect('/setup');
-    }
-
-    protected function setupApiKey(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'faction_id' => 'required|numeric',
             'torn_api_key' => 'required|string|min:16',
             'ffscouter_api_key' => 'nullable|string',
             'base_domain' => 'nullable|url',
+            'admin_name' => 'required|string|max:255|unique:users,name',
+            'torn_player_id' => 'required|numeric|unique:users,torn_player_id',
+            'admin_password' => 'required|string|min:8|confirmed',
         ]);
 
         if ($validator->fails()) {
-            return back()->withErrors($validator)->with('step', 1);
+            return back()->withErrors($validator)->withInput();
         }
 
         FactionSettings::updateOrCreate(
@@ -66,34 +50,16 @@ class SetupController extends Controller
             ]
         );
 
-        return redirect('/setup?step=2')->with('success', 'API keys configured successfully');
-    }
-
-    protected function createAdmin(Request $request)
-    {
         $settings = FactionSettings::first();
-        
-        $validator = Validator::make($request->all(), [
-            'admin_name' => 'required|string|max:255|unique:users,name',
-            'torn_player_id' => 'required|numeric|unique:users,torn_player_id',
-            'admin_password' => 'required|string|min:8|confirmed',
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->with('step', 2);
-        }
-
         $tornApi = new TornApiService();
-        // Pass API key directly to ensure we use the latest
         $playerData = $tornApi->getPlayer($request->input('torn_player_id'), 'profile', $settings->torn_api_key);
 
         if (!$playerData || !isset($playerData['faction'])) {
-            return back()->withErrors(['torn_player_id' => 'Player not found or has no faction.'])->with('step', 2);
+            return back()->withErrors(['torn_player_id' => 'Player not found or has no faction.'])->withInput();
         }
 
-        if (!isset($playerData['faction']['faction_id']) || 
-            $playerData['faction']['faction_id'] != $settings->faction_id) {
-            return back()->withErrors(['torn_player_id' => 'Player is not a member of the faction.'])->with('step', 2);
+        if (!isset($playerData['faction']['faction_id']) || $playerData['faction']['faction_id'] != $settings->faction_id) {
+            return back()->withErrors(['torn_player_id' => 'Player is not a member of the faction.'])->withInput();
         }
 
         User::create([
@@ -104,6 +70,6 @@ class SetupController extends Controller
             'status' => User::STATUS_ACTIVE,
         ]);
 
-        return redirect('/')->with('success', 'Admin account created successfully!');
+        return redirect('/')->with('success', 'Setup completed successfully!');
     }
 }

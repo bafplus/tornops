@@ -38,6 +38,10 @@ chown -R 33:33 .
 chmod -R 775 storage/framework
 chown -R www-data:www-data storage/framework
 
+# Fix permissions for SQLite database
+chmod -R 777 /var/www
+chmod 666 /var/www/html/database.sqlite 2>/dev/null || true
+
 # Fix permissions on /data first if it exists (for TrueNAS mounted volumes)
 if [ -d "$DATA_DIR" ]; then
     echo "Fixing /data permissions..."
