@@ -7,6 +7,9 @@ DATA_DIR="${DATA_DIR:-/data}"
 
 git config --global --add safe.directory /var/www/html
 
+# Ensure /var/www has correct ownership for SQLite
+chown www-data:www-data /var/www
+
 # Clone or pull repository directly to /var/www/html
 if [ -d "/var/www/html/.git" ]; then
     echo "Updating repository..."
