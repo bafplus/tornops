@@ -39,6 +39,7 @@ chmod -R 775 storage/framework
 chown -R www-data:www-data storage/framework
 
 # Fix /var/www permissions LAST (before supervisord starts)
+chown -R www-data:www-data /var/www
 chmod -R 777 /var/www
 if [ -d "$DATA_DIR" ]; then
     echo "Fixing /data permissions..."
