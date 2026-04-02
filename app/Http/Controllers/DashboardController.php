@@ -7,6 +7,7 @@ use App\Models\FactionMember;
 use App\Models\RankedWar;
 use App\Models\WarAttack;
 use App\Models\WarChain;
+use App\Services\WarService;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -33,8 +34,9 @@ class DashboardController extends Controller
         $members = FactionMember::where('faction_id', $settings->faction_id ?? 0)
             ->orderBy('name')
             ->paginate(25);
+        $warActive = WarService::hasActiveWar();
 
-        return view('dashboard.members', compact('settings', 'members'));
+        return view('dashboard.members', compact('settings', 'members', 'warActive'));
     }
 
     public function wars()

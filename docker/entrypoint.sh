@@ -125,14 +125,21 @@ php artisan key:generate --force 2>/dev/null || true
 php artisan migrate --force
 php artisan cache:clear
 
-# Setup cron - staggered to avoid API spikes
-# sync-faction: every 10 min at :00 (members + wars)
-# sync-active: every 5 min at :02 (war updates only)
-# sync-attacks: every 10 min at :05 (attack data)
+# Setup cron
+# During active war: war syncs every minute, non-essential syncs disabled
+# Normal: faction sync every 10 min, stocks every 10 min
 sleep 5
-echo "*/10 * * * * root /usr/local/bin/php /var/www/html/artisan torn:sync-faction >> /dev/null 2>&1" > /etc/cron.d/tornops-sync
-echo "*/5 * * * * root /usr/local/bin/php /var/www/html/artisan torn:sync-active >> /dev/null 2>&1" >> /etc/cron.d/tornops-sync
-echo "*/10 * * * * root /usr/local/bin/php /var/www/html/artisan torn:sync-attacks --force >> /dev/null 2>&1" >> /etc/cron.d/tornops-sync
+
+# Copy war-sync wrapper script
+cp /var/www/html/docker/war-sync.sh /usr/local/bin/torn-sync-wrapper.sh
+chmod +x /usr/local/bin/torn-sync-wrapper.sh
+
+# Main sync wrapper (runs every minute)
+echo "* * * * * root /usr/local/bin/torn-sync-wrapper.sh >> /dev/null 2>&1" > /etc/cron.d/tornops-sync
+
+# Backup: ensure war syncs run if wrapper fails (every minute)
+echo "* * * * * root /usr/local/bin/php /var/www/html/artisan torn:sync-active >> /dev/null 2>&1" >> /etc/cron.d/tornops-sync
+
 chmod 644 /etc/cron.d/tornops-sync
 service cron reload
 

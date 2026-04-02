@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\TornApiService;
+use App\Services\WarService;
 use App\Models\FactionSettings;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,8 @@ class StocksController extends Controller
 {
     public function index(TornApiService $tornApi)
     {
+        $warActive = WarService::hasActiveWar();
+        
         $apiKey = $this->getApiKey();
         
         if (!$apiKey) {
@@ -20,6 +23,7 @@ class StocksController extends Controller
                 'history' => collect(),
                 'userStocks' => [],
                 'recommendations' => collect(),
+                'warActive' => $warActive,
             ]);
         }
         

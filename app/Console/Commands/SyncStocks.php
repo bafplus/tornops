@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Services\TornApiService;
+use App\Services\WarService;
 use App\Models\FactionSettings;
 use App\Models\StockHistory;
 use Illuminate\Console\Command;
@@ -10,11 +11,16 @@ use Illuminate\Support\Facades\Cache;
 
 class SyncStocks extends Command
 {
-    protected $signature = 'torn:sync-stocks';
+    protected $signature = 'torn:sync-stocks {--force : Force sync even during active war}';
     protected $description = 'Sync stock prices and save to history';
 
     public function handle()
     {
+        if (!WarService::canFetchNonEssentialData() && !$this->option('force')) {
+            $this->warn('Stock sync skipped: Active war detected. Non-essential API calls are disabled.');
+            return 0;
+        }
+
         $settings = FactionSettings::first();
         $apiKey = $settings?->torn_api_key;
         

@@ -102,6 +102,16 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     @endif
 
+    @if($warActive ?? false)
+    <div class="mb-4 p-4 bg-yellow-900/50 border border-yellow-700 rounded-lg text-yellow-400">
+        <div class="flex items-center gap-2 font-semibold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            Active War in Progress
+        </div>
+        <p class="text-sm mt-1">Non-essential API calls are disabled during active wars to conserve API usage. Stock data may be outdated. War-related syncs run every minute.</p>
+    </div>
+    @endif
+
     @if($error)
         <div class="mb-4 p-4 bg-red-900/50 border border-red-700 rounded-lg text-red-400">
             {{ $error }}
