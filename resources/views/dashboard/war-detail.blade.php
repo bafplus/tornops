@@ -649,16 +649,9 @@ const bTimer = parseInt(b.dataset.statusTimer) || 999999;
 const typeScore = { 'okay': 0, 'hosp': 1, 'travel': 2 };
 const aScore = typeScore[aType] !== undefined ? typeScore[aType] : 2;
 const bScore = typeScore[bType] !== undefined ? typeScore[bType] : 2;
-if (aScore !== bScore) return aScore - bScore;
-return aTimer - bTimer;
+if (aScore !== bScore) return dir === 'asc' ? aScore - bScore : bScore - aScore;
+return dir === 'asc' ? aTimer - bTimer : bTimer - aTimer;
 }
-return aTimer - bTimer;
-}
-
-if (typeof aVal === 'string') {
-return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-}
-return dir === 'asc' ? aVal - bVal : bVal - aVal;
 });
 
 rows.forEach(row => tbody.appendChild(row));
