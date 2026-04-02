@@ -218,7 +218,7 @@
                                 default => '2'
                             };
                         @endphp
-                        <tr class="hover:bg-gray-700/30" data-name="{{ strtolower($member->name) }}" data-level="{{ $member->level }}" data-ff="{{ $member->ff_score ?? 0 }}" data-stats="{{ $member->estimated_stats ?? '' }}" data-hits="{{ $hits }}" data-pwar="{{ $warScore }}" data-status="{{ $member->status_description ?? '' }}" data-status-type="{{ $statusType }}" data-status-timer="{{ $remaining }}">
+                        <tr class="hover:bg-gray-700/30" data-name="{{ strtolower($member->name) }}" data-level="{{ $member->level }}" data-ff="{{ $member->ff_score ?? 0 }}" data-stats="{{ $member->estimated_stats ?? '' }}" data-hits="{{ $hits }}" data-pwar="{{ $warScore }}" data-status="{{ $member->status_description ?? '' }}" data-status-type="{{ $statusType }}">
                             <td class="p-3">
                                 <span class="inline-block w-2 h-2 rounded-full mr-2 @if($member->online_status === 'Online') bg-green-500 @elseif($member->online_status === 'Idle') bg-yellow-500 @else bg-gray-500 @endif"></span>
                                 <span class="font-medium">{{ $member->name }}</span>
@@ -315,7 +315,7 @@
                                 default => '2'
                             };
                         @endphp
-                        <tr class="hover:bg-gray-700/30 {{ $leavingSoon ? 'bg-red-900/20' : '' }}" data-name="{{ strtolower($member->name) }}" data-level="{{ $member->level }}" data-ff="{{ $member->ff_score ?? 0 }}" data-stats="{{ $member->estimated_stats ?? '' }}" data-hits="{{ $hits }}" data-status="{{ $member->status_description ?? '' }}" data-status-type="{{ $statusType }}" data-status-timer="{{ $remaining }}">
+                        <tr class="hover:bg-gray-700/30 {{ $leavingSoon ? 'bg-red-900/20' : '' }}" data-name="{{ strtolower($member->name) }}" data-level="{{ $member->level }}" data-ff="{{ $member->ff_score ?? 0 }}" data-stats="{{ $member->estimated_stats ?? '' }}" data-hits="{{ $hits }}" data-status="{{ $member->status_description ?? '' }}" data-status-type="{{ $statusType }}">
                             <td class="p-3">
                                 <span class="inline-block w-2 h-2 rounded-full mr-2 @if($member->online_status === 'Online') bg-green-500 @elseif($member->online_status === 'Idle') bg-yellow-500 @else bg-gray-500 @endif"></span>
                                 <a href="https://www.torn.com/loader.php?sid=attack&user2ID={{ $member->player_id }}" target="_blank" class="font-medium hover:text-blue-400">{{ $member->name }}</a>
