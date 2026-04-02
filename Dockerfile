@@ -52,6 +52,8 @@ RUN mkdir -p /run/mysqld /var/lib/mysql \
 
 RUN usermod -u 1000 www-data
 
+RUN mkdir -p /var/www && chown -R www-data:www-data /var/www && chmod -R 777 /var/www
+
 WORKDIR /var/www/html
 
 EXPOSE 80 443
