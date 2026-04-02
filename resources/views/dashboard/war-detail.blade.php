@@ -616,42 +616,46 @@ function sortTable(tbody, field, dir) {
 const rows = Array.from(tbody.querySelectorAll('tr'));
 
 rows.sort((a, b) => {
-let aVal, bVal;
 if (field === 'name') {
-aVal = a.dataset.name;
-bVal = b.dataset.name;
+const aVal = a.dataset.name || '';
+const bVal = b.dataset.name || '';
+return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
 } else if (field === 'level') {
-aVal = parseInt(a.dataset.level);
-bVal = parseInt(b.dataset.level);
+const aVal = parseInt(a.dataset.level) || 0;
+const bVal = parseInt(b.dataset.level) || 0;
+return dir === 'asc' ? aVal - bVal : bVal - aVal;
 } else if (field === 'ff') {
-aVal = parseFloat(a.dataset.ff) || 0;
-bVal = parseFloat(b.dataset.ff) || 0;
+const aVal = parseFloat(a.dataset.ff) || 0;
+const bVal = parseFloat(b.dataset.ff) || 0;
+return dir === 'asc' ? aVal - bVal : bVal - aVal;
 } else if (field === 'stats') {
-aVal = parseStats(a.dataset.stats);
-bVal = parseStats(b.dataset.stats);
+const aVal = parseStats(a.dataset.stats);
+const bVal = parseStats(b.dataset.stats);
+return dir === 'asc' ? aVal - bVal : bVal - aVal;
 } else if (field === 'pwar') {
-aVal = parseFloat(a.dataset.pwar) || 0;
-bVal = parseFloat(b.dataset.pwar) || 0;
+const aVal = parseFloat(a.dataset.pwar) || 0;
+const bVal = parseFloat(b.dataset.pwar) || 0;
+return dir === 'asc' ? aVal - bVal : bVal - aVal;
 } else if (field === 'hits') {
-aVal = parseInt(a.dataset.hits) || 0;
-bVal = parseInt(b.dataset.hits) || 0;
+const aVal = parseInt(a.dataset.hits) || 0;
+const bVal = parseInt(b.dataset.hits) || 0;
+return dir === 'asc' ? aVal - bVal : bVal - aVal;
 } else if (field === 'warscore') {
-aVal = parseFloat(a.dataset.warscore) || 0;
-bVal = parseFloat(b.dataset.warscore) || 0;
+const aVal = parseFloat(a.dataset.warscore) || 0;
+const bVal = parseFloat(b.dataset.warscore) || 0;
+return dir === 'asc' ? aVal - bVal : bVal - aVal;
 } else if (field === 'status') {
-aVal = a.dataset.status || '';
-bVal = b.dataset.status || '';
 const aType = a.dataset.statusType || 'okay';
 const bType = b.dataset.statusType || 'okay';
 const aTimer = parseInt(a.dataset.statusTimer) || 999999;
 const bTimer = parseInt(b.dataset.statusTimer) || 999999;
-// Sort: okay=0 first, hosp=1 second, others=2 last - then by timer
 const typeScore = { 'okay': 0, 'hosp': 1, 'travel': 2 };
 const aScore = typeScore[aType] !== undefined ? typeScore[aType] : 2;
 const bScore = typeScore[bType] !== undefined ? typeScore[bType] : 2;
 if (aScore !== bScore) return dir === 'asc' ? aScore - bScore : bScore - aScore;
 return dir === 'asc' ? aTimer - bTimer : bTimer - aTimer;
 }
+return 0;
 });
 
 rows.forEach(row => tbody.appendChild(row));

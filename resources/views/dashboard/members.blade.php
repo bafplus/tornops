@@ -142,17 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Sort rows
         const rows = Array.from(tbody.querySelectorAll('tr'));
         rows.sort((a, b) => {
-            let aVal = a.dataset[sortKey] || '';
-            let bVal = b.dataset[sortKey] || '';
-            
-            if (['level', 'ff', 'stats', 'days'].includes(sortKey)) {
-                aVal = parseFloat(aVal) || 0;
-                bVal = parseFloat(bVal) || 0;
-                return dir === 'asc' ? aVal - bVal : bVal - aVal;
-            }
-            
             if (sortKey === 'status') {
-                // Custom sort: okay first, hosp second, others last - then by timer
                 const aType = a.dataset['statusType'] || 'okay';
                 const bType = b.dataset['statusType'] || 'okay';
                 const aTimer = parseInt(a.dataset['statusTimer']) || 999999;
@@ -160,12 +150,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 const typeScore = { 'okay': 0, 'hosp': 1, 'travel': 2 };
                 const aScore = typeScore[aType] !== undefined ? typeScore[aType] : 2;
                 const bScore = typeScore[bType] !== undefined ? typeScore[bType] : 2;
-                if (aScore !== bScore) return aScore - bScore;
-                return aTimer - bTimer;
+                if (aScore !== bScore) return dir === 'asc' ? aScore - bScore : bScore - aScore;
+                return dir === 'asc' ? aTimer - bTimer : bTimer - aTimer;
             }
             
-            aVal = aVal.toLowerCase();
-            bVal = bVal.toLowerCase();
+            if (['level', 'ff', 'stats', 'days'].includes(sortKey)) {
+                const aVal = parseFloat(a.dataset[sortKey]) || 0;
+                const bVal = parseFloat(b.dataset[sortKey]) || 0;
+                return dir === 'asc' ? aVal - bVal : bVal - aVal;
+            }
+            
+            const aVal = (a.dataset[sortKey] || '').toLowerCase();
+            const bVal = (b.dataset[sortKey] || '').toLowerCase();
             return dir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
         });
         
