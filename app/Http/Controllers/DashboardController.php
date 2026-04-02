@@ -32,8 +32,8 @@ class DashboardController extends Controller
     {
         $settings = FactionSettings::first();
         $members = FactionMember::where('faction_id', $settings->faction_id ?? 0)
-            ->orderByRaw("CASE WHEN status_color = 'green' THEN 0 WHEN status_color = 'red' THEN 1 ELSE 2 END")
-            ->orderByRaw("CASE WHEN status_color = 'red' AND data IS NOT NULL THEN json_extract(data, '$.status.until') ELSE 999999999999 END")
+            ->orderByRaw("CASE WHEN status_color = 'green' THEN 0 WHEN status_color = 'red' THEN 1 WHEN status_color = 'blue' THEN 2 ELSE 3 END")
+            ->orderByRaw("CASE WHEN (status_color = 'red' OR status_color = 'blue') AND data IS NOT NULL THEN json_extract(data, '$.status.until') ELSE 999999999999 END")
             ->orderBy('name')
             ->paginate(25);
         $warActive = WarService::hasActiveWar();
@@ -69,15 +69,15 @@ class DashboardController extends Controller
         
 $ourMembers = $war->members()
             ->where('faction_id', $settings->faction_id)
-            ->orderByRaw("CASE WHEN status_color = 'green' THEN 0 WHEN status_color = 'red' THEN 1 ELSE 2 END")
-            ->orderByRaw("CASE WHEN status_color = 'red' AND data IS NOT NULL THEN json_extract(data, '$.status.until') ELSE 999999999999 END")
+            ->orderByRaw("CASE WHEN status_color = 'green' THEN 0 WHEN status_color = 'red' THEN 1 WHEN status_color = 'blue' THEN 2 ELSE 3 END")
+            ->orderByRaw("CASE WHEN (status_color = 'red' OR status_color = 'blue') AND data IS NOT NULL THEN json_extract(data, '$.status.until') ELSE 999999999999 END")
             ->orderBy('name')
             ->get();
         
         $opponentMembers = $war->members()
             ->where('faction_id', $war->opponent_faction_id)
-            ->orderByRaw("CASE WHEN status_color = 'green' THEN 0 WHEN status_color = 'red' THEN 1 ELSE 2 END")
-            ->orderByRaw("CASE WHEN status_color = 'red' AND data IS NOT NULL THEN json_extract(data, '$.status.until') ELSE 999999999999 END")
+            ->orderByRaw("CASE WHEN status_color = 'green' THEN 0 WHEN status_color = 'red' THEN 1 WHEN status_color = 'blue' THEN 2 ELSE 3 END")
+            ->orderByRaw("CASE WHEN (status_color = 'red' OR status_color = 'blue') AND data IS NOT NULL THEN json_extract(data, '$.status.until') ELSE 999999999999 END")
             ->orderBy('name')
             ->get();
         
