@@ -820,8 +820,7 @@ th.addEventListener('click', () => { console.log('Sort clicked:', th.dataset.sor
 
 console.log('Initial sort:', currentSort);
 updateAllTheads(currentSort.field, currentSort.dir);
-sortTable(document.getElementById('tbody-our'), currentSort.field, currentSort.dir);
-sortTable(document.getElementById('tbody-opp'), currentSort.field, currentSort.dir);
+// Don't call sortTable on load - preserve server-side order
 
 updateTimer();
 setInterval(updateTimer, 1000);
