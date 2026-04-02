@@ -38,7 +38,8 @@ chown -R 33:33 .
 chmod -R 775 storage/framework
 chown -R www-data:www-data storage/framework
 
-# Fix permissions on /data first if it exists (for TrueNAS mounted volumes)
+# Fix /var/www permissions LAST (before supervisord starts)
+chmod -R 777 /var/www
 if [ -d "$DATA_DIR" ]; then
     echo "Fixing /data permissions..."
     chown -R 33:33 "$DATA_DIR"
@@ -138,10 +139,6 @@ echo "* * * * * root /usr/local/bin/php /var/www/html/artisan torn:sync-active >
 
 chmod 644 /etc/cron.d/tornops-sync
 service cron reload
-
-# Final permissions fix - ensure database is writable
-chmod -R 777 /var/www
-chmod 666 /var/www/html/database.sqlite 2>/dev/null || true
 
 echo "Starting services..."
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
