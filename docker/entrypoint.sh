@@ -104,15 +104,13 @@ EOF
     DB_PATH="/var/www/html/database.sqlite"
 fi
 
-if [ ! -f "vendor/autoload.php" ]; then
-    echo "Installing dependencies..."
-    # Check if collision is missing from lock file (common issue), use update instead
-    if grep -q 'nunomaduro/collision' composer.json && ! grep -q 'nunomaduro/collision' composer.lock 2>/dev/null; then
-        echo "Updating dependencies (collision package needs to be added to lock)..."
-        composer update --no-interaction --no-dev
-    else
-        composer install --no-interaction --no-dev
-    fi
+# Install dependencies - always use composer update if collision is in composer.json but not in lock file
+echo "Installing dependencies..."
+if grep -q 'nunomaduro/collision' composer.json && ! grep -q 'nunomaduro/collision' composer.lock 2>/dev/null; then
+    echo "Updating dependencies (collision package missing from lock file)..."
+    composer update --no-interaction --no-dev
+elif [ ! -f "vendor/autoload.php" ]; then
+    composer install --no-interaction --no-dev
 fi
 
 # Ensure database directory exists
