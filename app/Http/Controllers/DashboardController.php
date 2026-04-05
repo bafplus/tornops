@@ -38,7 +38,9 @@ class DashboardController extends Controller
             ->paginate(25);
         $warActive = WarService::hasActiveWar();
 
-        return view('dashboard.members', compact('settings', 'members', 'warActive'));
+        $travelMethod = FactionSettings::value('travel_method', 1);
+
+        return view('dashboard.members', compact('settings', 'members', 'warActive', 'travelMethod'));
     }
 
     public function wars()
@@ -165,7 +167,9 @@ $ourMembers = $war->members()
         ];
     }
 
-    return view('dashboard.war-detail', compact('settings', 'war', 'ourMembers', 'opponentMembers', 'attackStats', 'attacks', 'retaliationTargets', 'chainStats', 'activeChain', 'oppActiveChain'));
+    $travelMethod = FactionSettings::value('travel_method', 1);
+
+    return view('dashboard.war-detail', compact('settings', 'war', 'ourMembers', 'opponentMembers', 'attackStats', 'attacks', 'retaliationTargets', 'chainStats', 'activeChain', 'oppActiveChain', 'travelMethod'));
     }
 
     public function warStats(int $warId)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FactionSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -10,7 +11,8 @@ class SettingsController extends Controller
 {
     public function index()
     {
-        return view('settings.index');
+        $travelMethod = FactionSettings::value('travel_method', 1);
+        return view('settings.index', compact('travelMethod'));
     }
 
     public function updatePassword(Request $request)
@@ -38,5 +40,18 @@ class SettingsController extends Controller
         $user->save();
 
         return back()->with('status', 'API key updated successfully.');
+    }
+
+    public function updateTravelMethod(Request $request)
+    {
+        $request->validate([
+            'travel_method' => ['required', 'integer', 'min:1', 'max:4'],
+        ]);
+
+        $settings = FactionSettings::first();
+        $settings->travel_method = $request->travel_method;
+        $settings->save();
+
+        return back()->with('status', 'Travel method updated successfully.');
     }
 }

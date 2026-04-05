@@ -14,6 +14,7 @@ class FactionSettings extends Model
         'auto_sync_enabled',
         'sync_settings',
         'base_domain',
+        'travel_method',
     ];
 
     protected $casts = [

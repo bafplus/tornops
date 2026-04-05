@@ -66,6 +66,29 @@
     </div>
 
     <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">Travel Method</h2>
+        <p class="text-gray-400 text-sm mb-4">
+            Select your travel method for accurate ETA calculations.
+        </p>
+        <form action="/settings/travel-method" method="POST" class="space-y-4">
+            @csrf
+            @method('PUT')
+            <div>
+                <label class="block text-gray-400 mb-2">Travel Method</label>
+                <select name="travel_method" class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                    <option value="1" {{ ($travelMethod ?? 1) == 1 ? 'selected' : '' }}>1 - Standard (Normal)</option>
+                    <option value="2" {{ ($travelMethod ?? 1) == 2 ? 'selected' : '' }}>2 - Airstrip</option>
+                    <option value="3" {{ ($travelMethod ?? 1) == 3 ? 'selected' : '' }}>3 - WLT (White Light Travel)</option>
+                    <option value="4" {{ ($travelMethod ?? 1) == 4 ? 'selected' : '' }}>4 - BCT (Black Cloud Travel)</option>
+                </select>
+            </div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white">
+                Save Travel Method
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <h2 class="text-xl font-semibold mb-4">Change Password</h2>
         <form action="/settings/password" method="POST" class="space-y-4">
             @csrf

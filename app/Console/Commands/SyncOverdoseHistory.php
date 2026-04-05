@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Http;
 
 class SyncOverdoseHistory extends Command
 {
-    protected $signature = 'torn:sync-overdose-history {faction_id?}';
+    protected $signature = 'torn:sync-overdose-history {faction_id?} {--player= : Specific player ID to fetch}';
     protected $description = 'Fetch historical overdose events for faction members';
 
     public function handle(TornApiService $tornApi): int

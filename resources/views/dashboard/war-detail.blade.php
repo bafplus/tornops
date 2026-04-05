@@ -556,8 +556,9 @@ continue;
 }
 
 var travelTimeSec = travelTime * 60;
+var earliestLanding = Math.floor(travelTimeSec / 1.03);
 var elapsed = now - statusChanged;
-var remaining = travelTimeSec - elapsed;
+var remaining = earliestLanding - elapsed;
 
 if (remaining > 0) {
 var h = Math.floor(remaining / 3600);
@@ -739,13 +740,36 @@ const countryMap = {
 };
 
 const travelTimes = {
-        'UK': 111, 'UAE': 190, 'USA': 90, 'SA': 208,
-        'NZ': 120, 'HK': 105, 'CH': 123, 'MX': 18,
-        'CN': 169, 'JP': 158, 'AR': 117, 'CA': 29,
-        'DE': 45, 'FR': 40, 'IT': 50, 'ES': 35,
-        'NL': 35, 'BR': 60, 'IN': 75, 'AU': 120,
-        'Cayman Islands': 25, 'Cayman': 25, 'Hawaii': 94
+        // Standard travel times (in minutes)
+        'Mexico': 26, 'Cayman Islands': 35, 'Cayman': 35,
+        'Canada': 41, 'Hawaii': 134, 'United Kingdom': 159,
+        'Argentina': 167, 'Switzerland': 175, 'Japan': 225,
+        'China': 242, 'UAE': 271, 'South Africa': 297,
+        // Aliases
+        'UK': 159, 'CA': 41, 'MX': 26, 'SA': 297,
+        'USA': 90, 'NZ': 120, 'HK': 105, 'CH': 123,
+        'CN': 242, 'JP': 225, 'AR': 167, 'DE': 45,
+        'FR': 40, 'IT': 50, 'ES': 35, 'NL': 35,
+        'BR': 60, 'IN': 75, 'AU': 120, 'UAE': 271,
     };
+
+    // Travel times by method: [Standard, Airstrip, WLT, BCT] in minutes
+    const travelTimesByMethod = {
+        'Mexico': [26, 18, 13, 8],
+        'Cayman Islands': [35, 25, 18, 11], 'Cayman': [35, 25, 18, 11],
+        'Canada': [41, 29, 20, 12],
+        'Hawaii': [134, 91, 67, 40],
+        'United Kingdom': [159, 111, 80, 48], 'UK': [159, 111, 80, 48],
+        'Argentina': [167, 117, 83, 50],
+        'Switzerland': [175, 123, 88, 53],
+        'Japan': [225, 158, 113, 68],
+        'China': [242, 169, 121, 72],
+        'UAE': [271, 190, 135, 81],
+        'South Africa': [297, 208, 149, 89],
+    };
+
+    // Travel method setting (1=Standard, 2=Airstrip, 3=WLT, 4=BCT)
+    var TRAVEL_METHOD = parseInt(document.body.dataset.travelMethod) || 1;
 
 let country = null;
 for (const [full, short] of Object.entries(countryMap)) {
@@ -760,7 +784,9 @@ const match = original.match(/(?:In |Returning to Torn from |Traveling to )(.*)/
 if (match) country = match[1];
 }
 
-const travelTime = travelTimes[country] || 60;
+const travelTime = (travelTimesByMethod[country] && travelTimesByMethod[country][TRAVEL_METHOD - 1])
+        ? travelTimesByMethod[country][TRAVEL_METHOD - 1]
+        : (travelTimes[country] || 60);
 
 if (original.startsWith('Returning to Torn from') && country) {
 return { direction: 'left', country, isTraveling: true, travelTime };

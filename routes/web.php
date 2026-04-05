@@ -60,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index']);
     Route::put('/settings/password', [SettingsController::class, 'updatePassword']);
     Route::put('/settings/api-key', [SettingsController::class, 'updateApiKey']);
+    Route::put('/settings/travel-method', [SettingsController::class, 'updateTravelMethod']);
     
     Route::get('/gym', [GymAssistantController::class, 'index']);
     Route::post('/gym/update', [GymAssistantController::class, 'update']);

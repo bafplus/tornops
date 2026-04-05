@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" sizes="120x120" href="/images/tornops-shield-background.png">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
+<body class="bg-gray-900 text-white min-h-screen" data-travel-method="{{ $travelMethod ?? 1 }}">
 <nav class="bg-gray-800 border-b border-gray-700">
     <div class="container mx-auto px-4">
         <div class="flex items-center justify-between h-16">
