@@ -15,8 +15,8 @@ class OrganizedCrimesController extends Controller
         
         $ocs = OrganizedCrime::where('faction_id', $factionId)
             ->with('slots')
-            ->orderByDesc('created_at')
-            ->limit(20)
+            ->orderByDesc('oc_created_at')
+            ->limit(50)
             ->get();
         
         $playerIds = [];
