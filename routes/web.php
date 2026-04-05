@@ -71,6 +71,7 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/travel', [TravelController::class, 'index']);
     Route::get('/items', [ItemsController::class, 'index']);
+    Route::get('/overdoses', [OverdoseController::class, 'index']);
     Route::get('/stocks', [StocksController::class, 'index']);
     Route::post('/stocks/update', [StocksController::class, 'update']);
 Route::get('/jumps', [JumpsController::class, 'index']);

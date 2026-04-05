@@ -241,6 +241,11 @@ public function getWarfare(int $factionId): ?array
 return $this->get("faction/{$factionId}", ['selections' => 'warfare']);
 }
 
+public function getFactionContributors(int $factionId, string $stat = 'drugoverdoses'): ?array
+{
+return $this->getNoCache("faction/{$factionId}", ['selections' => 'contributors', 'stat' => $stat]);
+}
+
 public function getFactionAttacks(int $factionId, ?string $apiKey = null, ?int $from = null, ?int $to = null): ?array
 {
 $params = ['selections' => 'attacks'];
