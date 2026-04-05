@@ -14,9 +14,10 @@ chown www-data:www-data /var/www
 if [ -d "/var/www/html/.git" ]; then
     echo "Updating repository..."
     cd /var/www/html
-    # Discard local changes to avoid conflicts
-    git checkout --force .
+    # Save any local changes, pull, then restore
+    git stash push --include-untracked -m "temp_stash" || true
     git pull origin main || true
+    git stash pop || true
 else
     echo "First run: Cloning repository..."
     if [ -d "/data" ]; then
@@ -104,23 +105,9 @@ EOF
     DB_PATH="/var/www/html/database.sqlite"
 fi
 
-# Install dependencies - use composer update if collision is in composer.json but not in lock file
-echo "Checking dependency status..."
-COLLISION_IN_JSON=false
-COLLISION_IN_LOCK=false
-
-grep -q 'nunomaduro/collision' composer.json 2>/dev/null && COLLISION_IN_JSON=true
-grep -q 'nunomaduro/collision' composer.lock 2>/dev/null && COLLISION_IN_LOCK=true
-
-echo "collision in json: $COLLISION_IN_JSON, in lock: $COLLISION_IN_LOCK"
-
-if [ "$COLLISION_IN_JSON" = true ] && [ "$COLLISION_IN_LOCK" = false ]; then
-    echo "Updating dependencies (collision package missing from lock file)..."
-    composer update --no-interaction --no-dev
-else
-    echo "Using composer install..."
-    composer install --no-interaction --no-dev
-fi
+# Install dependencies
+echo "Installing dependencies..."
+composer install --no-interaction --no-dev --ignore-platform-reqs || composer update --no-interaction --no-dev
 
 # Ensure database directory exists
 mkdir -p "$(dirname "$DB_PATH")"
