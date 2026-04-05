@@ -17,7 +17,7 @@ class OrganizedCrime extends Model
         'name',
         'difficulty',
         'status',
-        'created_at',
+        'oc_created_at',
         'planning_started_at',
         'ready_at',
         'executed_at',
@@ -27,7 +27,7 @@ class OrganizedCrime extends Model
 
     protected $casts = [
         'difficulty' => 'integer',
-        'created_at' => 'integer',
+        'oc_created_at' => 'integer',
         'planning_started_at' => 'integer',
         'ready_at' => 'integer',
         'executed_at' => 'integer',

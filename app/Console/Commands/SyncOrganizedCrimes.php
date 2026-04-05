@@ -53,7 +53,7 @@ class SyncOrganizedCrimes extends Command
                     'name' => $crimeData['name'],
                     'difficulty' => $crimeData['difficulty'],
                     'status' => strtolower($crimeData['status']),
-                    'created_at' => $crimeData['created_at'],
+                    'oc_created_at' => $crimeData['created_at'],
                     'planning_started_at' => $crimeData['planning_at'],
                     'ready_at' => $crimeData['ready_at'],
                     'executed_at' => $crimeData['executed_at'],

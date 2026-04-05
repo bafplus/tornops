@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('name');
             $table->tinyInteger('difficulty');
             $table->string('status'); // planning, recruiting, ready, executed
-            $table->unsignedBigInteger('created_at')->nullable();
+            $table->unsignedBigInteger('oc_created_at')->nullable();
             $table->unsignedBigInteger('planning_started_at')->nullable();
             $table->unsignedBigInteger('ready_at')->nullable();
             $table->unsignedBigInteger('executed_at')->nullable();
