@@ -104,7 +104,13 @@ fi
 
 if [ ! -f "vendor/autoload.php" ]; then
     echo "Installing dependencies..."
-    composer install --no-interaction --no-dev
+    # Check if collision is missing from lock file (common issue), use update instead
+    if grep -q 'nunomaduro/collision' composer.json && ! grep -q 'nunomaduro/collision' composer.lock 2>/dev/null; then
+        echo "Updating dependencies (collision package needs to be added to lock)..."
+        composer update --no-interaction --no-dev
+    else
+        composer install --no-interaction --no-dev
+    fi
 fi
 
 # Ensure database directory exists
