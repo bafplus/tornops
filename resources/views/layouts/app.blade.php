@@ -36,6 +36,7 @@
                         <a href="/members" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('members') ? 'bg-gray-700 text-white' : '' }}">Members</a>
                         <a href="/wars" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('wars*') ? 'bg-gray-700 text-white' : '' }}">Ranked Wars</a>
                         <a href="/overdoses" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('overdoses*') ? 'bg-gray-700 text-white' : '' }}">Overdoses</a>
+                        <a href="/organized-crimes" class="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->is('organized-crimes*') ? 'bg-gray-700 text-white' : '' }}">Organized Crimes</a>
                     </div>
                 </div>
 

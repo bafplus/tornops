@@ -16,9 +16,12 @@ if [ "$WAR_ACTIVE" = "1" ]; then
     $PHP $ARTISAN torn:sync-stocks --force >> $LOG 2>&1
     # Sync overdoses even during war
     $PHP $ARTISAN torn:sync-overdoses --force >> $LOG 2>&1
+    # Sync OCs even during war
+    $PHP $ARTISAN torn:sync-ocs --force >> $LOG 2>&1
 else
     # Normal operation - full syncs
     $PHP $ARTISAN torn:sync-faction >> $LOG 2>&1
     $PHP $ARTISAN torn:sync-stocks >> $LOG 2>&1
     $PHP $ARTISAN torn:sync-overdoses >> $LOG 2>&1
+    $PHP $ARTISAN torn:sync-ocs >> $LOG 2>&1
 fi

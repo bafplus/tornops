@@ -8,6 +8,7 @@ use App\Models\RankedWar;
 use App\Models\WarAttack;
 use App\Models\WarChain;
 use App\Services\WarService;
+use App\Services\OCService;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -24,8 +25,10 @@ class DashboardController extends Controller
             ->orderBy('start_date', 'desc')
             ->limit(5)
             ->get();
+        
+        $ocAlerts = OCService::getActiveOCs();
 
-        return view('dashboard.index', compact('settings', 'totalMembers', 'activeWars', 'recentWars'));
+        return view('dashboard.index', compact('settings', 'totalMembers', 'activeWars', 'recentWars', 'ocAlerts'));
     }
 
     public function members()

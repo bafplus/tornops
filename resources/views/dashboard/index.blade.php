@@ -26,6 +26,36 @@
         </div>
     </div>
 
+    @if(!empty($ocAlerts))
+    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-orange-400">Organized Crimes Alerts</h2>
+            <a href="/organized-crimes" class="text-orange-400 hover:text-orange-300 text-sm">View all →</a>
+        </div>
+        
+        <div class="space-y-2">
+            @foreach($ocAlerts as $alert)
+            <div class="flex items-center gap-3 p-3 rounded-lg 
+                {{ $alert['severity'] === 'danger' ? 'bg-red-900/30 border border-red-700' : 
+                   ($alert['severity'] === 'warning' ? 'bg-yellow-900/30 border border-yellow-700' : 
+                   'bg-blue-900/30 border border-blue-700') }}">
+                @if($alert['severity'] === 'danger')
+                <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                @elseif($alert['severity'] === 'warning')
+                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                @else
+                <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+                @endif
+                <span class="{{ $alert['severity'] === 'danger' ? 'text-red-400' : 
+                               ($alert['severity'] === 'warning' ? 'text-yellow-400' : 'text-blue-400') }}">
+                    {{ $alert['message'] }}
+                </span>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold text-blue-400">Recent Ranked Wars</h2>
