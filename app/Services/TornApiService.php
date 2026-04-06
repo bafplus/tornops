@@ -253,7 +253,9 @@ return $this->get("v2/faction/{$factionId}", ['selections' => 'crimes']);
 
 public function getItems(): ?array
 {
-return $this->getNoCache("v2/torn/items");
+$settings = \App\Models\FactionSettings::first();
+$apiKey = $settings?->torn_api_key;
+return $this->getNoCache("v2/torn/items", [], $apiKey);
 }
 
 public function getFactionAttacks(int $factionId, ?string $apiKey = null, ?int $from = null, ?int $to = null): ?array
