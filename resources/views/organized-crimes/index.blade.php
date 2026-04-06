@@ -46,11 +46,12 @@
                     </span>
                     @endif
                     @if($oc->rewards && in_array($oc->status, ['successful', 'Successful']))
+                    @php $r = is_string($oc->rewards) ? json_decode($oc->rewards, true) : $oc->rewards; @endphp
                     <span class="text-green-400 text-sm ml-2">
-                        💰 {{ number_format($oc->rewards['money'] ?? 0) }} | 
-                        Respect +{{ $oc->rewards['respect'] ?? 0 }}
-                        @if(($oc->rewards['payout']['percentage'] ?? 0) > 0)
-                            | {{ $oc->rewards['payout']['percentage'] }}% paid
+                        💰 {{ number_format($r['money'] ?? 0) }} | 
+                        Respect +{{ $r['respect'] ?? 0 }}
+                        @if(($r['payout']['percentage'] ?? 0) > 0)
+                            | {{ $r['payout']['percentage'] }}% paid
                         @endif
                     </span>
                     @endif

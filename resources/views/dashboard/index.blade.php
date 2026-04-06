@@ -105,5 +105,54 @@
             </div>
         @endif
     </div>
+
+    @if(!$inactiveMembers->isEmpty())
+    <div class="bg-gray-800 rounded-lg p-6 border border-red-900">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-red-400">Members Not in OC (14+ days)</h2>
+            <span class="text-gray-400 text-sm">{{ $inactiveMembers->count() }} members</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-gray-400 border-b border-gray-700">
+                        <th class="pb-3">Member</th>
+                        <th class="pb-3">Last OC</th>
+                        <th class="pb-3">Days Ago</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    @foreach($inactiveMembers as $member)
+                    <tr class="hover:bg-gray-700/50">
+                        <td class="py-3">
+                            <a href="https://www.torn.com/profiles.php?XID={{ $member->player_id }}" target="_blank" class="text-blue-400 hover:text-blue-300">
+                                {{ $member->name }}
+                            </a>
+                        </td>
+                        <td class="py-3 text-gray-400">
+                            @if($member->last_oc)
+                            {{ \Carbon\Carbon::createFromTimestamp($member->last_oc)->format('M j, Y') }}
+                            @else
+                            <span class="text-red-400">Never</span>
+                            @endif
+                        </td>
+                        <td class="py-3">
+                            @if($member->last_oc)
+                            @php $days = now()->diffInDays(\Carbon\Carbon::createFromTimestamp($member->last_oc)); @endphp
+                            <span class="{{ $days > 20 ? 'text-red-400' : ($days > 14 ? 'text-yellow-400' : 'text-gray-400') }}">
+                                {{ $days }} days
+                            </span>
+                            @else
+                            <span class="text-red-400 font-medium">N/A</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
 </div>
 @endsection

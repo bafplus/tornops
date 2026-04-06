@@ -7,9 +7,11 @@ use App\Models\FactionMember;
 use App\Models\RankedWar;
 use App\Models\WarAttack;
 use App\Models\WarChain;
+use App\Models\OrganizedCrimeSlot;
 use App\Services\WarService;
 use App\Services\OCService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -28,7 +30,27 @@ class DashboardController extends Controller
         
         $ocAlerts = OCService::getActiveOCs();
 
-        return view('dashboard.index', compact('settings', 'totalMembers', 'activeWars', 'recentWars', 'ocAlerts'));
+        $twoWeeksAgo = now()->subDays(14)->timestamp;
+        
+        $ocParticipation = DB::table('organized_crime_slots')
+            ->select('user_id', DB::raw('MAX(user_joined_at) as last_oc'))
+            ->whereNotNull('user_id')
+            ->groupBy('user_id');
+        
+        $inactiveMembers = FactionMember::where('faction_id', $settings->faction_id ?? 0)
+            ->leftJoinSub($ocParticipation, 'ocs', function ($join) {
+                $join->on('faction_members.player_id', '=', 'ocs.user_id');
+            })
+            ->where(function($query) use ($twoWeeksAgo) {
+                $query->where('last_oc', '<', $twoWeeksAgo)
+                      ->orWhereNull('last_oc');
+            })
+            ->select('faction_members.player_id', 'faction_members.name', 'last_oc')
+            ->orderBy('last_oc')
+            ->limit(20)
+            ->get();
+
+        return view('dashboard.index', compact('settings', 'totalMembers', 'activeWars', 'recentWars', 'ocAlerts', 'inactiveMembers'));
     }
 
     public function members()
