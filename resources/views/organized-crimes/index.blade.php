@@ -25,10 +25,11 @@
                 </h2>
                 <div class="flex items-center gap-3 mt-1">
                     <span class="px-2 py-0.5 rounded text-xs font-medium
-                        @if($oc->difficulty <= 2) bg-green-900/50 text-green-400
-                        @elseif($oc->difficulty == 3) bg-yellow-900/50 text-yellow-400
+                        @if($oc->difficulty <= 3) bg-green-900/50 text-green-400
+                        @elseif($oc->difficulty <= 5) bg-yellow-900/50 text-yellow-400
+                        @elseif($oc->difficulty <= 7) bg-orange-900/50 text-orange-400
                         @else bg-red-900/50 text-red-400 @endif">
-                        {{ $oc->difficulty_label }}
+                        <span class="text-base font-bold">{{ $oc->difficulty }}</span><span class="text-xs">/10</span>
                     </span>
                     <span class="px-2 py-0.5 rounded text-xs font-medium
                         @if(in_array($oc->status, ['ready', 'Ready'])) bg-green-900/50 text-green-400
@@ -54,6 +55,7 @@
                     <tr>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-300 uppercase">Position</th>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-300 uppercase">Member</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-300 uppercase">Progress</th>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-300 uppercase">CPR</th>
                         <th class="px-3 py-2 text-left text-xs font-medium text-gray-300 uppercase">Item Required</th>
                     </tr>
@@ -69,9 +71,25 @@
                             <a href="https://www.torn.com/profiles.php?XID={{ $slot->user_id }}" target="_blank" class="text-blue-400 hover:text-blue-300">
                                 {{ $slot->member_name }}
                             </a>
-                            <span class="text-gray-500 text-xs ml-1">({{ number_format($slot->checkpoint_pass_rate ?? 0, 1) }}%)</span>
+                            @if($slot->user_outcome)
+                            <span class="px-1.5 py-0.5 rounded text-xs ml-1 {{ $slot->user_outcome === 'Successful' ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400' }}">
+                                {{ $slot->user_outcome }}
+                            </span>
+                            @endif
                             @else
                             <span class="text-yellow-400 font-medium">OPEN</span>
+                            @endif
+                        </td>
+                        <td class="px-3 py-2 text-sm">
+                            @if($slot->user_progress !== null)
+                            <div class="flex items-center gap-2">
+                                <div class="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                    <div class="h-full {{ $slot->user_progress >= 70 ? 'bg-green-500' : ($slot->user_progress >= 30 ? 'bg-yellow-500' : 'bg-red-500') }}" style="width: {{ $slot->user_progress }}%"></div>
+                                </div>
+                                <span class="text-xs text-gray-400">{{ number_format($slot->user_progress, 0) }}%</span>
+                            </div>
+                            @else
+                            <span class="text-gray-500">-</span>
                             @endif
                         </td>
                         <td class="px-3 py-2 text-sm">
@@ -96,7 +114,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-3 py-4 text-center text-gray-500">No slots</td>
+                        <td colspan="5" class="px-3 py-4 text-center text-gray-500">No slots</td>
                     </tr>
                     @endforelse
                 </tbody>

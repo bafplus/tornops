@@ -54,10 +54,12 @@ class SyncOrganizedCrimes extends Command
                     'difficulty' => $crimeData['difficulty'],
                     'status' => strtolower($crimeData['status']),
                     'oc_created_at' => $crimeData['created_at'],
+                    'previous_crime_id' => $crimeData['previous_crime_id'] ?? null,
                     'planning_started_at' => $crimeData['planning_at'],
                     'ready_at' => $crimeData['ready_at'],
                     'executed_at' => $crimeData['executed_at'],
                     'expires_at' => $crimeData['expired_at'],
+                    'rewards' => $crimeData['rewards'] ?? null,
                     'last_synced_at' => now(),
                 ]
             );
@@ -65,16 +67,21 @@ class SyncOrganizedCrimes extends Command
             foreach ($crimeData['slots'] as $slotData) {
                 $userId = $slotData['user']['id'] ?? null;
                 $itemReq = $slotData['item_requirement'];
+                $user = $slotData['user'] ?? [];
                 
                 OrganizedCrimeSlot::updateOrCreate(
                     ['oc_id' => $crimeData['id'], 'position' => $slotData['position'], 'position_number' => $slotData['position_number']],
                     [
                         'organized_crime_id' => $oc->id,
+                        'position_id' => $slotData['position_id'] ?? null,
                         'user_id' => $userId,
+                        'user_outcome' => $user['outcome'] ?? null,
+                        'user_progress' => $user['progress'] ?? null,
                         'checkpoint_pass_rate' => $slotData['checkpoint_pass_rate'],
-                        'user_joined_at' => $slotData['user']['joined_at'] ?? null,
+                        'user_joined_at' => $user['joined_at'] ?? null,
                         'item_required_id' => $itemReq['id'] ?? null,
                         'item_available' => $itemReq['is_available'] ?? false,
+                        'item_outcome' => $user['item_outcome'] ?? null,
                         'last_synced_at' => now(),
                     ]
                 );

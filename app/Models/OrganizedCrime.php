@@ -18,20 +18,24 @@ class OrganizedCrime extends Model
         'difficulty',
         'status',
         'oc_created_at',
+        'previous_crime_id',
         'planning_started_at',
         'ready_at',
         'executed_at',
         'expires_at',
+        'rewards',
         'last_synced_at',
     ];
 
     protected $casts = [
         'difficulty' => 'integer',
         'oc_created_at' => 'integer',
+        'previous_crime_id' => 'integer',
         'planning_started_at' => 'integer',
         'ready_at' => 'integer',
         'executed_at' => 'integer',
         'expires_at' => 'integer',
+        'rewards' => 'array',
         'last_synced_at' => 'datetime',
     ];
 
