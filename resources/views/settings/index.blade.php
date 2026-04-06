@@ -89,6 +89,37 @@
     </div>
 
     <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4 text-indigo-400">Discord Integration</h2>
+        <p class="text-gray-400 text-sm mb-4">
+            Link your Discord account to use TornOps commands in Discord.
+        </p>
+        <form action="/settings/discord" method="POST" class="space-y-4">
+            @csrf
+            @method('PUT')
+            <div>
+                <label class="block text-gray-400 mb-2">Discord User ID</label>
+                <input type="text" name="discord_user_id" value="{{ auth()->user()->discord_user_id ?? '' }}" 
+                       placeholder="Enter your Discord User ID" 
+                       class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500 font-mono">
+                <p class="text-gray-500 text-xs mt-1">
+                    To find your Discord User ID: User Settings → Advanced → Enable Developer Mode → Right-click username → Copy ID
+                </p>
+            </div>
+            @if(auth()->user()->discord_verified_at)
+            <div class="bg-green-900/30 border border-green-700 rounded px-4 py-3">
+                <span class="text-green-400">✓ Verified</span>
+                <span class="text-gray-400 text-sm ml-2">
+                    Linked {{ auth()->user()->discord_verified_at->diffForHumans() }}
+                </span>
+            </div>
+            @endif
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded text-white">
+                {{ auth()->user()->discord_user_id ? 'Update Discord ID' : 'Save Discord ID' }}
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <h2 class="text-xl font-semibold mb-4">Change Password</h2>
         <form action="/settings/password" method="POST" class="space-y-4">
             @csrf

@@ -97,6 +97,49 @@
     </div>
 
     <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4 text-indigo-400">Discord Bot</h2>
+        <form action="/admin/settings" method="POST" class="space-y-4">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center">
+                    <label class="flex items-center text-gray-400 cursor-pointer">
+                        <input type="checkbox" name="discord_enabled" value="1" {{ ($settings->discord_enabled ?? false) ? 'checked' : '' }}
+                               class="mr-2 w-5 h-5 rounded bg-gray-700 border-gray-600">
+                        Enable Discord Bot
+                    </label>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2">Bot Token</label>
+                    <input type="password" name="discord_bot_token" value="{{ $settings->discord_bot_token ?? '' }}" placeholder="MTEwND..."
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white font-mono focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2">Server ID (Discord Server)</label>
+                    <input type="number" name="discord_server_id" value="{{ $settings->discord_server_id ?? '' }}" placeholder="123456789012345678"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-2">Default Channel ID (Alerts)</label>
+                    <input type="number" name="discord_channel_id" value="{{ $settings->discord_channel_id ?? '' }}" placeholder="123456789012345678"
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-2 rounded text-white">
+                    Save Settings
+                </button>
+                <form action="/admin/discord/restart" method="POST">
+                    @csrf
+                    <button type="submit" class="bg-gray-600 hover:bg-gray-700 px-6 py-2 rounded text-white">
+                        Restart Bot
+                    </button>
+                </form>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
         <h2 class="text-xl font-semibold mb-4 text-purple-400">Users</h2>
         
         <div class="mb-4">

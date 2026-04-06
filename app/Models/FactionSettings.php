@@ -15,10 +15,15 @@ class FactionSettings extends Model
         'sync_settings',
         'base_domain',
         'travel_method',
+        'discord_enabled',
+        'discord_bot_token',
+        'discord_server_id',
+        'discord_channel_id',
     ];
 
     protected $casts = [
         'auto_sync_enabled' => 'boolean',
+        'discord_enabled' => 'boolean',
         'sync_settings' => 'array',
     ];
 

@@ -26,6 +26,8 @@ class User extends Authenticatable
         'invited_by',
         'invited_at',
         'disabled_at',
+        'discord_user_id',
+        'discord_verified_at',
     ];
 
     protected $hidden = [
@@ -41,6 +43,7 @@ class User extends Authenticatable
             'is_admin' => 'boolean',
             'invited_at' => 'datetime',
             'disabled_at' => 'datetime',
+            'discord_verified_at' => 'datetime',
         ];
     }
 

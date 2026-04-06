@@ -28,6 +28,7 @@
     24 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     25 => 'Termwind\\Laravel\\TermwindServiceProvider',
     26 => 'App\\Providers\\AppServiceProvider',
+    27 => 'App\\Providers\\DiscordServiceProvider',
   ),
   'eager' => 
   array (
@@ -45,6 +46,7 @@
     11 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     12 => 'Termwind\\Laravel\\TermwindServiceProvider',
     13 => 'App\\Providers\\AppServiceProvider',
+    14 => 'App\\Providers\\DiscordServiceProvider',
   ),
   'deferred' => 
   array (

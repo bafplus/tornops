@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\DataRefreshLog;
 use App\Services\TornApiService;
 use App\Services\WarService;
+use App\Services\DiscordBotService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -105,6 +106,10 @@ class AdminController extends Controller
             'ffscouter_api_key' => ['nullable', 'string', 'max:100'],
             'auto_sync_enabled' => ['boolean'],
             'base_domain' => ['nullable', 'string', 'max:255'],
+            'discord_enabled' => ['boolean'],
+            'discord_bot_token' => ['nullable', 'string', 'max:100'],
+            'discord_server_id' => ['nullable', 'integer'],
+            'discord_channel_id' => ['nullable', 'integer'],
         ]);
 
         $settings = FactionSettings::first();
@@ -114,9 +119,33 @@ class AdminController extends Controller
             'ffscouter_api_key' => $request->ffscouter_api_key,
             'auto_sync_enabled' => $request->boolean('auto_sync_enabled'),
             'base_domain' => $request->input('base_domain') ?: null,
+            'discord_enabled' => $request->boolean('discord_enabled'),
+            'discord_bot_token' => $request->input('discord_bot_token') ?: null,
+            'discord_server_id' => $request->input('discord_server_id') ?: null,
+            'discord_channel_id' => $request->input('discord_channel_id') ?: null,
         ]);
 
+        if ($request->boolean('discord_enabled') && $request->input('discord_bot_token')) {
+            try {
+                $discord = app(DiscordBotService::class);
+                $discord->restart();
+            } catch (\Exception $e) {
+                return back()->with('error', 'Failed to restart Discord bot: ' . $e->getMessage());
+            }
+        }
+
         return back()->with('status', 'Faction settings updated successfully.');
+    }
+
+    public function restartDiscordBot(Request $request)
+    {
+        try {
+            $discord = app(DiscordBotService::class);
+            $discord->restart();
+            return back()->with('status', 'Discord bot restarted successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to restart Discord bot: ' . $e->getMessage());
+        }
     }
 
     public function createUser(Request $request)

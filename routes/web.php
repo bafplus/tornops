@@ -62,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/settings/password', [SettingsController::class, 'updatePassword']);
     Route::put('/settings/api-key', [SettingsController::class, 'updateApiKey']);
     Route::put('/settings/travel-method', [SettingsController::class, 'updateTravelMethod']);
+    Route::put('/settings/discord', [SettingsController::class, 'updateDiscord']);
     
     Route::get('/gym', [GymAssistantController::class, 'index']);
     Route::post('/gym/update', [GymAssistantController::class, 'update']);
@@ -88,9 +89,10 @@ Route::post('/target-finder/register-key', [TargetFinderController::class, 'regi
 Route::get('/scripts', [ScriptsController::class, 'index']);
     Route::get('/tools', [ToolsController::class, 'index']);
     
-    Route::middleware(['admin'])->group(function () {
+        Route::middleware(['admin'])->group(function () {
         Route::get('/admin', [AdminController::class, 'index']);
         Route::put('/admin/settings', [AdminController::class, 'updateFactionSettings']);
+        Route::post('/admin/discord/restart', [AdminController::class, 'restartDiscordBot']);
         Route::post('/admin/users', [AdminController::class, 'createUser']);
         Route::post('/admin/users/{user}/regenerate', [AdminController::class, 'regenerateInvite']);
         Route::post('/admin/users/{user}/toggle', [AdminController::class, 'toggleAdmin']);

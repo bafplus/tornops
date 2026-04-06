@@ -54,4 +54,22 @@ class SettingsController extends Controller
 
         return back()->with('status', 'Travel method updated successfully.');
     }
+
+    public function updateDiscord(Request $request)
+    {
+        $request->validate([
+            'discord_user_id' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $user = auth()->user();
+        $user->discord_user_id = $request->input('discord_user_id') ?: null;
+        
+        if (!$request->input('discord_user_id')) {
+            $user->discord_verified_at = null;
+        }
+        
+        $user->save();
+
+        return back()->with('status', 'Discord ID updated successfully.');
+    }
 }

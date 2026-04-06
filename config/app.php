@@ -41,6 +41,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         App\Providers\AppServiceProvider::class,
+        App\Providers\DiscordServiceProvider::class,
     ],
 
     'aliases' => Illuminate\Support\Facades\Facade::defaultAliases()->merge([
