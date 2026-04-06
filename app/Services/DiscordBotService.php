@@ -297,12 +297,15 @@ class DiscordBotService
 
         $life = $member->life_current ?? 'N/A';
         $energy = $member->energy ?? 'N/A';
+        $lifeMax = $member->life_max ?? 'N/A';
+        $energyMax = $member->energy_max ?? 'N/A';
+        $level = $member->level ?? 'N/A';
 
         $message->channel->sendMessage("**Your Status**
 {$status}
-Life: {$life} / {$member->life_max ?? 'N/A'}
-Energy: {$energy} / {$member->energy_max ?? 'N/A'}
-Level: {$member->level ?? 'N/A'}");
+Life: {$life} / {$lifeMax}
+Energy: {$energy} / {$energyMax}
+Level: {$level}");
     }
 
     private function handleHelp(Message $message): void
