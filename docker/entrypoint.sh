@@ -14,6 +14,8 @@ chown www-data:www-data /var/www
 if [ -d "/var/www/html/.git" ]; then
     echo "Updating repository..."
     cd /var/www/html
+    # Switch to HTTPS if needed
+    git remote set-url origin https://github.com/bafplus/tornops.git || true
     # Save any local changes, pull, then restore
     git stash push --include-untracked -m "temp_stash" || true
     git pull origin main || true
