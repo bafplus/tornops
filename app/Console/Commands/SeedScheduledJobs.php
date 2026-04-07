@@ -71,7 +71,6 @@ class SeedScheduledJobs extends Command
                 'enabled' => true,
                 'cron_expression' => $config['default_cron'],
                 'war_mode_only' => $config['war_mode_only'],
-                'war_enabled' => true,
                 'war_cron' => $config['war_cron'] ?? null,
             ];
 

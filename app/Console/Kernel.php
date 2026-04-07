@@ -39,25 +39,11 @@ class Kernel extends ConsoleKernel
                 });
             }
         }
-        
-        $schedule->command('torn:check-faction-membership')
-            ->hourly()
-            ->withoutOverlapping()
-            ->runInBackground();
-        
-        $schedule->command('torn:sync-items')
-            ->daily()
-            ->withoutOverlapping()
-            ->runInBackground();
     }
     
     private function shouldScheduleJob(ScheduledJob $job, bool $isWarMode): bool
     {
         if ($job->war_mode_only && !$isWarMode) {
-            return false;
-        }
-        
-        if ($job->war_mode_only && $isWarMode && !$job->war_enabled) {
             return false;
         }
         

@@ -262,7 +262,12 @@
     </div>
 
     <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <h2 class="text-xl font-semibold mb-4 text-yellow-400">API Schedule</h2>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-yellow-400">API Schedule</h2>
+            <a href="/admin/scheduled-jobs" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded text-white text-sm">
+                Settings
+            </a>
+        </div>
         @if($warActive ?? false)
         <p class="text-red-400 text-sm mb-4">
             <span class="font-semibold">War Mode Active:</span> Non-essential syncs are disabled. Only war-critical syncs run every minute.
@@ -348,16 +353,6 @@
         <a href="/admin/logs" class="inline-block bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">
             View Logs
         </a>
-    </div>
-
-    <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-yellow-400">Scheduled Jobs</h2>
-            <a href="/admin/scheduled-jobs" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded text-white">
-                Manage Jobs
-            </a>
-        </div>
-        <p class="text-gray-400 text-sm">Configure scheduled sync jobs, cron expressions, and war mode settings.</p>
     </div>
 </div>
 @endsection

@@ -362,71 +362,132 @@ class AdminController extends Controller
     {
         $job = ScheduledJob::findOrFail($id);
         
-        $cronHour = $request->input('cron_hour') ?: '*';
-        $cronMin = $request->input('cron_min') ?: '*';
-        $cronExpression = "{$cronMin} {$cronHour} * * *";
+        $cronPreset = $request->input('cron_custom_preset');
+        $cronValue = $request->input('cron_custom_value');
+        $cronUnit = $request->input('cron_custom_unit', 'minutes');
+        $cronHour = $request->input('cron_custom_hour');
+        $cronMinute = $request->input('cron_custom_minute');
+        $cronExpression = $this->buildCronFromPreset($cronPreset, $cronValue, $cronUnit, $cronHour, $cronMinute);
         
-        $warHour = $request->input('war_hour') ?: '*';
-        $warMin = $request->input('war_min') ?: '*';
-        $warCron = "{$warMin} {$warHour} * * *";
+        $warPreset = $request->input('war_custom_preset');
+        $warValue = $request->input('war_custom_value');
+        $warUnit = $request->input('war_custom_unit', 'minutes');
+        $warCron = $request->boolean('war_mode_only') 
+            ? $this->buildCronFromPreset($warPreset, $warValue, $warUnit)
+            : null;
         
         $job->update([
             'enabled' => $request->boolean('enabled'),
             'cron_expression' => $cronExpression,
             'war_mode_only' => $request->boolean('war_mode_only'),
-            'war_enabled' => $request->boolean('war_enabled'),
             'war_cron' => $warCron,
         ]);
 
         return back()->with('status', 'Job updated successfully.');
+    }
+    
+    private function buildCronFromPreset(?string $preset, ?string $value, string $unit, ?string $hour = null, ?string $minute = null): string
+    {
+        if ($preset && $preset !== 'custom') {
+            if ($preset === 'every_minute') return '* * * * *';
+            if ($preset === 'every_odd_minute') return '1-59/2 * * * *';
+            if ($preset === 'every_even_minute') return '2-58/2 * * * *';
+            if (str_ends_with($preset, '_min')) {
+                $val = str_replace(['every_', '_min'], '', $preset);
+                return '*/' . $val . ' * * * *';
+            }
+            if (str_ends_with($preset, '_hour')) {
+                $val = str_replace(['every_', '_hour'], '', $preset);
+                return '0 */' . $val . ' * * *';
+            }
+            if (str_starts_with($preset, 'every_day_')) {
+                $time = str_replace('every_day_', '', $preset);
+                return '0 ' . $time . ' * * *';
+            }
+        }
+        
+        if ($value && is_numeric($value)) {
+            if ($unit === 'minutes') return '*/' . $value . ' * * * *';
+            if ($unit === 'hours') return '0 */' . $value . ' * * *';
+            if ($unit === 'days') {
+                $h = $hour ?? '0';
+                $m = $minute ?? '0';
+                return $m . ' ' . $h . ' * * *';
+            }
+        }
+        
+        return '*/10 * * * *';
     }
 
     public function seedScheduledJobs()
     {
         $definitions = [
             'torn:sync-faction' => [
-                'description' => 'Sync faction data (members, stats, info)',
+                'description' => 'Sync faction members from Torn API',
                 'war_mode_only' => false,
                 'default_cron' => '*/5 * * * *',
+                'api_info' => '1 bulk call',
+                'api_est' => '1',
+            ],
+            'torn:sync-member-stats' => [
+                'description' => 'Sync FF stats via FF Scouter API',
+                'war_mode_only' => false,
+                'default_cron' => '*/10 * * * *',
+                'api_info' => '1 call per member',
+                'api_est' => '15-20',
             ],
             'torn:sync-wars' => [
                 'description' => 'Sync ranked wars list',
                 'war_mode_only' => true,
                 'default_cron' => '*/10 * * * *',
                 'war_cron' => '*/5 * * * *',
+                'api_info' => '1 bulk call',
+                'api_est' => '1',
             ],
             'torn:sync-active' => [
                 'description' => 'Sync active war details and scores',
                 'war_mode_only' => true,
                 'default_cron' => '*/10 * * * *',
                 'war_cron' => '*/1 * * * *',
+                'api_info' => '1 call per opponent faction',
+                'api_est' => '2-5',
             ],
             'torn:sync-attacks' => [
                 'description' => 'Sync war attacks data',
                 'war_mode_only' => true,
                 'default_cron' => '*/10 * * * *',
                 'war_cron' => '*/1 * * * *',
+                'api_info' => '1 call per active war',
+                'api_est' => '10-50',
             ],
             'torn:sync-chains' => [
                 'description' => 'Sync war chain data',
                 'war_mode_only' => true,
                 'default_cron' => '*/10 * * * *',
                 'war_cron' => '*/1 * * * *',
+                'api_info' => '1 call per faction',
+                'api_est' => '2',
             ],
             'torn:check-faction-membership' => [
                 'description' => 'Check faction membership and sync new members',
                 'war_mode_only' => false,
-                'default_cron' => '0 * * * *',
+                'default_cron' => '0 */6 * * *',
+                'api_info' => '1 bulk call',
+                'api_est' => '1',
             ],
             'torn:sync-stocks' => [
                 'description' => 'Sync market stocks data',
                 'war_mode_only' => false,
-                'default_cron' => '0 0 * * *',
+                'default_cron' => '0 1 * * *',
+                'api_info' => '1 bulk call',
+                'api_est' => '1',
             ],
             'torn:sync-items' => [
                 'description' => 'Sync item market data',
                 'war_mode_only' => false,
-                'default_cron' => '0 0 * * *',
+                'default_cron' => '0 2 * * *',
+                'api_info' => '1 bulk call',
+                'api_est' => '1',
             ],
         ];
 
@@ -441,8 +502,9 @@ class AdminController extends Controller
                 'enabled' => true,
                 'cron_expression' => $config['default_cron'],
                 'war_mode_only' => $config['war_mode_only'],
-                'war_enabled' => true,
                 'war_cron' => $config['war_cron'] ?? null,
+                'api_info' => $config['api_info'] ?? null,
+                'api_est' => $config['api_est'] ?? null,
             ];
 
             if ($exists) {

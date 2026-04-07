@@ -13,14 +13,14 @@ class ScheduledJob extends Model
         'enabled',
         'cron_expression',
         'war_mode_only',
-        'war_enabled',
         'war_cron',
+        'api_info',
+        'api_est',
     ];
 
     protected $casts = [
         'enabled' => 'boolean',
         'war_mode_only' => 'boolean',
-        'war_enabled' => 'boolean',
     ];
 
     public static function isWarMode(): bool
@@ -48,10 +48,6 @@ class ScheduledJob extends Model
         }
 
         $cron = $this->getEffectiveCron();
-        
-        if ($this->war_mode_only && self::isWarMode() && !$this->war_enabled) {
-            return false;
-        }
 
         return $cron !== null;
     }
