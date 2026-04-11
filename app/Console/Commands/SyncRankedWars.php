@@ -91,8 +91,6 @@ class SyncRankedWars extends Command
                         $ffIndex[$ff['player_id']] = $ff;
                     }
                     
-                    $onlineResults = $tornApi->getPlayersOnlineStatus($playerIds);
-                    
                     foreach ($memberData['members'] as $playerId => $member) {
                         $warScore = $oppData['score'] ?? 0;
                         
@@ -100,8 +98,6 @@ class SyncRankedWars extends Command
                         $ffScore = $ffData['fair_fight'] ?? null;
                         $estimatedStats = $ffData['bs_estimate_human'] ?? null;
                         $ffUpdatedAt = isset($ffData['last_updated']) ? now()->createFromTimestamp($ffData['last_updated']) : null;
-                        
-                        $onlineData = $onlineResults[$playerId] ?? ['online_status' => 'offline', 'online_description' => null];
                         
                         WarMember::updateOrCreate(
                             [
@@ -121,8 +117,8 @@ class SyncRankedWars extends Command
                                 'ff_score' => $ffScore,
                                 'estimated_stats' => $estimatedStats,
                                 'ff_updated_at' => $ffUpdatedAt,
-                                'online_status' => $onlineData['online_status'],
-                                'online_description' => $onlineData['online_description'],
+                                'online_status' => $member['last_action']['status'] ?? null,
+                                'online_description' => $member['last_action']['description'] ?? null,
                                 'data' => $member,
                             ]
                         );
