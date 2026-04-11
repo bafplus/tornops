@@ -333,18 +333,6 @@
                 </tbody>
             </table>
         </div>
-        
-        <div class="mt-4 p-4 bg-gray-900/50 rounded border border-gray-700">
-            <p class="text-gray-400 text-sm">
-                <span class="text-yellow-400 font-semibold">Note:</span> 
-                Torn API limits to 100 requests per minute. This system uses caching and smart reuse to stay well under that limit.
-                @if($warActive ?? false)
-                    <br><span class="text-green-400">During active wars, only essential war syncs run every minute.</span>
-                @else
-                    <br>War syncs (active wars, attacks) run every 5 minutes during peace time.
-                @endif
-            </p>
-        </div>
 
         <div class="mt-4 p-4 bg-gray-900/50 rounded border border-gray-700">
             <div class="flex items-center justify-between">

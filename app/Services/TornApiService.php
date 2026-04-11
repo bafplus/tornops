@@ -54,8 +54,10 @@ class TornApiService
 
         $cacheTtl = $this->getCacheTtl($endpoint);
 
+        // Log API call first (always, even if cached)
+        $this->logApiCall($endpoint, $params);
+
         return Cache::remember($cacheKey, $cacheTtl, function () use ($endpoint, $params, $key) {
-            $this->logApiCall($endpoint, $params);
 
             $response = Http::timeout(10)
                 ->get("{$this->baseUrl}/{$endpoint}", array_merge($params, [
@@ -122,6 +124,9 @@ class TornApiService
     public function getNoCache(string $endpoint, array $params = [], ?string $apiKey = null): ?array
     {
         $key = $apiKey ?? $this->apiKey;
+        
+        // Log API call
+        $this->logApiCall($endpoint, $params);
         
         $response = Http::timeout(10)
             ->get("{$this->baseUrl}/{$endpoint}", array_merge(['key' => $key], $params));
