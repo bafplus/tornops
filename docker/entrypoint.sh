@@ -129,6 +129,7 @@ export APACHE_RUN_GROUP=www-data
 php artisan key:generate --force 2>/dev/null || true
 php artisan migrate --force
 php artisan cache:clear
+php artisan jobs:seed
 
 # Ensure /data directory and database are writable by www-data (fix volume permissions)
 if [ -d "/data" ]; then
