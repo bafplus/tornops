@@ -46,27 +46,7 @@ class AdminController extends Controller
             'torn:sync-items' => ['k'=>'items','d'=>'Syncs items','c'=>'1','e'=>0],
         ];
         
-        foreach ($map as $cmd => $i) {
-            $cron = $dbJobs[$cmd] ?? null;
-            $schedule[$i['k']] = ['name'=>$cmd,'schedule'=>$cron?$cron:'Not set','description'=>$i['d'],'api_calls'=>$i['c'],'essential'=>$i['e']];
-        }
-        
-        private function getApiSchedule(bool $warActive): array
-    {
-        $dbJobs = ScheduledJob::pluck('cron_expression', 'command')->toArray();
-        
-        $map = [
-            'torn:sync-faction' => ['k'=>'faction_sync','d'=>'Syncs faction members','c'=>'1','e'=>0],
-            'torn:sync-ffstats' => ['k'=>'ff_stats','d'=>'Syncs FF stats','c'=>'1','e'=>0],
-            'torn:sync-wars' => ['k'=>'ranked_wars','d'=>'Syncs ranked wars','c'=>'1','e'=>0],
-            'torn:sync-active' => ['k'=>'active_wars','d'=>'War updates','c'=>'1','e'=>1],
-            'torn:sync-attacks' => ['k'=>'war_attacks','d'=>'War attacks','c'=>'1','e'=>1],
-            'torn:sync-chains' => ['k'=>'war_chains','d'=>'War chains','c'=>'1','e'=>1],
-            'torn:sync-stocks' => ['k'=>'stocks','d'=>'Syncs stocks','c'=>'1','e'=>0],
-            'torn:sync-items' => ['k'=>'items','d'=>'Syncs items','c'=>'1','e'=>0],
-        ];
-        
-        foreach ($map as $cmd => $i) {
+foreach ($map as $cmd => $i) {
             $cron = $dbJobs[$cmd] ?? null;
             $schedule[$i['k']] = ['name'=>$cmd,'schedule'=>$cron?:'Not set','description'=>$i['d'],'api_calls'=>$i['c'],'essential'=>(bool)$i['e']];
         }
