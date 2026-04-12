@@ -33,6 +33,49 @@ class AdminController extends Controller
 
     private function getApiSchedule(bool $warActive): array
     {
+        $dbJobs = ScheduledJob::pluck('cron_expression', 'command')->toArray();
+        
+        $schedule = [];
+        
+        $jobMap = [
+            'torn:sync-faction' => ['key' => 'faction_sync', 'desc' => 'Syncs faction members from Torn API', 'calls' => '1 call', 'essential' => false],
+            'torn:sync-ffstats' => ['key' => 'ff_stats', 'desc' => 'Syncs FF stats via FF Scouter API', 'calls' => '1 batch call', 'essential' => false],
+            'torn:sync-wars' => ['key' => 'ranked_wars', 'desc' => 'Syncs ranked wars list', 'calls' => '1 call', 'essential' => false],
+            'torn:sync-active' => ['key' => 'active_wars', 'desc' => 'War updates with scores and member status', 'calls' => '1 call per opponent', 'essential' => true],
+            'torn:sync-attacks' => ['key' => 'war_attacks', 'desc' => 'Syncs war attack details', 'calls' => 'New attacks only', 'essential' => true],
+            'torn:sync-chains' => ['key' => 'war_chains', 'desc' => 'Syncs war chain data', 'calls' => '1 call', 'essential' => true],
+            'torn:sync-stocks' => ['key' => 'stocks', 'desc' => 'Syncs market stocks', 'calls' => '1 call', 'essential' => false],
+            'torn:sync-items' => ['key' => 'items', 'desc' => 'Syncs item market data', 'calls' => '1 call', 'essential' => false],
+            'torn:check-faction-membership' => ['key' => 'check_membership', 'desc' => 'Checks if users are still in faction', 'calls' => '1 call', 'essential' => false],
+        ];
+        
+        foreach ($jobMap as $command => $info) {
+            $cron = $dbJobs[$command] ?? null;
+            $schedule[$info['key']] = [
+                'name' => $command,
+                'schedule' => $cron ? $this->formatCron($cron) : 'Not scheduled',
+                'description' => $info['desc'],
+                'api_calls' => $info['calls'],
+                'essential' => $info['essential'],
+            ];
+        }
+        
+        return $schedule;
+    }
+    
+    private function formatCron(string $cron): string
+    {
+        if ($cron === '*/5 * * * *') return 'Every 5 min';
+        if ($cron === '*/10 * * * *') return 'Every 10 min';
+        if ($cron === '*/1 * * * *') return 'Every 1 min';
+        if ($cron === '0 * * * *') return 'Every hour';
+        if ($cron === '0 0 * * *') return 'Daily (midnight)';
+        if (preg_match('/^0\s+\d+\s+\*\s+\*\s+$/', $cron)) return 'Daily at ' . explode(' ', $cron)[1] . ':00';
+        return $cron;
+    }
+    
+    private function getApiScheduleLegacy(bool $warActive): array
+    {
         $nonEssentialDuringWar = ['faction_sync', 'faction_members', 'member_stats', 'stocks', 'items'];
         
         $schedule = [
@@ -43,51 +86,6 @@ class AdminController extends Controller
                 'api_calls' => '1 call',
                 'essential' => false,
             ],
-            'ff_stats' => [
-                'name' => 'torn:sync-ffstats',
-                'schedule' => 'Every 10 min',
-                'description' => 'Syncs FF stats via FF Scouter API',
-                'api_calls' => '1 batch call',
-                'essential' => false,
-            ],
-            'ranked_wars' => [
-                'name' => 'torn:sync-wars',
-                'schedule' => 'Every 10 min',
-                'description' => 'Syncs ranked wars list',
-                'api_calls' => '1 call',
-                'essential' => false,
-            ],
-            'active_wars' => [
-                'name' => 'torn:sync-active',
-                'schedule' => 'War: Every 1 min',
-                'description' => 'War updates with scores and member status',
-                'api_calls' => '1 call per opponent',
-                'essential' => true,
-            ],
-            'war_attacks' => [
-                'name' => 'torn:sync-attacks',
-                'schedule' => 'War: Every 1 min',
-                'description' => 'Syncs war attack details',
-                'api_calls' => 'New attacks only',
-                'essential' => true,
-            ],
-            'war_chains' => [
-                'name' => 'torn:sync-chains',
-                'schedule' => 'War: Every 1 min',
-                'description' => 'Syncs war chain data',
-                'api_calls' => '1 call',
-                'essential' => true,
-            ],
-            'check_membership' => [
-                'name' => 'torn:check-faction-membership',
-                'schedule' => 'Every 6 hours',
-                'description' => 'Checks if users are still in faction',
-                'api_calls' => '1 call',
-                'essential' => false,
-            ],
-            'stocks' => [
-                'name' => 'torn:sync-stocks',
-                'schedule' => 'Daily (01:00)',
                 'description' => 'Syncs stock prices',
                 'api_calls' => '1 call',
                 'essential' => false,
