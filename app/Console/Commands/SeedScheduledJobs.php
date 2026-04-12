@@ -46,6 +46,11 @@ class SeedScheduledJobs extends Command
             'war_mode_only' => false,
             'default_cron' => '0 0 * * *',
         ],
+        'torn:sync-stocks' => [
+            'description' => 'Sync market stocks',
+            'war_mode_only' => false,
+            'default_cron' => '0 * * * *',
+        ],
         'torn:sync-ffstats' => [
             'description' => 'Sync FF stats via FF Scouter',
             'war_mode_only' => false,

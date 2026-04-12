@@ -43,6 +43,7 @@ class AdminController extends Controller
             'torn:sync-attacks' => ['k'=>'war_attacks','d'=>'War attacks','c'=>'1','e'=>1],
             'torn:sync-chains' => ['k'=>'war_chains','d'=>'War chains','c'=>'1','e'=>1],
             'torn:sync-stocks' => ['k'=>'stocks','d'=>'Syncs stocks','c'=>'1','e'=>0],
+            'torn:sync-stocks' => ['k'=>'stocks','d'=>'Syncs stocks','c'=>'1','e'=>0],
             'torn:sync-items' => ['k'=>'items','d'=>'Syncs items','c'=>'1','e'=>0],
         ];
         
