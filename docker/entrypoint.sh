@@ -130,6 +130,16 @@ php artisan key:generate --force 2>/dev/null || true
 php artisan migrate --force
 php artisan cache:clear
 
+# Ensure /data directory and database are writable by www-data (fix volume permissions)
+if [ -d "/data" ]; then
+    chown -R www-data:www-data /data
+    chmod -R 775 /data
+    if [ -f "/data/database.sqlite" ]; then
+        chown www-data:www-data /data/database.sqlite
+        chmod 664 /data/database.sqlite
+    fi
+fi
+
 # Setup cron
 # During active war: war syncs every minute, non-essential syncs disabled
 # Normal: faction sync every 10 min, stocks every 10 min
