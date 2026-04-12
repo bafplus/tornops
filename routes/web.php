@@ -122,6 +122,11 @@ Route::get('/scripts', [ScriptsController::class, 'index']);
             return back()->with('status', 'War attacks sync completed.');
         });
 
+        Route::post('/admin/sync/chains', function () {
+            \Illuminate\Support\Facades\Artisan::call('torn:sync-chains');
+            return back()->with('status', 'Chains sync completed.');
+        });
+
         Route::post('/admin/sync/stocks', function () {
             \Illuminate\Support\Facades\Artisan::call('torn:sync-stocks');
             return back()->with('status', 'Stocks sync completed.');

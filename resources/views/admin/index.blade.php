@@ -316,6 +316,7 @@
                                         'faction_members' => 'members',
                                         'active_wars' => 'active',
                                         'war_attacks' => 'attacks',
+                                        'war_chains' => 'chains',
                                         'stocks' => 'stocks',
                                     ];
                                     $route = $routeMap[$key] ?? 'wars';
