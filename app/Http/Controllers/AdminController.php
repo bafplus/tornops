@@ -42,14 +42,25 @@ class AdminController extends Controller
             'torn:sync-active' => ['k'=>'active_wars','d'=>'War updates','c'=>'1','e'=>1],
             'torn:sync-attacks' => ['k'=>'war_attacks','d'=>'War attacks','c'=>'1','e'=>1],
             'torn:sync-chains' => ['k'=>'war_chains','d'=>'War chains','c'=>'1','e'=>1],
-            'torn:sync-stocks' => ['k'=>'stocks','d'=>'Syncs stocks','c'=>'1','e'=>0],
-            'torn:sync-stocks' => ['k'=>'stocks','d'=>'Syncs stocks','c'=>'1','e'=>0],
+'torn:sync-stocks' => ['k'=>'stocks','d'=>'Syncs stocks','c'=>'1','e'=>0],
             'torn:sync-items' => ['k'=>'items','d'=>'Syncs items','c'=>'1','e'=>0],
         ];
         
-foreach ($map as $cmd => $i) {
-            $cron = $dbJobs[$cmd] ?? null;
-            $schedule[$i['k']] = ['name'=>$cmd,'schedule'=>$cron?:'Not set','description'=>$i['d'],'api_calls'=>$i['c'],'essential'=>(bool)$i['e']];
+        $dbJobsFull = ScheduledJob::all()->keyBy('command');
+        
+        foreach ($map as $cmd => $i) {
+            $job = $dbJobsFull[$cmd] ?? null;
+            $cron = $job?->cron_expression ?? null;
+            if ($warActive && $job?->war_cron) {
+                $cron = $job->war_cron;
+            }
+            $schedule[$i['k']] = [
+                'name' => $cmd,
+                'schedule' => $cron ?: 'Not set',
+                'description' => $i['d'],
+                'api_calls' => $i['c'],
+                'essential' => (bool)$i['e']
+            ];
         }
         
         foreach ($schedule as $key => &$item) {
