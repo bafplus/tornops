@@ -12,6 +12,7 @@ if [ "$WAR_ACTIVE" = "1" ]; then
     # Active war - only run war-essential syncs every minute
     $PHP $ARTISAN torn:sync-active >> $LOG 2>&1
     $PHP $ARTISAN torn:sync-attacks --force >> $LOG 2>&1
+    $PHP $ARTISAN torn:sync-chains >> $LOG 2>&1
     # Still sync stocks but warn (user can still view manually)
     $PHP $ARTISAN torn:sync-stocks --force >> $LOG 2>&1
     # Sync OCs even during war
