@@ -13,6 +13,35 @@
             <p class="text-gray-400">Setup Wizard</p>
         </div>
 
+        @php
+        $warnings = [];
+        if (!is_dir('/data')) {
+            $warnings[] = 'Data directory (/data) not found';
+        } else if (!is_writable('/data')) {
+            $warnings[] = 'Data directory is not writable';
+        }
+        if (!file_exists('/data/database.sqlite')) {
+            $warnings[] = 'Database file not found';
+        } else if (!is_writable('/data/database.sqlite')) {
+            $warnings[] = 'Database is not writable';
+        }
+        @endphp
+
+        @if(!empty($warnings))
+        <div class="bg-yellow-900/50 border border-yellow-500 text-yellow-400 px-4 py-3 rounded mb-6">
+            <p class="font-semibold mb-2">System Check Failed:</p>
+            <ul class="list-disc list-inside text-sm">
+                @foreach($warnings as $w)
+                <li>{{ $w }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @else
+        <div class="bg-green-900/50 border border-green-500 text-green-400 px-4 py-3 rounded mb-6">
+            System check passed - ready to setup
+        </div>
+        @endif
+
         @if(session('success'))
         <div class="bg-green-900/50 border border-green-500 text-green-400 px-4 py-3 rounded mb-6">
             {{ session('success') }}
