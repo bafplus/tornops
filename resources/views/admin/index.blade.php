@@ -262,72 +262,93 @@
     </div>
 
     <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        @php
+            $settings = \App\Models\FactionSettings::first();
+            $warModeEnabled = $settings?->war_mode_enabled ?? false;
+            $cronOptions = [
+                '' => 'Disable',
+                '*/1 * * * *' => '30 seconds',
+                '*/5 * * * *' => 'Every 1 min',
+                '*/10 * * * *' => 'Every 5 min',
+                '*/30 * * * *' => 'Every 10 min',
+                '0 * * * *' => 'Hourly',
+                '0 0 * * *' => 'Daily',
+            ];
+        @endphp
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold text-yellow-400">API Schedule</h2>
-            <a href="/admin/scheduled-jobs" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded text-white text-sm">
-                Settings
-            </a>
+            <form method="POST" action="/admin/war-mode" class="flex items-center gap-2">
+                @csrf
+                <span class="text-gray-400 text-sm">War Mode:</span>
+                <button type="submit" name="enabled" value="{{ $warModeEnabled ? '0' : '1' }}" 
+                    class="px-3 py-1 rounded text-sm font-semibold {{ $warModeEnabled ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white' }}">
+                    {{ $warModeEnabled ? 'ON' : 'OFF' }}
+                </button>
+            </form>
         </div>
-        @if($warActive ?? false)
-        <p class="text-red-400 text-sm mb-4">
-            <span class="font-semibold">War Mode Active:</span> Non-essential syncs are disabled. Only war-critical syncs run every minute.
-        </p>
-        @else
-        <p class="text-gray-400 text-sm mb-4">All scheduled API calls and their current status</p>
-        @endif
         
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-left text-gray-400 bg-gray-700/50">
                         <th class="p-3">Command</th>
-                        <th class="p-3">Schedule</th>
+                        <th class="p-3">Normal</th>
+                        <th class="p-3">War</th>
                         <th class="p-3">Last Run</th>
-                        <th class="p-3">Status</th>
-                        <th class="p-3">API Calls</th>
-                        <th class="p-3">Description</th>
+                        <th class="p-3">API</th>
                         <th class="p-3">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
                     @foreach($apiSchedule as $key => $item)
-                    <tr class="hover:bg-gray-700/30 {{ $item['disabled'] ?? false ? 'opacity-50' : '' }}">
-                        <td class="p-3 font-mono {{ $item['disabled'] ?? false ? 'text-gray-500' : 'text-blue-400' }}">{{ $item['name'] }}</td>
-                        <td class="p-3 {{ $item['disabled'] ?? false ? 'text-gray-500' : '' }}">{{ $item['schedule'] }}</td>
-                        <td class="p-3 text-gray-300">{{ $item['last_run'] }}</td>
+                    <tr class="hover:bg-gray-700/30">
+                        <td class="p-3 font-mono text-blue-400">{{ $item['name'] }}</td>
                         <td class="p-3">
-                            @if($item['disabled'] ?? false)
-                                <span class="px-2 py-1 rounded text-xs bg-red-900 text-red-400">Disabled (War)</span>
-                            @elseif($item['essential'] ?? false)
-                                <span class="px-2 py-1 rounded text-xs bg-green-900 text-green-400">Active</span>
+                            <form method="POST" action="/admin/job/{{ str_replace('torn:', '', $item['name']) }}" class="flex gap-1">
+                                @csrf
+                                <select name="schedule" class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-xs">
+                                    @foreach($cronOptions as $val => $label)
+                                    <option value="{{ $val }}" {{ $item['schedule_raw'] === $val ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+                        </td>
+                        <td class="p-3">
+                            @if($warModeEnabled)
+                            <form method="POST" action="/admin/job/{{ str_replace('torn:', '', $item['name']) }}" class="flex gap-1">
+                                @csrf
+                                <select name="war_schedule" class="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-xs">
+                                    @foreach($cronOptions as $val => $label)
+                                    <option value="{{ $val }}" {{ $item['war_schedule_raw'] === $val ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
                             @else
-                                <span class="px-2 py-1 rounded text-xs bg-blue-900 text-blue-400">Active</span>
+                            <span class="text-gray-500 text-xs">—</span>
                             @endif
                         </td>
+                        <td class="p-3 text-gray-300">{{ $item['last_run'] }}</td>
                         <td class="p-3 text-gray-400">{{ $item['api_calls'] }}</td>
-                        <td class="p-3 text-gray-400">{{ $item['description'] }}</td>
                         <td class="p-3">
-                            @if($item['disabled'] ?? false)
-                                <span class="text-gray-500 text-xs">Skipped during war</span>
-                            @else
-                                @php
-                                    $routeMap = [
-                                        'faction_sync' => 'factions',
-                                        'faction_members' => 'members',
-                                        'active_wars' => 'active',
-                                        'war_attacks' => 'attacks',
-                                        'war_chains' => 'chains',
-                                        'stocks' => 'stocks',
-                                    ];
-                                    $route = $routeMap[$key] ?? 'wars';
-                                @endphp
-                                <form action="/admin/sync/{{ $route }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-xs">
-                                        Run Now
-                                    </button>
-                                </form>
-                            @endif
+                            @php
+                            $routeMap = [
+                                'faction_sync' => 'factions',
+                                'ff_stats' => 'factions',
+                                'ranked_wars' => 'wars',
+                                'active_wars' => 'active',
+                                'war_attacks' => 'attacks',
+                                'war_chains' => 'chains',
+                                'stocks' => 'stocks',
+                                'items' => 'stocks',
+                            ];
+                            $route = $routeMap[$key] ?? 'wars';
+                            @endphp
+                            <form action="/admin/sync/{{ $route }}" method="POST">
+                                @csrf
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-white text-xs">
+                                    Run Now
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach
@@ -339,11 +360,11 @@
             <div class="flex items-center justify-between">
                 <p class="text-gray-400 text-sm">
                     <span class="text-yellow-400 font-semibold">Note:</span> 
-                    Torn API limits to 100 requests per minute. This system uses caching and smart reuse to stay well under that limit.
-                    @if($warActive ?? false)
-                        <br><span class="text-green-400">During active wars, only essential war syncs run every minute.</span>
+                    Torn API limits to 100 requests per minute. This system uses caching and smart reuse.
+                    @if($warModeEnabled)
+                        <br><span class="text-green-400">War Mode is ON - jobs with war schedules run during active war.</span>
                     @else
-                        <br>War syncs (active wars, attacks) run every 5 minutes during peace time.
+                        <br>War Mode is OFF - all jobs run their normal schedules.
                     @endif
                 </p>
                 <div class="flex items-center gap-4">

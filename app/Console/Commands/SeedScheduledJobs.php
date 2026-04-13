@@ -4,96 +4,41 @@ namespace App\Console\Commands;
 
 use App\Models\ScheduledJob;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 
 class SeedScheduledJobs extends Command
 {
     protected $signature = 'jobs:seed';
-    protected $description = 'Seed scheduled jobs from Kernel.php schedule configuration';
-
-    protected array $jobDefinitions = [
-        'torn:sync-faction' => [
-            'description' => 'Sync faction data (members, stats, info)',
-            'war_mode_only' => false,
-            'default_cron' => '*/5 * * * *',
-        ],
-        'torn:sync-wars' => [
-            'description' => 'Sync ranked wars list',
-            'war_mode_only' => true,
-            'default_cron' => '*/10 * * * *',
-            'war_cron' => '*/5 * * * *',
-        ],
-        'torn:sync-active' => [
-            'description' => 'Sync active war details and scores',
-            'war_mode_only' => true,
-            'default_cron' => '*/10 * * * *',
-            'war_cron' => '*/1 * * * *',
-        ],
-        'torn:sync-attacks' => [
-            'description' => 'Sync war attacks data',
-            'war_mode_only' => true,
-            'default_cron' => '*/10 * * * *',
-            'war_cron' => '*/1 * * * *',
-        ],
-        'torn:sync-chains' => [
-            'description' => 'Sync war chain data',
-            'war_mode_only' => true,
-            'default_cron' => '*/10 * * * *',
-            'war_cron' => '*/1 * * * *',
-        ],
-        'torn:sync-items' => [
-            'description' => 'Sync item market data',
-            'war_mode_only' => false,
-            'default_cron' => '0 0 * * *',
-        ],
-        'torn:sync-stocks' => [
-            'description' => 'Sync market stocks',
-            'war_mode_only' => false,
-            'default_cron' => '0 * * * *',
-        ],
-        'torn:sync-ffstats' => [
-            'description' => 'Sync FF stats via FF Scouter',
-            'war_mode_only' => false,
-            'default_cron' => '*/5 * * * *',
-        ],
+    protected $description = 'Seed scheduled jobs with clean defaults';
+    protected $jobs = [
+        'torn:sync-faction' => ['d' => 'Sync faction members', 'c' => '*/5 * * * *', 'w' => '*/1 * * * *', 'a' => '1 call'],
+        'torn:sync-ffstats' => ['d' => 'Sync FF stats', 'c' => '*/5 * * * *', 'w' => '*/5 * * * *', 'a' => '1 call'],
+        'torn:sync-wars' => ['d' => 'Sync ranked wars', 'c' => '*/10 * * * *', 'w' => '*/5 * * * *', 'a' => '1 call'],
+        'torn:sync-active' => ['d' => 'War updates', 'c' => '*/5 * * * *', 'w' => '*/1 * * * *', 'a' => '1 call'],
+        'torn:sync-attacks' => ['d' => 'War attacks', 'c' => '*/5 * * * *', 'w' => '*/1 * * * *', 'a' => '1 call'],
+        'torn:sync-chains' => ['d' => 'War chains', 'c' => '*/5 * * * *', 'w' => '*/1 * * * *', 'a' => '1 call'],
+        'torn:sync-stocks' => ['d' => 'Sync stocks', 'c' => '0 * * * *', 'w' => '*/10 * * * *', 'a' => '1 call'],
+        'torn:sync-items' => ['d' => 'Sync items', 'c' => '0 0 * * *', 'w' => '0 0 * * *', 'a' => '1 call'],
     ];
 
     public function handle(): int
     {
-        $created = 0;
-        $updated = 0;
-        $deleted = 0;
-        $validCommands = array_keys($this->jobDefinitions);
-
-        $deleted = ScheduledJob::whereNotIn('command', $validCommands)->delete();
-
-        $this->info("Removed {$deleted} obsolete scheduled job(s).");
-
-        foreach ($this->jobDefinitions as $command => $config) {
-            $exists = ScheduledJob::where('command', $command)->exists();
-
-            $data = [
-                'description' => $config['description'],
+        ScheduledJob::truncate();
+        
+        foreach ($this->jobs as $cmd => $j) {
+            ScheduledJob::create([
+                'command' => $cmd,
+                'description' => $j['d'],
                 'enabled' => true,
-                'cron_expression' => $config['default_cron'],
-                'war_mode_only' => $config['war_mode_only'],
-                'war_cron' => $config['war_cron'] ?? null,
-            ];
-
-            if ($exists) {
-                ScheduledJob::where('command', $command)->update($data);
-                $updated++;
-                $this->info("Updated: {$command}");
-            } else {
-                ScheduledJob::create(array_merge(['command' => $command], $data));
-                $created++;
-                $this->info("Created: {$command}");
-            }
+                'cron_expression' => $j['c'],
+                'war_mode_only' => false,
+                'war_cron' => $j['w'],
+                'api_est' => $j['a'],
+            ]);
+            $this->info("Created: $cmd");
         }
 
         $this->newLine();
-        $this->info("Seeding complete: {$created} created, {$updated} updated.");
-
+        $this->info('Seeded ' . count($this->jobs) . ' jobs');
         return Command::SUCCESS;
     }
 }

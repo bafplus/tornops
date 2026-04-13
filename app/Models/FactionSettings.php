@@ -19,12 +19,14 @@ class FactionSettings extends Model
         'discord_bot_token',
         'discord_server_id',
         'discord_channel_id',
+        'war_mode_enabled',
     ];
 
     protected $casts = [
         'auto_sync_enabled' => 'boolean',
         'discord_enabled' => 'boolean',
         'sync_settings' => 'array',
+        'war_mode_enabled' => 'boolean',
     ];
 
     protected $hidden = [

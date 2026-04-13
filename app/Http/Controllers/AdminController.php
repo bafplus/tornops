@@ -31,52 +31,79 @@ class AdminController extends Controller
         return view('admin.index', compact('settings', 'users', 'apiSchedule', 'warActive', 'apiCallsLastMinute'));
     }
 
-    private function getApiSchedule(bool $warActive): array
+    private function getApiSchedule(): array
     {
-        $dbJobs = ScheduledJob::pluck('cron_expression', 'command')->toArray();
+        $settings = FactionSettings::first();
+        $warModeEnabled = $settings?->war_mode_enabled ?? false;
         
-        $map = [
-            'torn:sync-faction' => ['k'=>'faction_sync','d'=>'Syncs faction members','c'=>'1','e'=>0],
-            'torn:sync-ffstats' => ['k'=>'ff_stats','d'=>'Syncs FF stats','c'=>'1','e'=>0],
-            'torn:sync-wars' => ['k'=>'ranked_wars','d'=>'Syncs ranked wars','c'=>'1','e'=>0],
-            'torn:sync-active' => ['k'=>'active_wars','d'=>'War updates','c'=>'1','e'=>1],
-            'torn:sync-attacks' => ['k'=>'war_attacks','d'=>'War attacks','c'=>'1','e'=>1],
-            'torn:sync-chains' => ['k'=>'war_chains','d'=>'War chains','c'=>'1','e'=>1],
-'torn:sync-stocks' => ['k'=>'stocks','d'=>'Syncs stocks','c'=>'1','e'=>0],
-            'torn:sync-items' => ['k'=>'items','d'=>'Syncs items','c'=>'1','e'=>0],
-        ];
+        $jobs = ScheduledJob::orderBy('command')->get();
+        $schedule = [];
         
-        $dbJobsFull = ScheduledJob::all()->keyBy('command');
-        
-        foreach ($map as $cmd => $i) {
-            $job = $dbJobsFull[$cmd] ?? null;
-            $cron = trim($job?->cron_expression ?? '');
-            if ($warActive && $job?->war_cron) {
-                $cron = $job->war_cron;
-            }
-            $schedule[$i['k']] = [
-                'name' => $cmd,
-                'schedule' => $cron ? $this->formatCron($cron) : 'Not set',
-                'description' => $i['d'],
-                'api_calls' => $i['c'],
-                'essential' => (bool)$i['e']
+        foreach ($jobs as $job) {
+            $key = match($job->command) {
+                'torn:sync-faction' => 'faction_sync',
+                'torn:sync-ffstats' => 'ff_stats',
+                'torn:sync-wars' => 'ranked_wars',
+                'torn:sync-active' => 'active_wars',
+                'torn:sync-attacks' => 'war_attacks',
+                'torn:sync-chains' => 'war_chains',
+                'torn:sync-stocks' => 'stocks',
+                'torn:sync-items' => 'items',
+                default => null,
+            };
+            if (!$key) continue;
+            
+            $schedule[$key] = [
+                'name' => $job->command,
+                'schedule' => $this->formatCron($job->cron_expression ?? ''),
+                'schedule_raw' => $job->cron_expression ?? '',
+                'war_schedule' => $job->war_cron ? $this->formatCron($job->war_cron) : '—',
+                'war_schedule_raw' => $job->war_cron ?? '',
+                'description' => $job->description,
+                'api_calls' => $job->api_est ?? '1 call',
+                'essential' => in_array($job->command, ['torn:sync-active', 'torn:sync-attacks', 'torn:sync-chains']),
             ];
-        }
-        
-        foreach ($schedule as $key => &$item) {
+            
             $lastRun = DataRefreshLog::where('data_type', $key)->where('status', 'completed')->latest('completed_at')->first();
-            $item['last_run'] = $lastRun?->completed_at?->diffForHumans() ?? 'Never';
-            $item['last_run_at'] = $lastRun?->completed_at;
-            $item['disabled'] = $warActive && !$item['essential'];
+            $schedule[$key]['last_run'] = $lastRun?->completed_at?->diffForHumans() ?? 'Never';
+            $schedule[$key]['last_run_at'] = $lastRun?->completed_at;
         }
 
         return $schedule;
     }
 
+    public function toggleWarMode(Request $request)
+    {
+        $settings = FactionSettings::first();
+        $settings->war_mode_enabled = $request->boolean('enabled');
+        $settings->save();
+        return back()->with('status', 'War mode ' . ($settings->war_mode_enabled ? 'enabled' : 'disabled'));
+    }
+
+    public function updateJobSchedule(Request $request, $job)
+    {
+        $job = ScheduledJob::where('command', 'torn:' . $job)->firstOrFail();
+        $job->cron_expression = $request->input('schedule');
+        $job->war_cron = $request->input('war_schedule');
+        $job->save();
+        return back()->with('status', 'Schedule updated');
+    }
+
     private function formatCron(string $cron): string
     {
         $c = preg_replace('/\s+/', '', trim($cron));
-        if ($c === '*/1***') return 'Every 1 min';
+        if ($c === '*/1*****') return '30 seconds';
+        if ($c === '*/5*****') return 'Every 1 min';
+        if ($c === '*/10***') return 'Every 5 min';
+        if ($c === '*/30***') return 'Every 10 min';
+        if ($c === '0****') return 'Hourly';
+        if ($c === '00***') return 'Daily';
+        if ($c === '010***') return 'Daily 01:00';
+        if ($c === '020***') return 'Daily 02:00';
+        return $cron ?: 'Not set';
+    }
+
+    private function getLegacyApiSchedule(bool $warActive): array
         if ($c === '*/5***') return 'Every 5 min';
         if ($c === '*/10***') return 'Every 10 min';
         if ($c === '0***') return 'Hourly';
