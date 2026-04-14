@@ -1,35 +1,36 @@
 #!/bin/bash
 # TornOps scheduler - reads schedule from database and respects intervals
+# Only uses war_cron when there's an ACTIVE war (not just war mode setting)
 
 PHP="/usr/local/bin/php"
 ARTISAN="/var/www/html/artisan"
 LOG="/dev/null"
 
-# Check for active war or war mode enabled
+# Check for ACTIVE war only (not the war mode setting)
 WAR_ACTIVE=$($PHP $ARTISAN tinker --execute="echo App\Models\RankedWar::where('status', 'in progress')->exists() ? '1' : '0';" 2>/dev/null | tr -d '[:space:]')
-WAR_MODE=$($PHP $ARTISAN tinker --execute="echo App\Models\FactionSettings::first()?->war_mode_enabled ? '1' : '0';" 2>/dev/null | tr -d '[:space:]')
 
-IS_WAR_MODE="0"
-if [ "$WAR_ACTIVE" = "1" ] || [ "$WAR_MODE" = "1" ]; then
-    IS_WAR_MODE="1"
+IS_WAR_ACTIVE="0"
+if [ "$WAR_ACTIVE" = "1" ]; then
+    IS_WAR_ACTIVE="1"
 fi
 
 # Get all enabled jobs from database
 JOBS_DATA=$($PHP $ARTISAN tinker --execute="
 \$jobs = App\Models\ScheduledJob::where('enabled', true)->get();
-\$settings = App\Models\FactionSettings::first();
-\$warModeEnabled = \$settings?->war_mode_enabled ?? false;
 \$isWarActive = App\Models\RankedWar::where('status', 'in progress')->exists();
-\$isWarMode = \$warModeEnabled || \$isWarActive;
 
 foreach (\$jobs as \$j) {
-    // Use war_cron if in war mode, otherwise use cron_expression
-    \$cron = \$isWarMode && \$j->war_cron ? \$j->war_cron : \$j->cron_expression;
+    // Use war_cron only if there's an active war, otherwise use cron_expression
+    \$cron = \$isWarActive && \$j->war_cron ? \$j->war_cron : \$j->cron_expression;
     
     // Parse interval from cron
     \$interval = 60; // default 1 minute
     if (preg_match('/^\*\/(\d+)\s+\*/', \$cron, \$m)) {
         \$interval = (int)\$m[1] * 60;
+    } else if (\$cron === '0 * * * *') {
+        \$interval = 3600;
+    } else if (str_starts_with(\$cron, '0 0')) {
+        \$interval = 86400;
     }
     
     // Get last run time
