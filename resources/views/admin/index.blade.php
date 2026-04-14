@@ -267,10 +267,10 @@
             $warModeEnabled = $settings?->war_mode_enabled ?? false;
             $cronOptions = [
                 '' => 'Disable',
-                '*/1 * * * *' => '30 seconds',
-                '*/5 * * * *' => 'Every 1 min',
-                '*/10 * * * *' => 'Every 5 min',
-                '*/30 * * * *' => 'Every 10 min',
+                '*/1 * * * *' => 'Every 1 min',
+                '*/5 * * * *' => 'Every 5 min',
+                '*/10 * * * *' => 'Every 10 min',
+                '*/30 * * * *' => 'Every 30 min',
                 '0 * * * *' => 'Hourly',
                 '0 0 * * *' => 'Daily',
             ];
@@ -292,6 +292,7 @@
                 <thead>
                     <tr class="text-left text-gray-400 bg-gray-700/50">
                         <th class="p-3">Command</th>
+                        <th class="p-3">Description</th>
                         <th class="p-3">Normal</th>
                         <th class="p-3">War</th>
                         <th class="p-3">Last Run</th>
@@ -303,6 +304,7 @@
                     @foreach($apiSchedule as $key => $item)
                     <tr class="hover:bg-gray-700/30">
                         <td class="p-3 font-mono text-blue-400">{{ $item['name'] }}</td>
+                        <td class="p-3 text-gray-300 text-xs">{{ $item['description'] ?? '' }}</td>
                         <td class="p-3">
                             <form method="POST" action="/admin/job/{{ str_replace('torn:', '', $item['name']) }}" class="flex gap-1">
                                 @csrf
@@ -322,6 +324,7 @@
                                     <option value="{{ $val }}" {{ $item['war_schedule_raw'] === $val ? 'selected' : '' }}>{{ $label }}</option>
                                     @endforeach
                                 </select>
+                            </form>
                             @else
                             <span class="text-gray-500 text-xs">—</span>
                             @endif
@@ -337,6 +340,7 @@
                                 'active_wars' => 'active',
                                 'war_attacks' => 'attacks',
                                 'war_chains' => 'chains',
+                                'ocs' => 'ocs',
                                 'stocks' => 'stocks',
                                 'items' => 'stocks',
                             ];

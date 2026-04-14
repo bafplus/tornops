@@ -47,6 +47,7 @@ class AdminController extends Controller
                 'torn:sync-active' => 'active_wars',
                 'torn:sync-attacks' => 'war_attacks',
                 'torn:sync-chains' => 'war_chains',
+                'torn:sync-ocs' => 'organized_crimes',
                 'torn:sync-stocks' => 'stocks',
                 'torn:sync-items' => 'items',
                 default => null,
@@ -82,20 +83,29 @@ class AdminController extends Controller
 
     public function updateJobSchedule(Request $request, $job)
     {
-        $job = ScheduledJob::where('command', 'torn:' . $job)->firstOrFail();
-        $job->cron_expression = $request->input('schedule');
-        $job->war_cron = $request->input('war_schedule');
-        $job->save();
+        $jobModel = ScheduledJob::where('command', 'torn:' . $job)->firstOrFail();
+        
+        $schedule = $request->input('schedule');
+        $warSchedule = $request->input('war_schedule');
+        
+        if ($schedule !== null && $schedule !== '') {
+            $jobModel->cron_expression = $schedule;
+        }
+        if ($warSchedule !== null && $warSchedule !== '') {
+            $jobModel->war_cron = $warSchedule;
+        }
+        
+        $jobModel->save();
         return back()->with('status', 'Schedule updated');
     }
 
     private function formatCron(string $cron): string
     {
         $c = preg_replace('/\s+/', '', trim($cron));
-        if ($c === '*/1*****') return '30 seconds';
-        if ($c === '*/5*****') return 'Every 1 min';
-        if ($c === '*/10***') return 'Every 5 min';
-        if ($c === '*/30***') return 'Every 10 min';
+        if ($c === '*/1*****') return 'Every 1 min';
+        if ($c === '*/5*****') return 'Every 5 min';
+        if ($c === '*/10***') return 'Every 10 min';
+        if ($c === '*/30***') return 'Every 30 min';
         if ($c === '0****') return 'Hourly';
         if ($c === '00***') return 'Daily';
         if ($c === '010***') return 'Daily 01:00';

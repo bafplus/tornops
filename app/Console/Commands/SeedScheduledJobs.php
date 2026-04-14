@@ -16,6 +16,7 @@ class SeedScheduledJobs extends Command
         'torn:sync-active' => ['d' => 'War updates', 'c' => '*/5 * * * *', 'w' => '*/1 * * * *', 'a' => '1 call'],
         'torn:sync-attacks' => ['d' => 'War attacks', 'c' => '*/5 * * * *', 'w' => '*/1 * * * *', 'a' => '1 call'],
         'torn:sync-chains' => ['d' => 'War chains', 'c' => '*/5 * * * *', 'w' => '*/1 * * * *', 'a' => '1 call'],
+        'torn:sync-ocs' => ['d' => 'Organised crimes', 'c' => '*/10 * * * *', 'w' => '*/5 * * * *', 'a' => '1 call'],
         'torn:sync-stocks' => ['d' => 'Sync stocks', 'c' => '0 * * * *', 'w' => '*/10 * * * *', 'a' => '1 call'],
         'torn:sync-items' => ['d' => 'Sync items', 'c' => '0 0 * * *', 'w' => '0 0 * * *', 'a' => '1 call'],
     ];
