@@ -6,6 +6,7 @@ use App\Services\TornApiService;
 use App\Services\WarService;
 use App\Models\FactionSettings;
 use App\Models\StockHistory;
+use App\Models\DataRefreshLog;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
@@ -16,8 +17,11 @@ class SyncStocks extends Command
 
     public function handle()
     {
+        $log = DataRefreshLog::logStart('stocks');
+        
         if (!WarService::canFetchNonEssentialData() && !$this->option('force')) {
             $this->warn('Stock sync skipped: Active war detected. Non-essential API calls are disabled.');
+            $log->skip('Active war, non-essential');
             return 0;
         }
 
@@ -26,6 +30,7 @@ class SyncStocks extends Command
         
         if (!$apiKey) {
             $this->error('No faction API key found.');
+            $log->fail('No API key');
             return 1;
         }
 
@@ -36,6 +41,7 @@ class SyncStocks extends Command
         
         if (!$rawStocks) {
             $this->error('Failed to fetch stock data.');
+            $log->fail('API error');
             return 1;
         }
 
@@ -58,6 +64,7 @@ class SyncStocks extends Command
         }
 
         $this->info("Synced {$count} stocks and saved to history.");
+        $log->complete();
         return 0;
     }
 }

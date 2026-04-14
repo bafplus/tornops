@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Item;
+use App\Models\DataRefreshLog;
 use App\Services\TornApiService;
 use Illuminate\Console\Command;
 
@@ -13,12 +14,15 @@ class SyncItems extends Command
 
     public function handle(TornApiService $tornApi): int
     {
+        $log = DataRefreshLog::logStart('items');
+        
         $this->info("Syncing items from Torn API...");
         
         $data = $tornApi->getItems();
 
         if (!$data || !isset($data['items'])) {
             $this->error('Failed to fetch items.');
+            $log->fail('API error');
             return Command::FAILURE;
         }
 
@@ -49,6 +53,7 @@ class SyncItems extends Command
         }
 
         $this->info("Synced {$synced} items.");
+        $log->complete();
         return Command::SUCCESS;
     }
 }
