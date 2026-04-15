@@ -12,7 +12,8 @@ class StocksController extends Controller
 {
     public function index(TornApiService $tornApi)
     {
-        $warActive = WarService::hasActiveWar();
+        try {
+            $warActive = WarService::hasActiveWar();
         
         $apiKey = $this->getApiKey();
         
@@ -231,7 +232,7 @@ class StocksController extends Controller
             }
         }
 
-        return view('stocks.index', [
+return view('stocks.index', [
             'stocks' => $stocks,
             'history' => $history,
             'userStocks' => $userStocks,
@@ -239,8 +240,19 @@ class StocksController extends Controller
             'error' => null,
             'warActive' => $warActive,
         ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('StocksController error: ' . $e->getMessage());
+            return view('stocks.index', [
+                'error' => 'Error loading stocks: ' . $e->getMessage(),
+                'stocks' => [],
+                'history' => collect(),
+                'userStocks' => [],
+                'recommendations' => collect(),
+                'warActive' => false,
+            ]);
+        }
     }
-
+    
     public function update(TornApiService $tornApi)
     {
         $apiKey = $this->getApiKey();
