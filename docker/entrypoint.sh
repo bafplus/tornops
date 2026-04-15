@@ -80,7 +80,7 @@ LOG_LEVEL=warning
 DB_CONNECTION=sqlite
 DB_DATABASE=/data/database.sqlite
 SESSION_DRIVER=file
-CACHE_STORE=array
+CACHE_STORE=file
 TORN_API_KEY=${TORN_API_KEY:-dummy}
 FACTION_ID=${FACTION_ID:-}
 EOF
@@ -101,7 +101,7 @@ LOG_LEVEL=warning
 DB_CONNECTION=sqlite
 DB_DATABASE=/var/www/html/database.sqlite
 SESSION_DRIVER=file
-CACHE_STORE=array
+CACHE_STORE=file
 TORN_API_KEY=${TORN_API_KEY:-dummy}
 EOF
     DB_PATH="/var/www/html/database.sqlite"
