@@ -46,6 +46,10 @@ chown -R 33:33 .
 chmod -R 775 storage/framework
 chown -R www-data:www-data storage/framework
 
+mkdir -p storage/framework/cache/data
+chmod -R 775 storage/framework/cache/data
+chown -R www-data:www-data storage/framework/cache/data
+
 # Fix /var/www permissions LAST (before supervisord starts)
 chown -R www-data:www-data /var/www
 chmod -R 777 /var/www
