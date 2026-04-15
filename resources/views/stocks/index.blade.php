@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <tr class="text-left text-gray-400">
                             <th class="p-2">Stock</th>
                             @foreach($history->first()->sortBy('recorded_at') as $day)
-                                <th class="p-2 text-right">{{ $day->recorded_at->format('d M') }}</th>
+                                <th class="p-2 text-right">{{ $day->recorded_at->format('H:i') }}</th>
                             @endforeach
                             <th class="p-2 text-right">Change</th>
                         </tr>
