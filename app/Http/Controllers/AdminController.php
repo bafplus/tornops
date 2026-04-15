@@ -25,10 +25,43 @@ class AdminController extends Controller
         // Get last run times for each API endpoint
         $apiSchedule = $this->getApiSchedule($warActive);
         
-        // Get API calls in last minute
+        // Get ACTUAL API calls in last minute
         $apiCallsLastMinute = TornApiService::getApiCallsLastMinute();
         
-        return view('admin.index', compact('settings', 'users', 'apiSchedule', 'warActive', 'apiCallsLastMinute'));
+        // Calculate EXPECTED API calls per hour based on schedules
+        $expectedCallsPerHour = $this->calculateExpectedApiCalls($warActive);
+        
+        return view('admin.index', compact('settings', 'users', 'apiSchedule', 'warActive', 'apiCallsLastMinute', 'expectedCallsPerHour'));
+    }
+    
+    private function calculateExpectedApiCalls(bool $isWarActive): int
+    {
+        $settings = FactionSettings::first();
+        $warModeEnabled = $settings?->war_mode_enabled ?? false;
+        $isWarMode = $warModeEnabled || $isWarActive;
+        
+        $totalExpected = 0;
+        $jobs = ScheduledJob::all();
+        
+        foreach ($jobs as $job) {
+            $cron = $isWarMode && $job->war_cron ? $job->war_cron : $job->cron_expression;
+            if (!$cron || $cron === '') continue;
+            
+            // Calculate runs per hour based on cron
+            $runsPerHour = 60;
+            if (preg_match('/^\*\/(\d+)\s+/', $cron, $m)) {
+                $runsPerHour = 60 / (int)$m[1];
+            } elseif ($cron === '0 * * * *') {
+                $runsPerHour = 1;
+            } elseif (str_starts_with($cron, '0 0')) {
+                $runsPerHour = 1 / 24;
+            }
+            
+            $apiCalls = (int)($job->api_est ?? 1);
+            $totalExpected += $runsPerHour * $apiCalls;
+        }
+        
+        return (int)$totalExpected;
     }
 
     private function getApiSchedule(): array
