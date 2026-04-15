@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <tr class="text-left text-gray-400">
                             <th class="p-2">Stock</th>
                             @foreach($history->first()->sortBy('created_at') as $day)
-                                <th class="p-2 text-right">{{ $day->created_at->format('H:i') }}</th>
+                                <th class="p-2 text-right">@if($day->created_at){{ $day->created_at->format('H:i') }}@endif</th>
                             @endforeach
                             <th class="p-2 text-right">Change</th>
                         </tr>
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </td>
                                 @foreach($sorted as $day)
                                     <td class="p-2 text-right font-mono ${{
-                                        $day->price > ($sorted->where('recorded_at', '<', $day->created_at)->last()->price ?? $day->price)
+                                        $day->price > ($sorted->where('created_at', '<', $day->created_at)->last()->price ?? $day->price)
                                             ? 'text-green-400' : 'text-gray-400'
                                     }}">
                                         ${{ number_format($day->price, 2) }}
