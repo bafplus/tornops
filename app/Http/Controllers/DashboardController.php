@@ -102,12 +102,15 @@ $ourMembers = $war->members()
             ->orderBy('name')
             ->get();
         
-        $userFfScore = null;
+        $userFfScore = 1.0; // Default neutral FF
         $userId = Auth::id();
         if ($userId) {
             $tornPlayerId = \App\Models\User::find($userId)?->torn_player_id;
             if ($tornPlayerId) {
-                $userFfScore = FactionMember::where('player_id', $tornPlayerId)->value('ff_score');
+                $userFfScore = FactionMember::where('player_id', $tornPlayerId)->value('ff_score') ?? 1.0;
+            } else {
+                // Try to get FF from faction members - current logged-in member user_id might match
+                $userFfScore = FactionMember::where('user_id', $userId)->value('ff_score') ?? 1.0;
             }
         }
         
