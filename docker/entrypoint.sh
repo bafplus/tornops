@@ -72,7 +72,7 @@ if [ -d "$DATA_DIR" ]; then
         sed -i 's|DB_DATABASE=.*|DB_DATABASE=/data/database.sqlite|' .env
         
         grep -q "^SESSION_DRIVER=" .env || echo "SESSION_DRIVER=file" >> .env
-        grep -q "^CACHE_STORE=" .env || echo "CACHE_STORE=file" >> .env
+        grep -q "^CACHE_STORE=" .env || echo "CACHE_STORE=array" >> .env
     else
         echo "Using environment variables with /data volume..."
         # Create .env from environment variables but use /data for database
@@ -87,7 +87,7 @@ LOG_LEVEL=warning
 DB_CONNECTION=sqlite
 DB_DATABASE=/data/database.sqlite
 SESSION_DRIVER=file
-CACHE_STORE=file
+CACHE_STORE=array
 TORN_API_KEY=${TORN_API_KEY:-dummy}
 FACTION_ID=${FACTION_ID:-}
 EOF
@@ -108,7 +108,7 @@ LOG_LEVEL=warning
 DB_CONNECTION=sqlite
 DB_DATABASE=/var/www/html/database.sqlite
 SESSION_DRIVER=file
-CACHE_STORE=file
+CACHE_STORE=array
 TORN_API_KEY=${TORN_API_KEY:-dummy}
 EOF
     DB_PATH="/var/www/html/database.sqlite"
