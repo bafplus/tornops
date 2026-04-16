@@ -15,21 +15,27 @@
 
         @php
         $warnings = [];
-        if (!is_dir('/data')) {
-            $warnings[] = 'Data directory (/data) not found';
-        } else if (!is_writable('/data')) {
+        $dataDir = '/data';
+        $dbFile = '/data/database.sqlite';
+        
+        // Check if data directory exists, if not it's fine - will be created
+        if (!is_dir($dataDir)) {
+            $warnings[] = 'Data directory (/data) not found - will be created automatically';
+        } else if (!is_writable($dataDir)) {
             $warnings[] = 'Data directory is not writable';
         }
-        if (!file_exists('/data/database.sqlite')) {
-            $warnings[] = 'Database file not found';
-        } else if (!is_writable('/data/database.sqlite')) {
+        
+        // Check database - if not found it's fine, will be created during setup
+        if (!file_exists($dbFile)) {
+            $warnings[] = 'Database not found - will be created during setup';
+        } else if (!is_writable($dbFile)) {
             $warnings[] = 'Database is not writable';
         }
         @endphp
 
         @if(!empty($warnings))
         <div class="bg-yellow-900/50 border border-yellow-500 text-yellow-400 px-4 py-3 rounded mb-6">
-            <p class="font-semibold mb-2">System Check Failed:</p>
+            <p class="font-semibold mb-2">System Check:</p>
             <ul class="list-disc list-inside text-sm">
                 @foreach($warnings as $w)
                 <li>{{ $w }}</li>
@@ -37,8 +43,8 @@
             </ul>
         </div>
         @else
-        <div class="bg-green-900/50 border border-green-500 text-green-400 px-4 py-3 rounded mb-6">
-            System check passed - ready to setup
+        <div class="bg-blue-900/50 border border-blue-500 text-blue-400 px-4 py-3 rounded mb-6">
+            System ready - database will be created during setup
         </div>
         @endif
 
