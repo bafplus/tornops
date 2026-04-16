@@ -25,6 +25,7 @@ class SetupController extends Controller
 
     public function store(Request $request)
     {
+        try {
         $validator = Validator::make($request->all(), [
             'faction_id' => 'required|numeric',
             'torn_api_key' => 'required|string|min:16',
@@ -71,5 +72,9 @@ class SetupController extends Controller
         ]);
 
         return redirect('/')->with('success', 'Setup completed successfully!');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Setup error: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Setup failed: ' . $e->getMessage()])->withInput();
+        }
     }
 }
