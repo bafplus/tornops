@@ -114,20 +114,25 @@ EOF
     DB_PATH="/var/www/html/database.sqlite"
 fi
 
-# Install dependencies
-echo "Installing dependencies..."
-composer install --no-interaction --no-dev --ignore-platform-reqs || composer update --no-interaction --no-dev
-
-# Ensure database directory exists
-mkdir -p "$(dirname "$DB_PATH")"
-
 if [ ! -f "$DB_PATH" ]; then
     echo "Creating database at $DB_PATH..."
     touch "$DB_PATH"
+    chmod 666 "$DB_PATH"
+    chown 33:33 "$DB_PATH"
 fi
 
 chmod 666 "$DB_PATH"
 chown 33:33 "$DB_PATH"
+
+# Install dependencies
+echo "Installing dependencies..."
+composer install --no-interaction --no-dev --ignore-platform-reqs --no-scripts || composer update --no-interaction --no-dev --no-scripts
+
+# Now run post-install scripts (safe after DB exists)
+echo "Running post-install..."
+php artisan key:generate --force 2>/dev/null || true
+php artisan migrate --force
+php artisan package:discover --ansi
 
 # Set Apache to run as www-data
 export APACHE_RUN_USER=www-data
