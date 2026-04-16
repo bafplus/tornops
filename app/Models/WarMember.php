@@ -26,6 +26,7 @@ class WarMember extends Model
         'data',
         'last_synced_at',
         'status_changed_at',
+        'travel_started_at',
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class WarMember extends Model
         'data' => 'array',
         'last_synced_at' => 'datetime',
         'status_changed_at' => 'datetime',
+        'travel_started_at' => 'datetime',
     ];
 
     public function war()

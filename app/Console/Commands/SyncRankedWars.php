@@ -99,6 +99,13 @@ class SyncRankedWars extends Command
                         $estimatedStats = $ffData['bs_estimate_human'] ?? null;
                         $ffUpdatedAt = isset($ffData['last_updated']) ? now()->createFromTimestamp($ffData['last_updated']) : null;
                         
+                        $statusColor = $member['status']['color'] ?? null;
+                        $oldMember = WarMember::where('war_id', $warId)
+                            ->where('player_id', $playerId)
+                            ->first();
+                        $wasTraveling = $oldMember?->status_color === 'blue';
+                        $isTraveling = $statusColor === 'blue';
+                        
                         WarMember::updateOrCreate(
                             [
                                 'war_id' => $warId,
@@ -111,7 +118,7 @@ class SyncRankedWars extends Command
                                 'rank' => $member['rank'] ?? null,
                                 'position' => $member['position'] ?? null,
                                 'days_in_faction' => $member['days_in_faction'] ?? null,
-                                'status_color' => $member['status']['color'] ?? null,
+                                'status_color' => $statusColor,
                                 'status_description' => $member['status']['description'] ?? null,
                                 'war_score' => $warScore,
                                 'ff_score' => $ffScore,
@@ -120,6 +127,7 @@ class SyncRankedWars extends Command
                                 'online_status' => $member['last_action']['status'] ?? null,
                                 'online_description' => $member['last_action']['description'] ?? null,
                                 'data' => $member,
+                                'travel_started_at' => ($isTraveling && !$wasTraveling) ? now() : ($isTraveling ? ($oldMember?->travel_started_at ?? now()) : null),
                             ]
                         );
                         $memberCount++;
