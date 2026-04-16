@@ -232,7 +232,6 @@
                                     <span class="block text-[10px] text-gray-600">{{ $member->ff_updated_at->diffForHumans() }}</span>
                                 @endif
                             </td>
-                            <td class="p-3 text-right font-mono text-gray-400 text-sm">{{ $member->estimated_stats ?? '-' }}</td>
                             <td class="p-3 text-right">
                                 <span class="font-mono text-blue-400 text-lg">{{ $hits }}</span>
                                 <span class="block text-xs text-gray-500">S:{{ $successful }} F:{{ $failed }} I:{{ $interrupted }}</span>
@@ -356,7 +355,6 @@
                                     <span class="block text-[10px] text-gray-600">{{ $member->ff_updated_at->diffForHumans() }}</span>
                                 @endif
                             </td>
-                            <td class="p-3 text-right font-mono text-gray-400 text-sm">{{ $member->estimated_stats ?? '-' }}</td>
                             <td class="p-3 text-right font-mono text-yellow-400">{{ number_format($member->respect_score, 2) }}</td>
                             <td class="p-3">
                                 @if($member->status_color === 'red')
