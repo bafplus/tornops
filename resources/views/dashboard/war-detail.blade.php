@@ -741,20 +741,23 @@ updateUrlSort(currentSort.field, currentSort.dir);
 
 function simplifyTravelStatus(original) {
 const countryMap = {
-'United Kingdom': 'UK',
-'United Arab Emirates': 'UAE',
-'UAE': 'UAE',
-'United States': 'USA',
-'USA': 'USA',
-'South Africa': 'SA',
-'New Zealand': 'NZ',
-'Hong Kong': 'HK',
-'Switzerland': 'CH',
-'Mexico': 'MX',
-'China': 'CN',
-'Japan': 'JP',
-'Argentina': 'AR',
-'Canada': 'CA',
+        'United Kingdom': 'UK',
+        'United Arab Emirates': 'UAE',
+        'UAE': 'UAE',
+        'United States': 'USA',
+        'USA': 'USA',
+        'South Africa': 'SA',
+        'New Zealand': 'NZ',
+        'Hong Kong': 'HK',
+        'Switzerland': 'CH',
+        'Mexico': 'MX',
+        'China': 'CN',
+        'Japan': 'JP',
+        'Argentina': 'AR',
+        'Canada': 'CA',
+        'Hawaii': 'Hawaii',
+        'Cayman Islands': 'Cayman',
+        'Cayman': 'Cayman',
 'Germany': 'DE',
 'France': 'FR',
 'Italy': 'IT',
@@ -795,7 +798,7 @@ const travelTimes = {
     };
 
     // Travel method setting (1=Standard, 2=Airstrip, 3=WLT, 4=BCT)
-    var TRAVEL_METHOD = parseInt(document.body.dataset.travelMethod) || 1;
+    var TRAVEL_METHOD = 2; // Hardcoded for now
 
 let country = null;
 for (const [full, short] of Object.entries(countryMap)) {
