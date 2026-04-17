@@ -100,7 +100,6 @@ class SyncRankedWars extends Command
                         $ffUpdatedAt = isset($ffData['last_updated']) ? now()->createFromTimestamp($ffData['last_updated']) : null;
                         
                         $statusColor = $member['status']['color'] ?? null;
-                        $statusDesc = $member['status']['description'] ?? '';
                         
                         // Check previous member record
                         $oldMember = WarMember::where('war_id', $warId)
@@ -120,12 +119,15 @@ class SyncRankedWars extends Command
                         if (($isTraveling || $isReturning) && (!$wasTraveling && !$wasReturning)) {
                             // Starting new journey
                             $newTravelStartedAt = now();
-                        } elseif (($isTraveling || $isReturning) && $oldMember?->travel_started_at) {
-                            // Still traveling, keep existing timestamp
+                        } elseif (($isTraveling || $isReturning) && ($oldMember?->travel_started_at)) {
+                            // Already traveling, keep existing timestamp
                             $newTravelStartedAt = $oldMember->travel_started_at;
                         } elseif (($wasTraveling || $wasReturning) && (!$isTraveling && !$isReturning)) {
-                            // Journey ended, clear (will be null)
+                            // Journey ended, clear
                             $newTravelStartedAt = null;
+                        } elseif (($isTraveling || $isReturning) && !$oldMember?->travel_started_at) {
+                            // Currently traveling but no timestamp - backfill (started before our capture)
+                            $newTravelStartedAt = now();
                         }
                         
                         WarMember::updateOrCreate(

@@ -96,9 +96,9 @@ class SyncFactionMembers extends Command
             );
 
             // Track travel status
-            $currentStatus = $member['status']['description'] ?? '';
-            $isTraveling = $currentStatus === 'Traveling to %' && preg_match('/Traveling to .+/', $currentStatus);
-            $isReturning = $currentStatus === 'Returning to Torn';
+            $currentDesc = $member['status']['description'] ?? '';
+            $isTraveling = preg_match('/^Traveling to .+/', $currentDesc);
+            $isReturning = $currentDesc === 'Returning to Torn';
             
             // Check if member was previously traveling (if we have old data)
             $oldMember = FactionMember::where('faction_id', $factionId)
@@ -107,7 +107,7 @@ class SyncFactionMembers extends Command
             
             if ($oldMember) {
                 $oldStatus = $oldMember->status_description ?? '';
-                $wasTraveling = $oldStatus === 'Traveling to %' && preg_match('/Traveling to .+/', $oldStatus);
+                $wasTraveling = preg_match('/^Traveling to .+/', $oldStatus);
                 $wasReturning = $oldStatus === 'Returning to Torn';
                 
                 // Any transition TO traveling or returning → start new journey
@@ -118,6 +118,11 @@ class SyncFactionMembers extends Command
                 // Transition FROM traveling/returning → anything else → clear timestamp
                 elseif (($wasTraveling || $wasReturning) && (!$isTraveling && !$isReturning)) {
                     $oldMember->travel_started_at = null;
+                    $oldMember->save();
+                }
+                // Currently traveling but no timestamp - backfill (started before our capture)
+                elseif (($isTraveling || $isReturning) && !$oldMember->travel_started_at) {
+                    $oldMember->travel_started_at = now();
                     $oldMember->save();
                 }
             }
