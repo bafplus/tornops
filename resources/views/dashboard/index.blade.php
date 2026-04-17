@@ -9,14 +9,10 @@
         <span class="text-gray-400">Faction: {{ $settings->faction_id ?? 'N/A' }}</span>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-2">Total Members</h3>
             <p class="text-4xl font-bold text-blue-400">{{ $totalMembers }}</p>
-        </div>
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-2">Active Wars</h3>
-            <p class="text-4xl font-bold text-purple-400">{{ $activeWars }}</p>
         </div>
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-2">Last Sync</h3>
