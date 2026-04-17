@@ -568,37 +568,35 @@ function updateHospitalTimers() {
 }
 
 function updateTravelTimers() {
-var now = Math.floor(Date.now() / 1000);
-var bubbles = document.querySelectorAll('.travel-bubble');
-for (var i = 0; i < bubbles.length; i++) {
-var bubble = bubbles[i];
-var statusChanged = parseInt(bubble.getAttribute('data-status-changed'));
-var travelTime = parseInt(bubble.getAttribute('data-travel-time')) || 60;
-var etaEl = bubble.querySelector('.travel-eta');
+    var now = Math.floor(Date.now() / 1000);
+    var bubbles = document.querySelectorAll('.travel-bubble');
+    for (var i = 0; i < bubbles.length; i++) {
+        var bubble = bubbles[i];
+        var travelStarted = parseInt(bubble.getAttribute('data-status-changed'));
+        var travelTime = parseInt(bubble.getAttribute('data-travel-time')) || 60;
+        var etaEl = bubble.querySelector('.travel-eta');
 
-if (!etaEl) continue;
+        if (!etaEl || isNaN(travelStarted)) {
+            if (etaEl) etaEl.textContent = '';
+            continue;
+        }
 
-if (isNaN(statusChanged)) {
-etaEl.textContent = '';
-continue;
-}
+        // Calculate ETA: travel_started + travel_time
+        var travelTimeSec = travelTime * 60;
+        var eta = travelStarted + travelTimeSec;
+        var remaining = eta - now;
 
-var travelTimeSec = travelTime * 60;
-var earliestLanding = Math.floor(travelTimeSec / 1.03);
-var elapsed = now - statusChanged;
-var remaining = earliestLanding - elapsed;
-
-if (remaining > 0) {
-var h = Math.floor(remaining / 3600);
-var m = Math.floor((remaining % 3600) / 60);
-var s = remaining % 60;
-if (h > 0) {
-etaEl.textContent = '(' + h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0') + ')';
-} else {
-etaEl.textContent = '(' + m + ':' + s.toString().padStart(2, '0') + ')';
-}
-} else {
-            etaEl.textContent = '';
+        if (remaining > 0) {
+            var h = Math.floor(remaining / 3600);
+            var m = Math.floor((remaining % 3600) / 60);
+            var s = remaining % 60;
+            if (h > 0) {
+                etaEl.textContent = '(' + h + ':' + m.toString().padStart(2, '0') + ':' + s.toString().padStart(2, '0') + ')';
+            } else {
+                etaEl.textContent = '(' + m + ':' + s.toString().padStart(2, '0') + ')';
+            }
+        } else {
+            etaEl.textContent = '(Arrived)';
         }
     }
 }

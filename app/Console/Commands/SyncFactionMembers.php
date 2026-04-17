@@ -95,9 +95,10 @@ class SyncFactionMembers extends Command
                 ]
             );
 
-            // Track when member started traveling (blue status)
-            $isTraveling = ($member['status']['color'] ?? null) === 'blue';
-            $wasTraveling = false;
+            // Track travel status
+            $currentStatus = $member['status']['description'] ?? '';
+            $isTraveling = $currentStatus === 'Traveling to %' && preg_match('/Traveling to .+/', $currentStatus);
+            $isReturning = $currentStatus === 'Returning to Torn';
             
             // Check if member was previously traveling (if we have old data)
             $oldMember = FactionMember::where('faction_id', $factionId)
@@ -105,15 +106,17 @@ class SyncFactionMembers extends Command
                 ->first();
             
             if ($oldMember) {
-                $wasTraveling = $oldMember->status_color === 'blue';
+                $oldStatus = $oldMember->status_description ?? '';
+                $wasTraveling = $oldStatus === 'Traveling to %' && preg_match('/Traveling to .+/', $oldStatus);
+                $wasReturning = $oldStatus === 'Returning to Torn';
                 
-                // If transitioning from not traveling to traveling, set travel_started_at
-                if ($isTraveling && !$wasTraveling && !$oldMember->travel_started_at) {
+                // Any transition TO traveling or returning → start new journey
+                if (($isTraveling || $isReturning) && (!$wasTraveling && !$wasReturning)) {
                     $oldMember->travel_started_at = now();
                     $oldMember->save();
                 }
-                // If traveling stopped, clear travel_started_at
-                elseif (!$isTraveling && $wasTraveling) {
+                // Transition FROM traveling/returning → anything else → clear timestamp
+                elseif (($wasTraveling || $wasReturning) && (!$isTraveling && !$isReturning)) {
                     $oldMember->travel_started_at = null;
                     $oldMember->save();
                 }

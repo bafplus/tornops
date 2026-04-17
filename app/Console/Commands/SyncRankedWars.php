@@ -100,11 +100,33 @@ class SyncRankedWars extends Command
                         $ffUpdatedAt = isset($ffData['last_updated']) ? now()->createFromTimestamp($ffData['last_updated']) : null;
                         
                         $statusColor = $member['status']['color'] ?? null;
+                        $statusDesc = $member['status']['description'] ?? '';
+                        
+                        // Check previous member record
                         $oldMember = WarMember::where('war_id', $warId)
                             ->where('player_id', $playerId)
                             ->first();
-                        $wasTraveling = $oldMember?->status_color === 'blue';
-                        $isTraveling = $statusColor === 'blue';
+                        
+                        // Determine travel states
+                        $isTraveling = preg_match('/^Traveling to .+/', $statusDesc);
+                        $isReturning = $statusDesc === 'Returning to Torn';
+                        
+                        $oldStatus = $oldMember?->status_description ?? '';
+                        $wasTraveling = preg_match('/^Traveling to .+/', $oldStatus);
+                        $wasReturning = $oldStatus === 'Returning to Torn';
+                        
+                        // Calculate travel_started_at: any transition to travel → set, from travel → clear
+                        $newTravelStartedAt = null;
+                        if (($isTraveling || $isReturning) && (!$wasTraveling && !$wasReturning)) {
+                            // Starting new journey
+                            $newTravelStartedAt = now();
+                        } elseif (($isTraveling || $isReturning) && $oldMember?->travel_started_at) {
+                            // Still traveling, keep existing timestamp
+                            $newTravelStartedAt = $oldMember->travel_started_at;
+                        } elseif (($wasTraveling || $wasReturning) && (!$isTraveling && !$isReturning)) {
+                            // Journey ended, clear (will be null)
+                            $newTravelStartedAt = null;
+                        }
                         
                         WarMember::updateOrCreate(
                             [
@@ -127,7 +149,7 @@ class SyncRankedWars extends Command
                                 'online_status' => $member['last_action']['status'] ?? null,
                                 'online_description' => $member['last_action']['description'] ?? null,
                                 'data' => $member,
-                                'travel_started_at' => ($isTraveling && !$wasTraveling) ? now() : ($isTraveling ? ($oldMember?->travel_started_at ?? now()) : null),
+                                'travel_started_at' => $newTravelStartedAt,
                             ]
                         );
                         $memberCount++;
