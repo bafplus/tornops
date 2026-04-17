@@ -102,6 +102,20 @@ $ourMembers = $war->members()
             ->orderBy('name')
             ->get();
         
+        $opponentMembers = $war->members()
+            ->where('faction_id', $war->opponent_faction_id)
+            ->orderByRaw("CASE WHEN status_color = 'green' THEN 0 WHEN status_color = 'red' THEN 1 WHEN status_color = 'blue' THEN 2 ELSE 3 END")
+            ->orderByRaw("CASE WHEN (status_color = 'red' OR status_color = 'blue') AND data IS NOT NULL THEN json_extract(data, '$.status.until') ELSE 999999999999 END")
+            ->orderBy('name')
+            ->get()
+            ->map(function ($member) {
+                $member->respect_score = \App\Services\WarService::calculateRespectScore(
+                    $member->level ?? 1,
+                    $member->ff_score ?? 1.0
+                );
+                return $member;
+            });
+        
         // Get user FF score from their player_id in faction members
         $userFfScore = 1.0;
         $userId = Auth::id();
