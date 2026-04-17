@@ -37,9 +37,18 @@ class SyncRankedWars extends Command
         $warCount = 0;
         $memberCount = 0;
 
+        // Only sync wars that are pending, accepted, or in progress
+        $activeStates = ['pending', 'accepted', 'in progress'];
+        
         foreach ($data['rankedwars'] as $warId => $war) {
-            $factions = $war['factions'] ?? [];
             $warInfo = $war['war'] ?? [];
+            
+            // Skip finished/lost wars
+            if (isset($warInfo['winner']) && $warInfo['winner'] > 0) {
+                continue;
+            }
+            
+            $factions = $war['factions'] ?? [];
 
             $opponentId = null;
             $opponentName = null;
@@ -163,6 +172,16 @@ class SyncRankedWars extends Command
         }
 
         $this->info("Synced {$warCount} ranked wars with {$memberCount} member records.");
+        
+        // Cleanup members from old won/lost wars
+        $oldWars = \App\Models\RankedWar::whereIn('status', ['won', 'lost'])->get();
+        if ($oldWars->isNotEmpty()) {
+            $oldWarIds = $oldWars->pluck('war_id')->toArray();
+            $deleted = \App\Models\WarMember::whereIn('war_id', $oldWarIds)->delete();
+            if ($deleted > 0) {
+                $this->info("Cleaned up {$deleted} members from old wars.");
+            }
+        }
         
         $log->markComplete($memberCount);
         return Command::SUCCESS;
