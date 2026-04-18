@@ -782,25 +782,22 @@ const travelTimes = {
         'BR': 60, 'IN': 75, 'AU': 120, 'UAE': 271,
     };
 
-    // Travel times by method: [Standard, Airstrip, WLT, BCT] in minutes
-    const travelTimesByMethod = {
-        'Mexico': [26, 18, 13, 8],
-        'Cayman Islands': [35, 25, 18, 11], 'Cayman': [35, 25, 18, 11],
-        'Canada': [41, 29, 20, 12],
-        'Hawaii': [134, 91, 67, 40],
-        'United Kingdom': [159, 111, 80, 48], 'UK': [159, 111, 80, 48],
-        'Argentina': [167, 117, 83, 50],
-        'Switzerland': [175, 123, 88, 53],
-        'Japan': [225, 158, 113, 68],
-        'China': [242, 169, 121, 72],
-        'UAE': [271, 190, 135, 81],
-        'South Africa': [297, 208, 149, 89],
+// Airstrip travel times in minutes (fixed)
+    const AIRSTRIP_TIMES = {
+        'Mexico': 18,
+        'Cayman Islands': 25, 'Cayman': 25,
+        'Canada': 29,
+        'Hawaii': 91,
+        'United Kingdom': 111, 'UK': 111,
+        'Argentina': 117,
+        'Switzerland': 123,
+        'Japan': 158,
+        'China': 169,
+        'UAE': 190,
+        'South Africa': 208,
     };
 
-    // Travel method setting (1=Standard, 2=Airstrip, 3=WLT, 4=BCT)
-    var TRAVEL_METHOD = 2; // Hardcoded for now
-
-let country = null;
+    let country = null;
 for (const [full, short] of Object.entries(countryMap)) {
 if (original.includes(full)) {
 country = short;
@@ -813,9 +810,7 @@ const match = original.match(/(?:In |Returning to Torn from |Traveling to )(.*)/
 if (match) country = match[1];
 }
 
-const travelTime = (travelTimesByMethod[country] && travelTimesByMethod[country][TRAVEL_METHOD - 1])
-        ? travelTimesByMethod[country][TRAVEL_METHOD - 1]
-        : (travelTimes[country] || 60);
+const travelTime = AIRSTRIP_TIMES[country] || 60;
 
 if (original.startsWith('Returning to Torn from') && country) {
 return { direction: 'left', country, isTraveling: true, travelTime };
