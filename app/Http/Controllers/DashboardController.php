@@ -227,14 +227,27 @@ $ourMembers = $war->members()
 
     $travelMethod = FactionSettings::value('travel_method', 1);
 
-    $topHitterStats = $attackStats->sortByDesc('successful')->first();
-    $topHitterName = $topHitterStats ? ($ourMembers->firstWhere('player_id', (int)$topHitterStats->attacker_id)->player_name ?? 'Unknown') : 'N/A';
-    $topHitterHits = $topHitterStats ? $topHitterStats->successful : 0;
+    $topHitterName = 'N/A';
+    $topHitterHits = 0;
+    foreach ($ourMembers as $member) {
+        $stats = $attackStats[$member->player_id] ?? null;
+        if ($stats && $stats->successful > $topHitterHits) {
+            $topHitterHits = $stats->successful;
+            $topHitterName = $member->player_name;
+        }
+    }
 
-    $topRespectStats = $attackStats->sortByDesc('max_single')->first();
-    $topRespectName = $topRespectStats ? ($ourMembers->firstWhere('player_id', (int)$topRespectStats->attacker_id)->player_name ?? 'Unknown') : 'N/A';
+    $topRespectName = 'N/A';
+    $topRespectVal = 0;
+    foreach ($ourMembers as $member) {
+        $stats = $attackStats[$member->player_id] ?? null;
+        if ($stats && $stats->max_single > $topRespectVal) {
+            $topRespectVal = $stats->max_single;
+            $topRespectName = $member->player_name;
+        }
+    }
 
-    return view('dashboard.war-detail', compact('settings', 'war', 'ourMembers', 'opponentMembers', 'attackStats', 'attacks', 'retaliationTargets', 'chainStats', 'activeChain', 'oppActiveChain', 'travelMethod', 'topTargetIds', 'totalHits', 'topHitterName', 'topHitterHits', 'topRespectName', 'topRespectStats'));
+    return view('dashboard.war-detail', compact('settings', 'war', 'ourMembers', 'opponentMembers', 'attackStats', 'attacks', 'retaliationTargets', 'chainStats', 'activeChain', 'oppActiveChain', 'travelMethod', 'topTargetIds', 'totalHits', 'topHitterName', 'topHitterHits', 'topRespectName', 'topRespectVal'));
     }
 
     public function warStats(int $warId)
