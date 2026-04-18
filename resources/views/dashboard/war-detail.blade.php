@@ -256,7 +256,7 @@
                                     }
                                     @endphp
                                     @if($until > 0 && $remaining > 0)
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn text-xs ml-1">🔔</button></span>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn text-xs ml-1" data-player="{{ $member->player_id }}">🔔</button></span>
                                     @elseif($until > 0 && $remaining <= 0)
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">Released</span>
                                     @else
@@ -266,7 +266,7 @@
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-900/50 text-blue-400 text-xs font-medium travel-bubble" data-status-changed="{{ $member->travel_started_at?->timestamp ?? $member->status_changed_at?->timestamp }}" data-travel-time="60">
                                         <span class="torn-icon" style="display:none;width:12px;height:12px;border:1px solid currentColor;border-radius:50%;text-align:center;line-height:10px;font-size:8px;">T</span>
                                         <svg class="w-3 h-3 plane-icon" style="display:none;" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span><button class="bell-btn text-xs ml-1">🔔</button>
+                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span><button class="bell-btn text-xs ml-1" data-player="{{ $member->player_id }}">🔔</button>
                                     </span>
                                 @elseif($member->status_color === 'green')
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">{{ $member->status_description ?? 'Okay' }}</span>
@@ -373,7 +373,7 @@
                                     }
                                     @endphp
                                     @if($until > 0 && $remaining > 0)
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn text-xs ml-1">🔔</button></span>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn text-xs ml-1" data-player="{{ $member->player_id }}">🔔</button></span>
                                     @elseif($until > 0 && $remaining <= 0)
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">Released</span>
                                     @else
@@ -383,7 +383,7 @@
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-900/50 text-blue-400 text-xs font-medium travel-bubble" data-status-changed="{{ $member->travel_started_at?->timestamp ?? $member->status_changed_at?->timestamp }}" data-travel-time="60">
                                         <span class="torn-icon" style="display:none;width:12px;height:12px;border:1px solid currentColor;border-radius:50%;text-align:center;line-height:10px;font-size:8px;">T</span>
                                         <svg class="w-3 h-3 plane-icon" style="display:none;" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span><button class="bell-btn text-xs ml-1">🔔</button>
+                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span><button class="bell-btn text-xs ml-1" data-player="{{ $member->player_id }}">🔔</button>
                                     </span>
                                 @elseif($member->status_color === 'green')
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">{{ $member->status_description ?? 'Okay' }}</span>
@@ -950,6 +950,122 @@ fetch('/api/wars/' + warId + '/live')
 
 syncRealtime();
 setInterval(syncRealtime, syncInterval);
+
+function playSOS() {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var dot = 0.1, dash = 0.3, gap = 0.1, letterGap = 0.2, wordGap = 0.4;
+    var now = ctx.currentTime;
+    function beep(duration) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.setValueAtTime(0.3, now + duration);
+        gain.gain.linearRampToValueAtTime(0, now + duration + 0.01);
+        osc.start(now);
+        osc.stop(now + duration + 0.01);
+    }
+    beep(dot); now += dot + gap;
+    beep(dot); now += dot + gap;
+    beep(dot); now += dot + letterGap;
+    beep(dash); now += dash + gap;
+    beep(dash); now += dash + gap;
+    beep(dash); now += dash + wordGap;
+    beep(dot); now += dot + gap;
+    beep(dot); now += dot + gap;
+    beep(dot);
+}
+
+function getBellKey(type, playerId) {
+    return 'bell_' + warId + '_' + playerId + '_' + type;
+}
+
+function initBells() {
+    document.querySelectorAll('.bell-btn').forEach(function(btn) {
+        var type = btn.closest('.hospital-timer') ? 'hospital' : 'travel';
+        var playerEl = btn.closest('.hospital-timer, .travel-bubble').closest('tr');
+        var playerId = playerEl ? playerEl.querySelector('td:first-child').textContent.replace('#', '').trim().split(' ')[0] : 'unknown';
+        if (btn.dataset.player) playerId = btn.dataset.player;
+        btn.dataset.type = type;
+        btn.dataset.player = playerId;
+        
+        var key = getBellKey(type, playerId);
+        if (localStorage.getItem(key)) btn.classList.add('text-yellow-400');
+        
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!('Notification' in window) || Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            
+            var key = getBellKey(type, playerId);
+            var wasEnabled = localStorage.getItem(key);
+            
+            if (wasEnabled) {
+                localStorage.removeItem(key);
+                localStorage.removeItem(key + '_done');
+                btn.classList.remove('text-yellow-400');
+            } else {
+                var timerEl = btn.closest('.hospital-timer, .travel-bubble');
+                var until = type === 'hospital' 
+                    ? parseInt(timerEl.dataset.until)
+                    : parseInt(timerEl.dataset.statusChanged) + parseInt(timerEl.dataset.travelTime) * 60;
+                
+                if (until > Math.floor(Date.now() / 1000)) {
+                    localStorage.setItem(key, until);
+                    btn.classList.add('text-yellow-400');
+                }
+            }
+        });
+    });
+}
+
+function checkBells() {
+    var now = Math.floor(Date.now() / 1000);
+    var alert5 = now + 300;
+    
+    document.querySelectorAll('.bell-btn.text-yellow-400').forEach(function(btn) {
+        var type = btn.dataset.type;
+        var playerId = btn.dataset.player;
+        var timerEl = btn.closest('.hospital-timer, .travel-bubble');
+        var until = type === 'hospital'
+            ? parseInt(timerEl.dataset.until)
+            : parseInt(timerEl.dataset.statusChanged) + parseInt(timerEl.dataset.travelTime) * 60;
+        
+        var key = getBellKey(type, playerId);
+        var alertsDone = JSON.parse(localStorage.getItem(key + '_done') || '[]');
+        
+        if (!alertsDone.includes('5min') && until <= alert5 && until > now) {
+            alertsDone.push('5min');
+            localStorage.setItem(key + '_done', JSON.stringify(alertsDone));
+            var playerName = timerEl.closest('tr').querySelector('td:first-child a, td:first-child span').textContent;
+            new Notification('TornOps Alert', {
+                body: (type === 'hospital' ? 'Hospital release' : 'Travel return') + ' in 5 min for ' + playerName,
+                icon: '/favicon.ico'
+            });
+            playSOS();
+        }
+        
+        if (!alertsDone.includes('now') && until <= now) {
+            alertsDone.push('now');
+            localStorage.setItem(key + '_done', JSON.stringify(alertsDone));
+            var playerName = timerEl.closest('tr').querySelector('td:first-child a, td:first-child span').textContent;
+            new Notification('TornOps Alert', {
+                body: (type === 'hospital' ? 'Hospital released!' : 'Travel returned!') + ' ' + playerName,
+                icon: '/favicon.ico'
+            });
+            playSOS();
+            localStorage.removeItem(key);
+            btn.classList.remove('text-yellow-400');
+        }
+    });
+}
+
+initBells();
+setInterval(checkBells, 10000);
 })();
 }
 })();
