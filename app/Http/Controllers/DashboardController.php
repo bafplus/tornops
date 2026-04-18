@@ -229,24 +229,24 @@ $ourMembers = $war->members()
 
     $players = [];
     foreach ($ourMembers as $member) {
-        $players[$member->player_id] = $member->player_name;
+        $players[$member->player_id] = $member;
     }
 
     $topHitterName = 'N/A';
     $topHitterHits = 0;
-    foreach ($attackStats as $playerId => $stats) {
-        if ($stats->successful > $topHitterHits && isset($players[$playerId])) {
+    foreach ($attackStats as $attackerId => $stats) {
+        if ($stats->successful > $topHitterHits && isset($players[$attackerId])) {
             $topHitterHits = $stats->successful;
-            $topHitterName = $players[$playerId];
+            $topHitterName = $players[$attackerId]->player_name;
         }
     }
 
     $topRespectName = 'N/A';
     $topRespectVal = 0;
-    foreach ($attackStats as $playerId => $stats) {
-        if ($stats->max_single > $topRespectVal && isset($players[$playerId])) {
+    foreach ($attackStats as $attackerId => $stats) {
+        if ($stats->max_single > $topRespectVal && isset($players[$attackerId])) {
             $topRespectVal = $stats->max_single;
-            $topRespectName = $players[$playerId];
+            $topRespectName = $players[$attackerId]->player_name;
         }
     }
 
