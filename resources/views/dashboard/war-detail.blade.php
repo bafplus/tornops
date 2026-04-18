@@ -766,27 +766,13 @@ const countryMap = {
 'Australia': 'AU'
 };
 
-const travelTimes = {
-        // Standard travel times (in minutes)
-        'Mexico': 26, 'Cayman Islands': 35, 'Cayman': 35,
-        'Canada': 41, 'Hawaii': 134, 'United Kingdom': 159,
-        'Argentina': 167, 'Switzerland': 175, 'Japan': 225,
-        'China': 242, 'UAE': 271, 'South Africa': 297,
-        // Aliases
-        'UK': 159, 'CA': 41, 'MX': 26, 'SA': 297,
-        'USA': 90, 'NZ': 120, 'HK': 105, 'CH': 123,
-        'CN': 242, 'JP': 225, 'AR': 167, 'DE': 45,
-        'FR': 40, 'IT': 50, 'ES': 35, 'NL': 35,
-        'BR': 60, 'IN': 75, 'AU': 120, 'UAE': 271,
-    };
-
-// Airstrip travel times in minutes (fixed)
-    const AIRSTRIP_TIMES = {
+    // Travel times in minutes (fixed for all)
+    const TRAVEL_TIME = {
         'Mexico': 18,
-        'Cayman Islands': 25, 'Cayman': 25,
+        'Cayman Islands': 25,
         'Canada': 29,
         'Hawaii': 91,
-        'United Kingdom': 111, 'UK': 111,
+        'United Kingdom': 111,
         'Argentina': 117,
         'Switzerland': 123,
         'Japan': 158,
@@ -796,19 +782,19 @@ const travelTimes = {
     };
 
     let country = null;
-for (const [full, short] of Object.entries(countryMap)) {
-if (original.includes(full)) {
-country = short;
-break;
-}
-}
+    for (const [full, short] of Object.entries(countryMap)) {
+        if (original.includes(full)) {
+            country = short;
+            break;
+        }
+    }
 
-if (!country) {
-const match = original.match(/(?:In |Returning to Torn from |Traveling to )(.*)/);
-if (match) country = match[1];
-}
+    if (!country) {
+        const match = original.match(/(?:In |Returning to Torn from |Traveling to )(.*)/);
+        if (match) country = match[1];
+    }
 
-const travelTime = AIRSTRIP_TIMES[country] || 60;
+    const travelTime = TRAVEL_TIME[country] || 60;
 
 if (original.startsWith('Returning to Torn from') && country) {
 return { direction: 'left', country, isTraveling: true, travelTime };
