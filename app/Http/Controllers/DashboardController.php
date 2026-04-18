@@ -153,7 +153,7 @@ $ourMembers = $war->members()
             MAX(respect_gain) as max_single')
         ->groupBy('attacker_id')
         ->get()
-        ->keyBy('attacker_id');
+        ->keyBy(fn($item) => (int)$item->attacker_id);
 
     $totalHits = $attackStats->sum('successful');
     $topHitter = $attackStats->sortByDesc('successful')->first();
@@ -229,26 +229,24 @@ $ourMembers = $war->members()
 
     $players = [];
     foreach ($ourMembers as $member) {
-        $players[(int)$member->player_id] = $member;
+        $players[(int)$member->player_id] = $member->player_name;
     }
 
     $topHitterName = 'N/A';
     $topHitterHits = 0;
-    foreach ($attackStats as $attackerId => $stats) {
-        $id = (int)$attackerId;
+    foreach ($attackStats as $id => $stats) {
         if ($stats->successful > $topHitterHits && isset($players[$id])) {
             $topHitterHits = $stats->successful;
-            $topHitterName = $players[$id]->player_name;
+            $topHitterName = $players[$id];
         }
     }
 
     $topRespectName = 'N/A';
     $topRespectVal = 0;
-    foreach ($attackStats as $attackerId => $stats) {
-        $id = (int)$attackerId;
+    foreach ($attackStats as $id => $stats) {
         if ($stats->max_single > $topRespectVal && isset($players[$id])) {
             $topRespectVal = $stats->max_single;
-            $topRespectName = $players[$id]->player_name;
+            $topRespectName = $players[$id];
         }
     }
 
