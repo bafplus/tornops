@@ -373,7 +373,7 @@
                                     }
                                     @endphp
                                     @if($until > 0 && $remaining > 0)
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}" data-player-id="{{ $member->player_id }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn ml-1 opacity-50 hover:opacity-100 transition-opacity" data-type="hospital" data-player="{{ $member->player_id }}" title="Alert 5min before release"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.659 6 8.006 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></button></span>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}" data-player-id="{{ $member->player_id }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn ml-1 opacity-50 hover:opacity-100" data-type="hospital" data-player="{{ $member->player_id }}">🔔</button></span>
                                     @elseif($until > 0 && $remaining <= 0)
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">Released</span>
                                     @else
