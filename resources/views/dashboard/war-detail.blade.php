@@ -297,7 +297,7 @@
                             <th class="p-3" data-sort="status" data-dir="asc">Status <span class="sort-icon">↑</span></th>
                         </tr>
                     </thead>
-<tbody class="divide-y divide-gray-700" id="tbody-opp">
+                    <tbody class="divide-y divide-gray-700" id="tbody-opp">
                         @foreach($opponentMembers as $member)
                         @php
                             $stats = $attackStats[$member->player_id] ?? null;
@@ -334,51 +334,6 @@
                                         #{{ $rank }}
                                     </span>
                                 @endif
-                                <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
-                            </td>
-                            <td class="p-3">{{ $member->level }}</td>
-                            <td class="p-3 text-right">
-                                <span class="font-mono text-red-400">{{ $member->ff_score ?? '-' }}</span>
-                                @if($member->ff_score)
-                                    @php $difficulty = match(true) {
-                                        $member->ff_score <= 1 => 'Extremely easy',
-                                        $member->ff_score <= 2 => 'Easy',
-                                        $member->ff_score <= 3.5 => 'Moderate',
-                                        $member->ff_score <= 4.5 => 'Difficult',
-                                        default => 'Impossible',
-                                    }; @endphp
-                                    <span class="block text-[10px] @if($difficulty === 'Extremely easy' || $difficulty === 'Easy') text-green-400 @elseif($difficulty === 'Moderate') text-yellow-400 @elseif($difficulty === 'Difficult') text-orange-400 @else text-red-400 @endif">{{ $difficulty }}</span>
-                                @endif
-                            </td>
-                            <td class="p-3 text-right">
-                                <span class="font-mono text-gray-400 text-sm">{{ $member->estimated_stats ?? '-' }}</span>
-                                @if($member->ff_updated_at)
-                                    <span class="block text-[10px] text-gray-600">{{ $member->ff_updated_at->diffForHumans() }}</span>
-                                @endif
-                            </td>
-                            <td class="p-3">
-                                @if($member->status_color === 'red')
-                                    @php 
-                                    $data = $member->data;
-                                    $statusData = $data['status'] ?? [];
-                                    $until = $statusData['until'] ?? 0;
-                                    $remaining = $until > 0 ? max(0, $until - time()) : 0;
-                                    $h = floor($remaining / 3600);
-                                    $m = floor((remaining % 3600) / 60);
-                                    $s = $remaining % 60;
-                                    $timeStr = $remaining > 0 ? ($h > 0 ? "{$h}h {$m}m" : ($m > 0 ? "{$m}m {$s}s" : "{$s}s")) : '';
-                                    $statusDesc = $statusData['description'] ?? $member->status_description ?? 'Hospital';
-                                    if (stripos($statusDesc, 'In hospital for') === 0) {
-                                        $statusDesc = 'In Hospital';
-                                    }
-                                    @endphp
-                                    @if($until > 0 && $remaining > 0)
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}" data-player-id="{{ $member->player_id }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn ml-1 opacity-50 hover:opacity-100" data-type="hospital" data-player="{{ $member->player_id }}">🔔</button></span>
-                                    @elseif($until > 0 && $remaining <= 0)
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">Released</span>
-                                    @else
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium">{{ $statusDesc }}</span>
-                                    @endif
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
                             </td>
                             <td class="p-3">{{ $member->level }}</td>
@@ -512,123 +467,6 @@
 <script>
 (function() {
 'use strict';
-
-function playSOS() {
-    var ctx = new (window.AudioContext || window.webkitAudioContext)();
-    var dot = 0.1, dash = 0.3, gap = 0.1, letterGap = 0.2, wordGap = 0.4;
-    var now = ctx.currentTime;
-    var freq = 880;
-    
-    function beep(duration) {
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = freq;
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.setValueAtTime(0.3, now + duration);
-        gain.gain.linearRampToValueAtTime(0, now + duration + 0.01);
-        osc.start(now);
-        osc.stop(now + duration + 0.01);
-    }
-    
-    // S: dot dot dot
-    beep(dot); now += dot + gap;
-    beep(dot); now += dot + gap;
-    beep(dot); now += dot + letterGap;
-    // O: dash dash dash
-    beep(dash); now += dash + gap;
-    beep(dash); now += dash + gap;
-    beep(dash); now += dash + wordGap;
-    // S: dot dot dot
-    beep(dot); now += dot + gap;
-    beep(dot); now += dot + gap;
-    beep(dot);
-}
-
-function getBellKey(type, playerId) {
-    return 'bell_' + warId + '_' + playerId + '_' + type;
-}
-
-function initBells() {
-    document.querySelectorAll('.bell-btn').forEach(function(btn) {
-        var type = btn.dataset.type;
-        var playerId = btn.dataset.player;
-        var key = getBellKey(type, playerId);
-        var enabled = localStorage.getItem(key) !== null;
-        if (enabled) btn.classList.add('text-yellow-400', 'opacity-100');
-        
-        btn.addEventListener('click', function() {
-            if (!('Notification' in window) || Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
-            
-            var key = getBellKey(type, playerId);
-            var wasEnabled = localStorage.getItem(key) !== null;
-            
-            if (wasEnabled) {
-                localStorage.removeItem(key);
-                btn.classList.remove('text-yellow-400', 'opacity-100');
-            } else {
-                var timerEl = btn.closest('.hospital-timer, .travel-bubble');
-                var until = type === 'hospital' 
-                    ? parseInt(timerEl.dataset.until)
-                    : parseInt(timerEl.dataset.statusChanged) + parseInt(timerEl.dataset.travelTime) * 60;
-                
-                if (until > Math.floor(Date.now() / 1000)) {
-                    localStorage.setItem(key, until);
-                    btn.classList.add('text-yellow-400', 'opacity-100');
-                }
-            }
-        });
-    });
-}
-
-function checkBells() {
-    var now = Math.floor(Date.now() / 1000);
-    var alert5 = now + 300;
-    
-    document.querySelectorAll('.bell-btn.text-yellow-400').forEach(function(btn) {
-        var type = btn.dataset.type;
-        var playerId = btn.dataset.player;
-        var timerEl = btn.closest('.hospital-timer, .travel-bubble');
-        var until = type === 'hospital'
-            ? parseInt(timerEl.dataset.until)
-            : parseInt(timerEl.dataset.statusChanged) + parseInt(timerEl.dataset.travelTime) * 60;
-        
-        var key = getBellKey(type, playerId);
-        var alertsDone = JSON.parse(localStorage.getItem(key + '_done') || '[]');
-        
-        if (!alertsDone.includes('5min') && until <= alert5 && until > now) {
-            alertsDone.push('5min');
-            localStorage.setItem(key + '_done', JSON.stringify(alertsDone));
-            
-            var playerName = timerEl.closest('tr').querySelector('td:first-child a').textContent;
-            new Notification('TornOps Alert', {
-                body: (type === 'hospital' ? 'Hospital release' : 'Travel return') + ' in 5 min for ' + playerName,
-                icon: '/favicon.ico'
-            });
-            playSOS();
-        }
-        
-        if (!alertsDone.includes('now') && until <= now) {
-            alertsDone.push('now');
-            localStorage.setItem(key + '_done', JSON.stringify(alertsDone));
-            
-            var playerName = timerEl.closest('tr').querySelector('td:first-child a').textContent;
-            new Notification('TornOps Alert', {
-                body: (type === 'hospital' ? 'Hospital released!' : 'Travel returned!') + ' ' + playerName,
-                icon: '/favicon.ico'
-            });
-            playSOS();
-            
-            localStorage.removeItem(key);
-            btn.classList.remove('text-yellow-400', 'opacity-100');
-        }
-    });
-}
-
 var status = '{{ $war->status }}';
 var startTimestamp = {{ $war->start_date ? $war->start_date->timestamp : 0 }};
 var endTimestamp = {{ $war->end_date ? $war->end_date->timestamp : 0 }};
@@ -1052,9 +890,6 @@ setInterval(updateTimer, 1000);
 
 updateHospitalTimers();
 setInterval(updateHospitalTimers, 1000);
-
-initBells();
-setInterval(checkBells, 10000);
 
 initTravelBubbles();
         updateTravelTimers();
