@@ -297,7 +297,7 @@
                             <th class="p-3" data-sort="status" data-dir="asc">Status <span class="sort-icon">↑</span></th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-700" id="tbody-opp">
+<tbody class="divide-y divide-gray-700" id="tbody-opp">
                         @foreach($opponentMembers as $member)
                         @php
                             $stats = $attackStats[$member->player_id] ?? null;
@@ -334,6 +334,51 @@
                                         #{{ $rank }}
                                     </span>
                                 @endif
+                                <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
+                            </td>
+                            <td class="p-3">{{ $member->level }}</td>
+                            <td class="p-3 text-right">
+                                <span class="font-mono text-red-400">{{ $member->ff_score ?? '-' }}</span>
+                                @if($member->ff_score)
+                                    @php $difficulty = match(true) {
+                                        $member->ff_score <= 1 => 'Extremely easy',
+                                        $member->ff_score <= 2 => 'Easy',
+                                        $member->ff_score <= 3.5 => 'Moderate',
+                                        $member->ff_score <= 4.5 => 'Difficult',
+                                        default => 'Impossible',
+                                    }; @endphp
+                                    <span class="block text-[10px] @if($difficulty === 'Extremely easy' || $difficulty === 'Easy') text-green-400 @elseif($difficulty === 'Moderate') text-yellow-400 @elseif($difficulty === 'Difficult') text-orange-400 @else text-red-400 @endif">{{ $difficulty }}</span>
+                                @endif
+                            </td>
+                            <td class="p-3 text-right">
+                                <span class="font-mono text-gray-400 text-sm">{{ $member->estimated_stats ?? '-' }}</span>
+                                @if($member->ff_updated_at)
+                                    <span class="block text-[10px] text-gray-600">{{ $member->ff_updated_at->diffForHumans() }}</span>
+                                @endif
+                            </td>
+                            <td class="p-3">
+                                @if($member->status_color === 'red')
+                                    @php 
+                                    $data = $member->data;
+                                    $statusData = $data['status'] ?? [];
+                                    $until = $statusData['until'] ?? 0;
+                                    $remaining = $until > 0 ? max(0, $until - time()) : 0;
+                                    $h = floor($remaining / 3600);
+                                    $m = floor((remaining % 3600) / 60);
+                                    $s = $remaining % 60;
+                                    $timeStr = $remaining > 0 ? ($h > 0 ? "{$h}h {$m}m" : ($m > 0 ? "{$m}m {$s}s" : "{$s}s")) : '';
+                                    $statusDesc = $statusData['description'] ?? $member->status_description ?? 'Hospital';
+                                    if (stripos($statusDesc, 'In hospital for') === 0) {
+                                        $statusDesc = 'In Hospital';
+                                    }
+                                    @endphp
+                                    @if($until > 0 && $remaining > 0)
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}" data-player-id="{{ $member->player_id }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn ml-1 opacity-50 hover:opacity-100 transition-opacity" data-type="hospital" data-player="{{ $member->player_id }}" title="Alert 5min before release"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.659 6 8.006 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></button></span>
+                                    @elseif($until > 0 && $remaining <= 0)
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">Released</span>
+                                    @else
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium">{{ $statusDesc }}</span>
+                                    @endif
                                 <span class="text-gray-500 text-xs ml-1">#{{ $member->player_id }}</span>
                             </td>
                             <td class="p-3">{{ $member->level }}</td>
