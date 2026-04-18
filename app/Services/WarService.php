@@ -70,10 +70,8 @@ class WarService
 
     public static function calculateRespectScore(int $level, float $ffScore): float
     {
-        $baseRespect = self::calculateBaseRespect($level);
-        $warBonus = 2.0;
-
-        return $baseRespect * $ffScore * $warBonus;
+        // Not used anymore - kept for potential future use
+        return $level * $ffScore;
     }
 
     public static function getTopTargets(array $members, int $count = 3, ?float $userFfScore = null): array
