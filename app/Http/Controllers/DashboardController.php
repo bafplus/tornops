@@ -227,23 +227,26 @@ $ourMembers = $war->members()
 
     $travelMethod = FactionSettings::value('travel_method', 1);
 
+    $players = [];
+    foreach ($ourMembers as $member) {
+        $players[$member->player_id] = $member->player_name;
+    }
+
     $topHitterName = 'N/A';
     $topHitterHits = 0;
-    foreach ($ourMembers as $member) {
-        $stats = $attackStats[$member->player_id] ?? null;
-        if ($stats && $stats->successful > $topHitterHits) {
+    foreach ($attackStats as $playerId => $stats) {
+        if ($stats->successful > $topHitterHits && isset($players[$playerId])) {
             $topHitterHits = $stats->successful;
-            $topHitterName = $member->player_name;
+            $topHitterName = $players[$playerId];
         }
     }
 
     $topRespectName = 'N/A';
     $topRespectVal = 0;
-    foreach ($ourMembers as $member) {
-        $stats = $attackStats[$member->player_id] ?? null;
-        if ($stats && $stats->max_single > $topRespectVal) {
+    foreach ($attackStats as $playerId => $stats) {
+        if ($stats->max_single > $topRespectVal && isset($players[$playerId])) {
             $topRespectVal = $stats->max_single;
-            $topRespectName = $member->player_name;
+            $topRespectName = $players[$playerId];
         }
     }
 
