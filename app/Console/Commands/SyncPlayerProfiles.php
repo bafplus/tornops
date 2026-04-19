@@ -168,10 +168,14 @@ class SyncPlayerProfiles extends Command
             usleep(500000);
             $profile = $data;
 
-            if (!isset($profile['id'])) {
+            if (!$profile) {
                 $this->error("No profile data for player {$playerId}");
                 $this->errors++;
                 return;
+            }
+            
+            if ($playerId === 3055372) {
+                $this->warn("Debug: " . json_encode($profile));
             }
 
             // Determine if this is from a war opponent
