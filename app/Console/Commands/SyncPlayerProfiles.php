@@ -30,7 +30,7 @@ class SyncPlayerProfiles extends Command
         $force = $this->option('force');
         
         // Get target player IDs
-        $targetIds = $this->getTargetPlayerIds();
+        $targetIds = $this->getTargetPlayerIds($force);
         
         if (empty($targetIds)) {
             $this->warn('No players to sync');
@@ -73,7 +73,7 @@ class SyncPlayerProfiles extends Command
         return 0;
     }
 
-    protected function getTargetPlayerIds(): array
+    protected function getTargetPlayerIds(bool $force = false): array
     {
         $settings = DB::table('faction_settings')->first();
         $factionId = $settings->faction_id ?? 0;
