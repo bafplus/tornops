@@ -150,15 +150,15 @@ class SyncPlayerProfiles extends Command
             $api = new TornApiService();
             $data = $api->getPlayer($playerId, 'profile', $apiKey);
 
-            if (!$data) {
-                $this->error("API error for player {$playerId}");
+            if (!$data || isset($data['error'])) {
+                $this->error("API error for player {$playerId}: " . ($data['error']['error'] ?? 'Unknown'));
                 $this->errors++;
                 return;
             }
 
             $profile = $data;
 
-            if (!$profile) {
+            if (!isset($profile['id'])) {
                 $this->error("No profile data for player {$playerId}");
                 $this->errors++;
                 return;
