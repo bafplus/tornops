@@ -393,7 +393,6 @@
                                 @endif
                             <td class="p-3 text-right font-mono text-blue-400">{{ $hits }}</td>
                             <td class="p-3">
-                                @if($member->status_color === 'red')
                                     @php 
                                     $statusData = ($member->data['status'] ?? []);
                                     $until = $statusData['until'] ?? 0;
