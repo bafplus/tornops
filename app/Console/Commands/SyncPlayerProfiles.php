@@ -148,12 +148,7 @@ class SyncPlayerProfiles extends Command
     {
         try {
             $api = new TornApiService();
-            $api->setApiKey($apiKey);
-            
-            $data = $api->get("user/{$playerId}", [
-                'section' => 'profile',
-                'statustags' => 'true',
-            ]);
+            $data = $api->getPlayer($playerId, 'profile', $apiKey);
 
             if (!$data) {
                 $this->error("API error for player {$playerId}");
@@ -161,7 +156,7 @@ class SyncPlayerProfiles extends Command
                 return;
             }
 
-            $profile = $data['profile'] ?? null;
+            $profile = $data;
 
             if (!$profile) {
                 $this->error("No profile data for player {$playerId}");
