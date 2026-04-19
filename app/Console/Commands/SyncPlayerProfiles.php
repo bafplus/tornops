@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\RankedWar;
 use App\Services\TornApiService;
@@ -120,7 +121,7 @@ class SyncPlayerProfiles extends Command
             if (!$profile) {
                 // New player
                 $result[] = $id;
-            } elseif ($force || $profile->last_synced_at->lt($cutoff)) {
+            } elseif ($force || \Carbon\Carbon::parse($profile->last_synced_at)->lt($cutoff)) {
                 // Stale
                 $result[] = $id;
             }
