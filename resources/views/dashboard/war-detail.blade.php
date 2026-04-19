@@ -984,7 +984,10 @@ function getBellKey(type, playerId) {
 }
 
 function initBells() {
-    document.querySelectorAll(".bell-btn").forEach(function(b) { b.classList.remove("text-yellow-400"); b.classList.add("text-gray-400"); });
+    document.querySelectorAll('.bell-btn').forEach(function(b) { 
+        b.classList.remove('text-yellow-400'); 
+        b.classList.add('text-gray-400'); 
+    });
 
     document.querySelectorAll('.bell-btn').forEach(function(btn) {
         var type = btn.closest('.hospital-timer') ? 'hospital' : 'travel';
