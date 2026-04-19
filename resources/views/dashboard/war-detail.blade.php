@@ -256,7 +256,7 @@
                                     }
                                     @endphp
                                     @if($until > 0 && $remaining > 0)
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn text-xs ml-1 data-player="{{ $member->player_id }}">🔕</button></span>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span></span>
                                     @elseif($until > 0 && $remaining <= 0)
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">Released</span>
                                     @else
@@ -266,13 +266,16 @@
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-900/50 text-blue-400 text-xs font-medium travel-bubble" data-status-changed="{{ $member->travel_started_at?->timestamp ?? $member->status_changed_at?->timestamp }}" data-travel-time="60">
                                         <span class="torn-icon" style="display:none;width:12px;height:12px;border:1px solid currentColor;border-radius:50%;text-align:center;line-height:10px;font-size:8px;">T</span>
                                         <svg class="w-3 h-3 plane-icon" style="display:none;" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span><button class="bell-btn text-xs ml-1 data-player="{{ $member->player_id }}">🔕</button>
+                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span>
                                     </span>
                                 @elseif($member->status_color === 'green')
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">{{ $member->status_description ?? 'Okay' }}</span>
                                 @else
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-700/50 text-gray-400 text-xs font-medium">{{ $member->status_description ?? 'Offline' }}</span>
                                 @endif
+                            </td>
+                            <td class="p-3 text-center">
+                                <button class="bell-btn text-lg" data-player="{{ $member->player_id }}">🔕</button>
                             </td>
                         </tr>
                         @endforeach
@@ -373,7 +376,7 @@
                                     }
                                     @endphp
                                     @if($until > 0 && $remaining > 0)
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span><button class="bell-btn text-xs ml-1 data-player="{{ $member->player_id }}">🔕</button></span>
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-900/50 text-red-400 text-xs font-medium hospital-timer" data-until="{{ $until }}"><span class="hospital-time">{{ $statusDesc }} ({{ $timeStr }})</span></span>
                                     @elseif($until > 0 && $remaining <= 0)
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">Released</span>
                                     @else
@@ -383,7 +386,7 @@
                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-900/50 text-blue-400 text-xs font-medium travel-bubble" data-status-changed="{{ $member->travel_started_at?->timestamp ?? $member->status_changed_at?->timestamp }}" data-travel-time="60">
                                         <span class="torn-icon" style="display:none;width:12px;height:12px;border:1px solid currentColor;border-radius:50%;text-align:center;line-height:10px;font-size:8px;">T</span>
                                         <svg class="w-3 h-3 plane-icon" style="display:none;" fill="currentColor" viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
-                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span><button class="bell-btn text-xs ml-1 data-player="{{ $member->player_id }}">🔕</button>
+                                        <span class="travel-text">{{ $member->status_description ?? 'Traveling' }}</span><span class="travel-eta ml-1 font-mono"></span>
                                     </span>
                                 @elseif($member->status_color === 'green')
                                     <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-900/50 text-green-400 text-xs font-medium">{{ $member->status_description ?? 'Okay' }}</span>
@@ -984,30 +987,16 @@ function getBellKey(type, playerId) {
 }
 
 function initBells() {
-    var oppTable = document.getElementById('tbody-opp');
-    if (!oppTable) return;
-    var oppRows = oppTable.querySelectorAll('tr');
-    var oppPlayerIds = new Set();
-    oppRows.forEach(function(row) {
-        var link = row.querySelector('td:first-child a');
-        if (link) {
-            var match = link.textContent.match(/#(\d+)/);
-            if (match) oppPlayerIds.add(match[1]);
-        }
-    });
+    var isOppTable = document.getElementById('tbody-opp');
+    if (!isOppTable) return;
     
     document.querySelectorAll('.bell-btn').forEach(function(btn) {
-        var playerId = btn.dataset.player;
-        if (!oppPlayerIds.has(playerId)) {
-            btn.style.display = 'none';
-            return;
-        }
         btn.textContent = '🔕';
     });
     document.querySelectorAll('.bell-btn').forEach(function(btn) {
-        if (btn.style.display === 'none') return;
         var type = btn.closest('.hospital-timer') ? 'hospital' : 'travel';
-        var playerEl = btn.closest('.hospital-timer, .travel-bubble').closest('tr');
+        var timerEl = btn.closest('tr').querySelector('.hospital-timer, .travel-bubble');
+        var playerEl = btn.closest('tr');
         var playerId = playerEl ? playerEl.querySelector('td:first-child').textContent.replace('#', '').trim().split(' ')[0] : 'unknown';
         if (btn.dataset.player) playerId = btn.dataset.player;
         btn.dataset.type = type;
@@ -1053,10 +1042,11 @@ function checkBells() {
     var alert5 = now + 300;
     
     document.querySelectorAll('.bell-btn').forEach(function(btn) {
-        if (btn.style.display === 'none' || btn.textContent !== '🔔') return;
+        if (btn.textContent !== '🔔') return;
         var type = btn.dataset.type;
         var playerId = btn.dataset.player;
-        var timerEl = btn.closest('.hospital-timer, .travel-bubble');
+        var timerEl = btn.closest('tr').querySelector('.hospital-timer, .travel-bubble');
+        if (!timerEl) return;
         var until = type === 'hospital'
             ? parseInt(timerEl.dataset.until)
             : parseInt(timerEl.dataset.statusChanged) + parseInt(timerEl.dataset.travelTime) * 60;
