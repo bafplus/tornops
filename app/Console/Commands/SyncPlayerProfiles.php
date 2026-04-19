@@ -129,10 +129,19 @@ class SyncPlayerProfiles extends Command
 
     protected function getApiKeys(): array
     {
-        return User::whereNotNull('torn_api_key')
+        $keys = User::whereNotNull('torn_api_key')
             ->where('torn_api_key', '!=', '')
             ->pluck('torn_api_key')
             ->toArray();
+        
+        if (empty($keys)) {
+            $settings = DB::table('faction_settings')->first();
+            if ($settings?->torn_api_key) {
+                $keys = [$settings->torn_api_key];
+            }
+        }
+        
+        return $keys;
     }
 
     protected function processPlayer(int $playerId, string $apiKey, bool $force): void
