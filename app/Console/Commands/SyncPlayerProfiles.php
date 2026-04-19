@@ -20,6 +20,8 @@ class SyncPlayerProfiles extends Command
     protected $new = 0;
     protected $errors = 0;
     protected $rateLimited = false;
+    protected $apiCallsThisMinute = 0;
+    protected $callsPerMinute = 100;
 
     public function handle(): int
     {
@@ -146,6 +148,12 @@ class SyncPlayerProfiles extends Command
 
     protected function processPlayer(int $playerId, string $apiKey, bool $force): void
     {
+        if ($this->apiCallsThisMinute >= $this->callsPerMinute) {
+            $this->warn('Approaching rate limit, pausing...');
+            sleep(60);
+            $this->apiCallsThisMinute = 0;
+        }
+        
         try {
             $api = new TornApiService();
             $data = $api->getPlayer($playerId, 'profile', $apiKey);
@@ -156,6 +164,8 @@ class SyncPlayerProfiles extends Command
                 return;
             }
 
+            $this->apiCallsThisMinute++;
+            usleep(500000);
             $profile = $data;
 
             if (!isset($profile['id'])) {
