@@ -19,6 +19,7 @@ class SeedScheduledJobs extends Command
         'torn:sync-ocs' => ['d' => 'Organised crimes', 'c' => '*/10 * * * *', 'w' => '*/5 * * * *', 'a' => '1 call'],
         'torn:sync-stocks' => ['d' => 'Sync stocks', 'c' => '0 * * * *', 'w' => '*/10 * * * *', 'a' => '1 call'],
         'torn:sync-items' => ['d' => 'Sync items', 'c' => '0 0 * * *', 'w' => '0 0 * * *', 'a' => '1 call'],
+        'torn:sync-profiles' => ['d' => 'Sync player profiles', 'c' => '0 * * * *', 'w' => '0 * * * *', 'a' => '50-100 calls'],
     ];
 
     public function handle(): int
