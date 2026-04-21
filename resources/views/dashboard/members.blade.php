@@ -75,7 +75,7 @@
                             <span class="inline-flex gap-0.5 justify-end">
                             @foreach($icons as $icon)
                             @if(isset($icon['id']))
-                            <img src="/sprite-1-{{ $icon['id'] }}.png" class="inline-block w-4 h-4 align-middle" title="{{ $icon['description'] ?? $icon['title'] ?? '' }}" alt="{{ $icon['title'] ?? '' }}" />
+                            <img src="/sprite-1-{{ $icon['id'] }}.png" class="inline-block w-4 h-4 align-middle" title="[{{ $icon['id'] }}] {{ $icon['description'] ?? $icon['title'] ?? '' }}" alt="{{ $icon['title'] ?? '' }}" />
                             @endif
                             @endforeach
                             </span>
