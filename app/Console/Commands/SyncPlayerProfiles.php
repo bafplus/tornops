@@ -104,30 +104,7 @@ class SyncPlayerProfiles extends Command
             return [];
         }
 
-        // Check what's already synced
-        $synced = DB::table('player_profiles')
-            ->whereIn('player_id', $targetIds)
-            ->whereNotNull('last_synced_at')
-            ->get()
-            ->keyBy('player_id');
-
-        // Filter new or stale
-        $cutoff = now()->subDays($this->staleDays);
-        
-        $result = [];
-        foreach ($targetIds as $id) {
-            $profile = $synced[$id] ?? null;
-            
-            if (!$profile) {
-                // New player
-                $result[] = $id;
-            } elseif ($force || \Carbon\Carbon::parse($profile->last_synced_at)->lt($cutoff)) {
-                // Stale
-                $result[] = $id;
-            }
-        }
-
-        return $result;
+        return $targetIds;
     }
 
     protected function getApiKeys(): array
