@@ -25,6 +25,7 @@
                 <thead>
                     <tr class="text-left text-gray-400 bg-gray-700/50 text-sm cursor-pointer select-none" id="thead">
                         <th class="p-3" data-sort="name" data-dir="asc">Name <span class="sort-icon">↑</span></th>
+                        <th class="p-3 text-right">Icons</th>
                         <th class="p-3" data-sort="level" data-dir="desc">Level <span class="sort-icon">↓</span></th>
                         <th class="p-3 text-right" data-sort="ff" data-dir="desc">FF <span class="sort-icon">↓</span></th>
                         <th class="p-3 text-right" data-sort="stats" data-dir="desc">Stats <span class="sort-icon">↓</span></th>
@@ -67,12 +68,14 @@
                             @if($member->revivable ?? false)
                             <span class="ml-1" title="Can be revived">🚨</span>
                             @endif
+                        </td>
+                        <td class="p-3 text-right">
                             @php $icons = $member->icons ? json_decode($member->icons, true) : []; @endphp
                             @if(!empty($icons))
-                            <span class="ml-1 inline-flex gap-0.5" title="{{ collect($icons)->pluck('title')->filter()->implode(', ') }}">
+                            <span class="inline-flex gap-0.5 justify-end">
                             @foreach($icons as $icon)
                             @if(isset($icon['id']))
-                            <img src="/sprite-1-{{ $icon['id'] }}.png" class="inline-block w-4 h-4 align-middle" alt="{{ $icon['title'] ?? '' }}" />
+                            <img src="/sprite-1-{{ $icon['id'] }}.png" class="inline-block w-4 h-4 align-middle" title="{{ $icon['description'] ?? $icon['title'] ?? '' }}" alt="{{ $icon['title'] ?? '' }}" />
                             @endif
                             @endforeach
                             </span>
