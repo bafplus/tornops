@@ -62,6 +62,12 @@
                     </div>
                 </div>
                 <div class="flex space-x-3 mt-4 md:mt-0">
+                    <form action="{{ route('merits.fetch') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium">
+                            Refresh from API
+                        </button>
+                    </form>
                     <form action="{{ route('merits.reset') }}" method="POST">
                         @csrf
                         <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-medium">
