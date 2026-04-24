@@ -123,9 +123,15 @@ class MeritPlannerController extends Controller
             $allMerits = MeritDefinition::getAllMeritNames();
             foreach ($allMerits as $meritName) {
                 $currentLevel = $v1Data[$meritName] ?? 0;
+                // Preserve existing planned_level, only update current_level
+                $existing = \DB::table('user_merits')
+                    ->where('user_id', $user->id)
+                    ->where('merit_name', $meritName)
+                    ->first();
+                $plannedLevel = $existing?->planned_level ?? $currentLevel;
                 \DB::table('user_merits')->updateOrInsert(
                     ['user_id' => $user->id, 'merit_name' => $meritName],
-                    ['current_level' => $currentLevel, 'planned_level' => $currentLevel, 'updated_at' => now()]
+                    ['current_level' => $currentLevel, 'planned_level' => $plannedLevel, 'updated_at' => now()]
                 );
             }
 
