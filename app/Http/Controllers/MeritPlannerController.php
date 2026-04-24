@@ -20,14 +20,20 @@ class MeritPlannerController extends Controller
     {
         $user = Auth::user();
 
-        // Auto-fetch if no merits exist - do this FIRST
+        // Auto-fetch if no merits exist OR data is stale (>24 hours)
         $fetchError = null;
         $merits = \DB::table('user_merits')
             ->where('user_id', $user->id)
             ->get()
             ->keyBy('merit_name');
 
-        if ($merits->isEmpty() && $user->torn_api_key && $user->torn_player_id) {
+        $stale = false;
+        if ($merits->isNotEmpty()) {
+            $firstMerit = $merits->first();
+            $stale = $firstMerit->updated_at && \Carbon\Carbon::parse($firstMerit->updated_at)->lt(now()->subHours(24));
+        }
+        
+        if (($merits->isEmpty() || $stale) && $user->torn_api_key && $user->torn_player_id) {
             $fetchError = $this->fetchMeritsFromApi($user);
             // Re-fetch from DB after auto-fetch
             $merits = \DB::table('user_merits')
